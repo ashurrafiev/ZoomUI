@@ -8,6 +8,10 @@ import com.xrbpowered.zoomui.icons.SvgIcon;
 
 public class UIToolButton extends UIButtonBase {
 
+	public static Color colorDown = UIButton.colorDown;
+	public static Color colorHover = new Color(0xe8e8e8);
+	public static Color colorBorder = UIButton.colorBorder;
+
 	public static final int STYLE_NORMAL = 0;
 	public static final int STYLE_SELECTED = 1;
 	public static final int STYLE_DISABLED = 2;
@@ -33,14 +37,13 @@ public class UIToolButton extends UIButtonBase {
 		int w = (int)getWidth();
 		int h = (int)getHeight();
 		
-		StdPainter painter = StdPainter.instance;
-		Color bgColor = down ? painter.colorDown : hover ? painter.colorHover : null;
+		Color bgColor = down ? colorDown : hover ? colorHover : null;
 		if(bgColor!=null) {
 			g2.setColor(bgColor);
 			g2.fillRect(0, 0, w, h);
 		}
 		if(hover) {
-			g2.setColor(painter.colorBorder);
+			g2.setColor(colorBorder);
 			g2.drawRect(0, 0, w, h);
 		}
 		icon.paint(g2, isDisabled() ? STYLE_DISABLED : STYLE_NORMAL, (w-iconSize)/2f, (h-iconSize)/2f, iconSize, getPixelScale(), true);

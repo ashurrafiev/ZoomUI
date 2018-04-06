@@ -1,5 +1,6 @@
 package com.xrbpowered.zoomui.icons;
 
+import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
@@ -14,9 +15,30 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-public class SvgPath {
+public class SvgFile {
 
-	private static void arcTo(Path2D.Double path, double rx, double ry, double theta, boolean largeArcFlag, boolean sweepFlag, double x, double y) {
+	public final Element root;
+	
+	public SvgFile(String uri) {
+		Element root;
+		try {
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(uri);
+			doc.getDocumentElement().normalize();
+			root = doc.getDocumentElement();
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+			root = null;
+		}
+		this.root = root;
+	}
+	
+	/*
+	 * From org.apache.batik.ext.awt.geom.ExtendedGeneralPath.computeArc().
+	 */
+	private void arcTo(Path2D.Double path, double rx, double ry, double theta, boolean largeArcFlag, boolean sweepFlag, double x, double y) {
 		// Ensure radii are valid
 		if(rx == 0 || ry == 0) {
 			path.lineTo(x, y);
@@ -104,7 +126,7 @@ public class SvgPath {
 		path.append(arc, true);
 	}
 	
-	private static Path2D createPath(String d, double scale) {
+	private Path2D createPath(String d, double scale) {
 		Path2D.Double path = new Path2D.Double();
 		String[] s = d.split("[\\,\\s]\\s*");
 		char cmd = '\0';
@@ -212,9 +234,10 @@ public class SvgPath {
 		return path;
 	}
 
-	private static void transform(AffineTransform transform, String tr, double scale) {
+	public static AffineTransform getTransform(String tr, double scale) {
+		AffineTransform tx = new AffineTransform();
 		if(tr==null || tr.isEmpty())
-			return;
+			return tx;
 		
 		Matcher m = Pattern.compile("([a-z]+)\\((.*?)\\)").matcher(tr);
 		int offs = 0;
@@ -226,26 +249,109 @@ public class SvgPath {
 			if(t.equals("translate")) {
 				double x = Double.parseDouble(s[0]) * scale;
 				double y = s.length<2 ? 0.0 : Double.parseDouble(s[1]) * scale;
-				transform.translate(x, y);
+				tx.translate(x, y);
 			}
 			else if(t.equals("scale")) {
 				double x = Double.parseDouble(s[0]);
 				double y = s.length<2 ? x : Double.parseDouble(s[1]);
-				transform.scale(x, y);
+				tx.scale(x, y);
 			}
 			else if(t.equals("matrix")) {
-				AffineTransform tx = new AffineTransform(new double[] {
+				AffineTransform tm = new AffineTransform(new double[] {
 					Double.parseDouble(s[0]), Double.parseDouble(s[1]), Double.parseDouble(s[2]), Double.parseDouble(s[3]),
 					Double.parseDouble(s[4]) * scale, Double.parseDouble(s[5]) * scale
 				});
-				transform.concatenate(tx);
+				tx.concatenate(tm);
 			}
 			
 			offs = m.end();
 		}
+		return tx;
 	}
 	
-	private static Path2D searchGroup(String pathId, AffineTransform transform, Element g, double scale) {
+	private static int getAttrValue(Element e, String name, double scale) {
+		String s = e.getAttribute(name);
+		return s.isEmpty() ? 0 : (int) (Double.parseDouble(s) * scale);
+	}
+	
+	private void render(Graphics2D g2, Element g, SvgDefs defs, SvgStyle parentStyle, double scale) {
+		Node n = g.getFirstChild();
+		
+		while(n!=null) {
+			if(n.getNodeType()==Node.ELEMENT_NODE) {
+				Element e = (Element) n;
+				SvgStyle style = SvgStyle.forElement(parentStyle, defs, e);
+				
+				AffineTransform t = g2.getTransform();
+				g2.transform(getTransform(e.getAttribute("transform"), scale));
+				
+				if(e.getNodeName().equals("g"))
+					render(g2, e, defs, style, scale);
+				else if(e.getNodeName().equals("defs"))
+					defs.addDefs(e, scale);
+				else if(e.getNodeName().equals("rect")) {
+					int x = getAttrValue(e, "x", scale);
+					int y =  getAttrValue(e, "y", scale);
+					int width =  getAttrValue(e, "width", scale);
+					int height =  getAttrValue(e, "height", scale);
+					int rx =  getAttrValue(e, "rx", scale*2.0);
+					int ry =  getAttrValue(e, "ry", scale*2.0);
+					if(rx<=0)
+						rx = ry;
+					if(style.hasFill()) {
+						style.setFillStyle(g2);
+						if(ry<=0)
+							g2.fillRect(x, y, width, height);
+						else
+							g2.fillRoundRect(x, y, width, height, rx, ry);
+					}
+					if(style.hasStroke()) {
+						style.setStrokeStyle(g2, scale);
+						if(ry<=0)
+							g2.drawRect(x, y, width, height);
+						else
+							g2.drawRoundRect(x, y, width, height, rx, ry);
+					}
+				}
+				else if(e.getNodeName().equals("circle")) {
+					double cx = Double.parseDouble(e.getAttribute("cx")) * scale;
+					double cy = Double.parseDouble(e.getAttribute("cy")) * scale;
+					double r = Double.parseDouble(e.getAttribute("r")) * scale;
+					int x = (int) (cx - r);
+					int y = (int) (cy - r);
+					int width = (int) (r * 2.0);
+					if(style.hasFill()) {
+						style.setFillStyle(g2);
+						g2.fillOval(x, y, width, width);
+					}
+					if(style.hasStroke()) {
+						style.setStrokeStyle(g2, scale);
+						g2.drawOval(x, y, width, width);
+					}
+				}
+				else if(e.getNodeName().equals("path")) {
+					Path2D path = createPath(e.getAttribute("d"), scale);
+					if(style.hasFill()) {
+						style.setFillStyle(g2);
+						g2.fill(path);
+					}
+					if(style.hasStroke()) {
+						style.setStrokeStyle(g2, scale);
+						g2.draw(path);
+					}
+				}
+				g2.setTransform(t);
+			}
+			
+			n = n.getNextSibling();
+		}
+	}
+	
+	public void render(Graphics2D g2, double scale) {
+		render(g2, root, new SvgDefs(), new SvgStyle(), scale);
+	}
+	
+	private Path2D getPath(String pathId, AffineTransform transform, Element g, double scale) {
 		Node n = g.getFirstChild();
 		
 		while(n!=null) {
@@ -253,10 +359,10 @@ public class SvgPath {
 				Element e = (Element) n;
 				
 				AffineTransform t = new AffineTransform(transform);
-				transform(t, e.getAttribute("transform"), scale);
+				t.concatenate(getTransform(e.getAttribute("transform"), scale));
 				
 				if(e.getNodeName().equals("g")) {
-					Path2D path = searchGroup(pathId, t, e, scale);
+					Path2D path = getPath(pathId, t, e, scale);
 					if(path!=null) {
 						path.transform(t);
 						return path;
@@ -282,20 +388,7 @@ public class SvgPath {
 		return null;
 	}
 	
-	public static Path2D getSvgPath(String uri, String pathId, double scale) {
-		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(uri);
-			doc.getDocumentElement().normalize();
-			Element root = doc.getDocumentElement();
-			
-			return searchGroup(pathId, new AffineTransform(), root, scale);
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+	public Path2D getPath(String pathId, double scale) {
+		return getPath(pathId, new AffineTransform(), root, scale);
 	}
-	
 }

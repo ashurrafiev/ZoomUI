@@ -9,9 +9,9 @@ import javax.swing.JFrame;
 import com.xrbpowered.zoomui.BasePanel;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIZoomView;
-import com.xrbpowered.zoomui.std.StdPainter;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListBox;
+import com.xrbpowered.zoomui.std.UITextBox;
 
 public class ZoomViewTest extends UIZoomView {
 
@@ -47,12 +47,11 @@ public class ZoomViewTest extends UIZoomView {
 	protected void paintSelf(Graphics2D g2) {
 		g2.setColor(Color.WHITE);
 		g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
-		StdPainter painter = StdPainter.instance;
-		int y = 200+painter.fontSize;
-		g2.setColor(painter.colorFg);
+		int y = 200+UIButton.font.getSize();
+		g2.setColor(UITextBox.colorText);
 		g2.drawString("sample.txt", 16, y);
-		y += painter.fontSize;
-		g2.setColor(painter.colorBorder);
+		y += UIButton.font.getSize();
+		g2.setColor(UIButton.colorBorder);
 		g2.drawString("10 Jan 2018, 18:23, 932KB", 16, y);
 	}
 

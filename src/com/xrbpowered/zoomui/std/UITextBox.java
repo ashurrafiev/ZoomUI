@@ -2,6 +2,7 @@ package com.xrbpowered.zoomui.std;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
@@ -13,6 +14,17 @@ import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 
 public class UITextBox extends UIElement implements KeyInputHandler {
+
+	public static Font font = UIButton.font;
+
+	public static Color colorBackground = Color.WHITE;
+	public static Color colorText = Color.BLACK;
+	public static Color colorSelection = new Color(0x0077dd);
+	public static Color colorSelectedText = Color.WHITE;
+	public static Color colorBorder = new Color(0x888888);
+
+	public static int defaultWidth = 120;
+	public static int defaultHeight = 20;
 
 	protected boolean hover = false;
 
@@ -60,13 +72,12 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	
 	public UITextBox(UIContainer parent) {
 		super(parent);
-		setSize(StdPainter.instance.buttonWidth, StdPainter.instance.buttonHeight);
+		setSize(defaultWidth, defaultHeight);
 	}
 	
 	@Override
 	public void paint(Graphics2D g2) {
-		StdPainter painter = StdPainter.instance;
-		g2.setColor(painter.colorTextBg);
+		g2.setColor(colorBackground);
 		g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 		
 		boolean focused = isFocused();
@@ -76,7 +87,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 		g2.translate(tx.getTranslateX(), tx.getTranslateY());
 		float pix = getPixelScale();
 		
-		g2.setFont(painter.font.deriveFont(painter.fontSize/pix));
+		g2.setFont(font.deriveFont(font.getSize()/pix)); // FIXME check if getSize needs to be pre-calc as float
 		FontMetrics fm = g2.getFontMetrics();
 		if(updateCursor) {
 			cursor = searchCol(fm, (cursorX-4f)/pix);
@@ -97,27 +108,27 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 		float descent = fm.getDescent();
 		
 		if(selStart<0) {
-			g2.setColor(painter.colorFg);
+			g2.setColor(colorText);
 			g2.drawString(text, x0, y);
 		}
 		else {
 			float x = x0;
 			String s;
 			if(selMin>0) {
-				g2.setColor(painter.colorFg);
+				g2.setColor(colorText);
 				s = text.substring(0, selMin);
 				g2.drawString(s, x, y);
 				x += (float)fm.getStringBounds(s, g2).getWidth();
 			}
 			s = text.substring(selMin, selMax);
 			float w = (float)fm.getStringBounds(s, g2).getWidth();
-			g2.setColor(painter.colorSelection);
+			g2.setColor(colorSelection);
 			g2.fillRect((int)x, (int)(y-lh+descent), (int)(x+w)-(int)x, (int)lh);
-			g2.setColor(painter.colorSelectionFg);
+			g2.setColor(colorSelectedText);
 			g2.drawString(s, x, y);
 			x += w;
 			if(selMax<text.length()) {
-				g2.setColor(painter.colorFg);
+				g2.setColor(colorText);
 				s = text.substring(selMax);
 				g2.drawString(s, x, y);
 			}
@@ -133,7 +144,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 		
 		g2.setTransform(tx);
 		
-		g2.setColor(focused ? painter.colorSelection : hover ? painter.colorFg : painter.colorBorder);
+		g2.setColor(focused ? colorSelection : hover ? colorText : colorBorder);
 		g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
 	}
 

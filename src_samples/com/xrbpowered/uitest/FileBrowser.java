@@ -3,6 +3,7 @@ package com.xrbpowered.uitest;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
@@ -26,21 +27,42 @@ import com.xrbpowered.zoomui.BasePanel;
 import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.icons.IconPalette;
 import com.xrbpowered.zoomui.icons.SvgIcon;
-import com.xrbpowered.zoomui.std.StdPainter;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIButtonBase;
+import com.xrbpowered.zoomui.std.UIListBox;
+import com.xrbpowered.zoomui.std.UIListItem;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
 
 public class FileBrowser extends UIContainer {
 
+	public static Font font = UIButton.font;
+
+	public static Color colorBackground = Color.WHITE;
+	public static Color colorBorder = UIListBox.colorBorder;
+	public static Color colorBorderLight = new Color(0xcccccc);
+	public static Color colorText = UIListItem.colorText;
+	public static Color colorHighlight = UIListItem.colorHighlight;
+	public static Color colorSelection = UIListItem.colorSelection;
+	public static Color colorSelectedText = UIListItem.colorSelectedText;
+	public static Color colorDisabledSelectedText = new Color(0x99ccff);
+	public static Color colorDisabledText = new Color(0x888888);
+
+	public static final IconPalette iconPalette = new IconPalette(new Color[][] {
+		{new Color(0xeeeeee), new Color(0xf8f8f8), new Color(0x888888), Color.BLACK},
+		{new Color(0x66aaff), new Color(0x4499ee), new Color(0xddeeff), Color.WHITE},
+		{new Color(0xf9f9f9), new Color(0xfdfdfd), new Color(0xd8d8d8), new Color(0xababab)}, 
+		{new Color(0x4298f3), new Color(0x2c8de8), new Color(0x90c4f3), new Color(0xa6d0f3)},
+	});
+
 	private static final SimpleDateFormat dateFmt = new SimpleDateFormat("d MMM yyyy, HH:mm");
 	
-	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, StdPainter.instance.iconPalette);
-	private static final SvgIcon folderIcon = new SvgIcon("svg/folder.svg", 160, StdPainter.instance.iconPalette);
-	private static final SvgIcon diskIcon = new SvgIcon("svg/disk.svg", 160, StdPainter.instance.iconPalette);
+	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, iconPalette);
+	private static final SvgIcon folderIcon = new SvgIcon("svg/folder.svg", 160, iconPalette);
+	private static final SvgIcon diskIcon = new SvgIcon("svg/disk.svg", 160, iconPalette);
 	
 	private static final int LIST_ITEM_WIDTH = 256;
 	private static final int LIST_ITEM_HEIGHT = 48;
@@ -99,9 +121,8 @@ public class FileBrowser extends UIContainer {
 			if(clip.y>h || clip.y+clip.height<0)
 				return;
 			
-			StdPainter painter = StdPainter.instance;
 			boolean sel = (file==fileBrowser.view.getSelectedFile());
-			Color bgColor = sel ? painter.colorSelection : hover ? painter.colorHighlight : painter.colorTextBg;
+			Color bgColor = sel ? colorSelection : hover ? colorHighlight : colorBackground;
 			g2.setColor(bgColor);
 			g2.fillRect(0, 0, w, h);
 
@@ -116,8 +137,8 @@ public class FileBrowser extends UIContainer {
 			if(isSystem) style += 2;
 			(disk ? diskIcon : file.isFile() ? fileIcon : folderIcon).paint(g2, style, 20, 8, 32, getPixelScale(), true);
 
-			g2.setFont(painter.font);
-			g2.setColor(sel ? painter.colorSelectionFg : painter.colorFg);
+			g2.setFont(font);
+			g2.setColor(sel ? colorSelectedText : colorText);
 			if(textWidth<0) {
 				FontMetrics fm = g2.getFontMetrics();
 				textWidth = fm.stringWidth(fileName);
@@ -131,15 +152,15 @@ public class FileBrowser extends UIContainer {
 					g2.setClip(r);
 					g2.drawString(fileName, 60, y);
 					g2.setClip(clip);
-					g2.setPaint(new GradientPaint(w-64, 0, new Color(bgColor.getRGB()&0xffffff, true), w-8, 0, bgColor));
-					g2.fillRect(w-64, 0, 56, h);
+					g2.setPaint(new GradientPaint(w-32, 0, new Color(bgColor.getRGB()&0xffffff, true), w-8, 0, bgColor));
+					g2.fillRect(w-32, 0, 24, h);
 				}
 			}
 			else {
 				g2.drawString(fileName, 60, y);
 			}
 			if(info!=null) {
-				g2.setColor(sel ? painter.colorSelectionFgDisabled : painter.colorFgDisabled);
+				g2.setColor(sel ? colorDisabledSelectedText : colorDisabledText);
 				g2.drawString(info, 60, (int)(h/2f+3f+textHeight));
 			}
 		}
@@ -183,23 +204,22 @@ public class FileBrowser extends UIContainer {
 		
 		@Override
 		public void paint(Graphics2D g2) {
-			StdPainter painter = StdPainter.instance;
-			Color bgColor = hover ? painter.colorHighlight : painter.colorTextBg;
+			Color bgColor = hover ? colorHighlight : colorBackground;
 			g2.setColor(bgColor);
 			g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 			
 			FileGroupBox grp = (FileGroupBox) getParent();
 			boolean open = grp.isViewOpen();
 			
-			g2.setColor(open ? painter.colorSelection : painter.colorFgDisabled);
+			g2.setColor(open ? colorSelection : colorDisabledText);
 			String str = String.format("%s (%d)", grp.title, grp.getNumFiles());
 			FontMetrics fm = g2.getFontMetrics();
 			int textWidth = fm.stringWidth(str);
-			g2.drawString(str, 20, 2+painter.fontSize);
+			g2.drawString(str, 20, 2+font.getSize());
 			
 			Stroke stroke = g2.getStroke();
 			g2.setStroke(new BasicStroke(2f));
-			g2.setColor(painter.colorFg);
+			g2.setColor(colorText);
 			int w = (int)(getHeight()/2f);
 			if(open)
 				g2.drawPolyline(new int[] {6, 10, 14}, new int[] {w-2, w+2, w-2}, 3);
@@ -207,7 +227,7 @@ public class FileBrowser extends UIContainer {
 				g2.drawPolyline(new int[] {8, 12, 8}, new int[] {w-4, w, w+4}, 3);
 			
 			g2.setStroke(stroke);
-			g2.setColor(painter.colorBorderLight);
+			g2.setColor(colorBorderLight);
 			g2.drawLine(textWidth+28, w, (int)getWidth()-8, w);
 		}
 	
@@ -302,7 +322,7 @@ public class FileBrowser extends UIContainer {
 		protected void layout() {
 			float w = getWidth();
 			header.setLocation(0, 0);
-			header.setSize(w, StdPainter.instance.fontSize+8);
+			header.setSize(w, font.getSize()+8);
 			if(body.isVisible()) {
 				body.setLocation(0, header.getHeight());
 				body.setSize(w, 0);
@@ -491,15 +511,14 @@ public class FileBrowser extends UIContainer {
 		
 		@Override
 		protected void paintSelf(Graphics2D g2) {
-			g2.setColor(StdPainter.instance.colorTextBg);
+			g2.setColor(colorBackground);
 			g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 		}
 		
 		@Override
 		protected void paintChildren(Graphics2D g2) {
 			super.paintChildren(g2);
-			StdPainter painter = StdPainter.instance;
-			g2.setColor(painter.colorBorder);
+			g2.setColor(colorBorder);
 			g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
 		}
 	}
@@ -515,7 +534,7 @@ public class FileBrowser extends UIContainer {
 		view = new FileViewPane(this, null, true);
 		txtPath = new UITextBox(this);
 		txtFileName = new UITextBox(this);
-		btnBack = new UIToolButton(this, new SvgIcon("svg/back.svg", 160, StdPainter.instance.iconPalette), 16, 2) {
+		btnBack = new UIToolButton(this, new SvgIcon("svg/back.svg", 160, iconPalette), 16, 2) {
 			public void onAction() {
 				if(historyIndex>0) {
 					historyIndex--;
@@ -528,7 +547,7 @@ public class FileBrowser extends UIContainer {
 				requestRepaint();
 			}
 		}.disable();
-		btnFwd = new UIToolButton(this, new SvgIcon("svg/forward.svg", 160, StdPainter.instance.iconPalette), 16, 2) {
+		btnFwd = new UIToolButton(this, new SvgIcon("svg/forward.svg", 160, iconPalette), 16, 2) {
 			public void onAction() {
 				if(historyIndex<history.size()-1) {
 					historyIndex++;
@@ -541,27 +560,27 @@ public class FileBrowser extends UIContainer {
 				requestRepaint();
 			}
 		}.disable();
-		btnRefresh = new UIToolButton(this, new SvgIcon("svg/refresh.svg", 160, StdPainter.instance.iconPalette), 16, 2) {
+		btnRefresh = new UIToolButton(this, new SvgIcon("svg/refresh.svg", 160, iconPalette), 16, 2) {
 			public void onAction() {
 				view.refresh();				
 				requestRepaint();
 			}
 		};
-		btnUp = new UIToolButton(this, new SvgIcon("svg/up.svg", 160, StdPainter.instance.iconPalette), 32, 8) {
+		btnUp = new UIToolButton(this, new SvgIcon("svg/up.svg", 160, iconPalette), 32, 8) {
 			public void onAction() {
 				if(view.upDirectory())
 					pushHistory();
 				requestRepaint();
 			}
 		};
-		btnHome = new UIToolButton(this, new SvgIcon("svg/home.svg", 160, StdPainter.instance.iconPalette), 32, 8) {
+		btnHome = new UIToolButton(this, new SvgIcon("svg/home.svg", 160, iconPalette), 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(new File(System.getProperty("user.home"))))
 					pushHistory();
 				requestRepaint();
 			}
 		};
-		btnRoots = new UIToolButton(this, new SvgIcon("svg/roots.svg", 160, StdPainter.instance.iconPalette), 32, 8) {
+		btnRoots = new UIToolButton(this, new SvgIcon("svg/roots.svg", 160, iconPalette), 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(null))
 					pushHistory();
@@ -591,14 +610,13 @@ public class FileBrowser extends UIContainer {
 	
 	@Override
 	protected void layout() {
-		StdPainter painter = StdPainter.instance;
 		float w = getWidth();
 		float h = getHeight();
 		float top = txtFileName.getHeight()+16;
-		float viewh = h-24-painter.buttonHeight*2-top;
+		float viewh = h-24-UIButton.defaultHeight*2-top;
 		view.setLocation(56, top);
 		view.setSize(w-56, viewh);
-		txtFileName.setLocation(56, h-painter.buttonHeight*2-16);
+		txtFileName.setLocation(56, h-UIButton.defaultHeight*2-16);
 		txtFileName.setSize(w-56-8, txtFileName.getHeight());
 		txtPath.setLocation(56, 8);
 		txtPath.setSize(w-56-4-28, txtFileName.getHeight());
@@ -608,32 +626,31 @@ public class FileBrowser extends UIContainer {
 		btnUp.setLocation(4, top+4);
 		btnHome.setLocation(4, top+viewh-48*2-4);
 		btnRoots.setLocation(4, top+viewh-48-4);
-		btnOk.setLocation(w-painter.buttonWidth*2-12, h-painter.buttonHeight-8);
-		btnCancel.setLocation(w-painter.buttonWidth-8, h-painter.buttonHeight-8);
+		btnOk.setLocation(w-UIButton.defaultWidth*2-12, h-UIButton.defaultHeight-8);
+		btnCancel.setLocation(w-UIButton.defaultWidth-8, h-UIButton.defaultHeight-8);
 		super.layout();
 	}
 	
 	@Override
 	protected void paintSelf(Graphics2D g2) {
-		StdPainter painter = StdPainter.instance;
 		int w = (int)getWidth();
 		int h = (int)getHeight();
 		int top = (int)(txtFileName.getHeight()+16);
-		int viewh = h-24-painter.buttonHeight*2-top;
+		int viewh = h-24-UIButton.defaultHeight*2-top;
 		
-		g2.setColor(painter.colorBgLight);
+		g2.setColor(Color.WHITE);
 		g2.fillRect(0, 0, w, top);
-		g2.setColor(painter.colorBg);
+		g2.setColor(new Color(0xf2f2f2));
 		g2.fillRect(0, top, w, h-top);
 		
-		g2.setColor(painter.colorBgDark);
+		g2.setColor(new Color(0xe4e4e4));
 		g2.fillRect(0, top, 56, viewh);
-		g2.setColor(painter.colorBorderLight);
+		g2.setColor(new Color(0xcccccc));
 		g2.drawLine(0, top, w, top);
 		g2.drawLine(0, top+viewh, 56, top+viewh);
 		
-		g2.setFont(painter.font);
-		g2.setColor(painter.colorFg);
+		g2.setFont(font);
+		g2.setColor(colorText);
 		TextUtils.drawString(g2, "File:", 52, (int)(txtFileName.getY()+txtFileName.getHeight()/2f), TextUtils.RIGHT, TextUtils.CENTER);
 	}
 	

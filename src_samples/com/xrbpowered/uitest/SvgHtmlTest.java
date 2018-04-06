@@ -24,12 +24,11 @@ import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.icons.SvgIcon;
-import com.xrbpowered.zoomui.std.StdPainter;
 
 public class SvgHtmlTest extends UIElement {
 
 	private static final Font font = new Font("Tahoma", Font.PLAIN, TextUtils.ptToPixels(9f));
-	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, StdPainter.instance.iconPalette);
+	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, FileBrowser.iconPalette);
 	private static final int iconSize = 16;
 
 	public static class SvgImageView extends ImageView {

@@ -3,11 +3,14 @@ package com.xrbpowered.zoomui.std;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIPanView;
 
 public abstract class UIScrollContainer extends UIContainer {
 
+	public static float scrollStep = 3f*TextUtils.ptToPixels(9f);
+	
 	private UIPanView view;
 	
 	public UIScrollContainer(UIContainer parent) {
@@ -47,7 +50,7 @@ public abstract class UIScrollContainer extends UIContainer {
 	
 	@Override
 	protected boolean onMouseScroll(float x, float y, float delta) {
-		view.pan(0, -delta*3f*StdPainter.instance.fontSize);
+		view.pan(0, -delta*scrollStep);
 		requestRepaint();
 		return true;
 	}

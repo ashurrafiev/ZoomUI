@@ -32,8 +32,8 @@ public class SvgIcon {
 	}
 	
 	public SvgIcon load() {
-		this.fgPath = SvgPath.getSvgPath(uri, "fg", 1);
-		this.bgPath = SvgPath.getSvgPath(uri, "bg", 1);
+		this.fgPath = new SvgFile(uri).getPath("fg", 1);
+		this.bgPath = new SvgFile(uri).getPath("bg", 1);
 		bounds = fgPath.getBounds2D();
 		if(bgPath!=null)
 			bounds.add(bgPath.getBounds2D());
