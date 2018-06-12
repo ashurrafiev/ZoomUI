@@ -1,8 +1,8 @@
 package com.xrbpowered.zoomui;
 
-import java.awt.Graphics2D;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 
 import javax.swing.SwingUtilities;
@@ -101,6 +101,12 @@ public abstract class UIElement {
 		this.visible = visible;
 	}
 	
+	public boolean isVisible(Rectangle clip) {
+		return visible &&
+			!(clip.x-x>getWidth() || clip.x-x+clip.width<0 ||
+			clip.y-y>getHeight() || clip.y-y+clip.height<0);
+	}
+	
 	public float getX() {
 		return x;
 	}
@@ -125,7 +131,7 @@ public abstract class UIElement {
 		return parent;
 	}
 	
-	public abstract void paint(Graphics2D g2);
+	public abstract void paint(GraphAssist g);
 	
 	public DragActor acceptDrag(int x, int y, int buttons) {
 		return null;

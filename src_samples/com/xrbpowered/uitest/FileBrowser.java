@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.io.File;
 import java.nio.file.Path;
@@ -20,7 +18,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.xrbpowered.zoomui.TextUtils;
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.WindowUtils;
@@ -111,17 +109,13 @@ public class FileBrowser extends UIContainer {
 		}
 		
 		@Override
-		public void paint(Graphics2D g2) {
+		public void paint(GraphAssist g) {
 			int w = (int)getWidth();
 			int h = (int)getHeight();
-			Rectangle clip = g2.getClipBounds();
-			if(clip.y>h || clip.y+clip.height<0)
-				return;
 			
 			boolean sel = (file==fileBrowser.view.getSelectedFile());
 			Color bgColor = sel ? colorSelection : hover ? colorHighlight : colorBackground;
-			g2.setColor(bgColor);
-			g2.fillRect(0, 0, w, h);
+			g.fill(this, bgColor);
 
 			String fileName = file.getName();
 			boolean disk = false;
@@ -132,33 +126,28 @@ public class FileBrowser extends UIContainer {
 
 			int style = sel ? 1 : 0;
 			if(isSystem) style += 2;
-			(disk ? diskIcon : file.isFile() ? fileIcon : folderIcon).paint(g2, style, 20, 8, 32, getPixelScale(), true);
+			(disk ? diskIcon : file.isFile() ? fileIcon : folderIcon).paint(g.graph, style, 20, 8, 32, getPixelScale(), true);
 
-			g2.setFont(font);
-			g2.setColor(sel ? colorSelectedText : colorText);
+			g.setFont(font);
+			g.setColor(sel ? colorSelectedText : colorText);
 			if(textWidth<0) {
-				FontMetrics fm = g2.getFontMetrics();
+				FontMetrics fm = g.graph.getFontMetrics();
 				textWidth = fm.stringWidth(fileName);
 				textHeight = fm.getAscent() - fm.getDescent();
 			}
 			float y = info==null ? (h/2f + textHeight/2f) : (h/2f-3f);
-			if(textWidth+60>=w-8) {
-				Rectangle r = new Rectangle(0, 0, w-8, h);
-				if(r.intersects(clip)) {
-					r = r.intersection(clip);
-					g2.setClip(r);
-					g2.drawString(fileName, 60, y);
-					g2.setClip(clip);
-					g2.setPaint(new GradientPaint(w-32, 0, new Color(bgColor.getRGB()&0xffffff, true), w-8, 0, bgColor));
-					g2.fillRect(w-32, 0, 24, h);
-				}
+			if(textWidth+60>=w-8 && g.pushClip(0, 0, w-8, h)) {
+				g.drawString(fileName, 60, y);
+				g.popClip();
+				g.setPaint(new GradientPaint(w-32, 0, new Color(bgColor.getRGB()&0xffffff, true), w-8, 0, bgColor));
+				g.fillRect(w-32, 0, 24, h);
 			}
 			else {
-				g2.drawString(fileName, 60, y);
+				g.drawString(fileName, 60, y);
 			}
 			if(info!=null) {
-				g2.setColor(sel ? colorDisabledSelectedText : colorDisabledText);
-				g2.drawString(info, 60, (int)(h/2f+3f+textHeight));
+				g.setColor(sel ? colorDisabledSelectedText : colorDisabledText);
+				g.drawString(info, 60, (int)(h/2f+3f+textHeight));
 			}
 		}
 		
@@ -200,32 +189,31 @@ public class FileBrowser extends UIContainer {
 		}
 		
 		@Override
-		public void paint(Graphics2D g2) {
+		public void paint(GraphAssist g) {
 			Color bgColor = hover ? colorHighlight : colorBackground;
-			g2.setColor(bgColor);
-			g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+			g.fill(this, bgColor);
 			
 			FileGroupBox grp = (FileGroupBox) getParent();
 			boolean open = grp.isViewOpen();
 			
-			g2.setColor(open ? colorSelection : colorDisabledText);
+			g.setColor(open ? colorSelection : colorDisabledText);
 			String str = String.format("%s (%d)", grp.title, grp.getNumFiles());
-			FontMetrics fm = g2.getFontMetrics();
+			FontMetrics fm = g.graph.getFontMetrics();
 			int textWidth = fm.stringWidth(str);
-			g2.drawString(str, 20, 2+font.getSize());
+			g.drawString(str, 20, 2+font.getSize());
 			
-			Stroke stroke = g2.getStroke();
-			g2.setStroke(new BasicStroke(2f));
-			g2.setColor(colorText);
+			Stroke stroke = g.graph.getStroke();
+			g.graph.setStroke(new BasicStroke(2f));
+			g.setColor(colorText);
 			int w = (int)(getHeight()/2f);
 			if(open)
-				g2.drawPolyline(new int[] {6, 10, 14}, new int[] {w-2, w+2, w-2}, 3);
+				g.graph.drawPolyline(new int[] {6, 10, 14}, new int[] {w-2, w+2, w-2}, 3);
 			else
-				g2.drawPolyline(new int[] {8, 12, 8}, new int[] {w-4, w, w+4}, 3);
+				g.graph.drawPolyline(new int[] {8, 12, 8}, new int[] {w-4, w, w+4}, 3);
 			
-			g2.setStroke(stroke);
-			g2.setColor(colorBorderLight);
-			g2.drawLine(textWidth+28, w, (int)getWidth()-8, w);
+			g.graph.setStroke(stroke);
+			g.setColor(colorBorderLight);
+			g.line(textWidth+28, w, getWidth()-8, w);
 		}
 	
 		@Override
@@ -507,16 +495,14 @@ public class FileBrowser extends UIContainer {
 		}
 		
 		@Override
-		protected void paintSelf(Graphics2D g2) {
-			g2.setColor(colorBackground);
-			g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+		protected void paintSelf(GraphAssist g) {
+			g.fill(this, colorBackground);
 		}
 		
 		@Override
-		protected void paintChildren(Graphics2D g2) {
-			super.paintChildren(g2);
-			g2.setColor(colorBorder);
-			g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
+		protected void paintChildren(GraphAssist g) {
+			super.paintChildren(g);
+			g.border(this, colorBorder);
 		}
 	}
 
@@ -629,26 +615,24 @@ public class FileBrowser extends UIContainer {
 	}
 	
 	@Override
-	protected void paintSelf(Graphics2D g2) {
+	protected void paintSelf(GraphAssist g) {
 		int w = (int)getWidth();
 		int h = (int)getHeight();
 		int top = (int)(txtFileName.getHeight()+16);
 		int viewh = h-24-UIButton.defaultHeight*2-top;
 		
-		g2.setColor(Color.WHITE);
-		g2.fillRect(0, 0, w, top);
-		g2.setColor(new Color(0xf2f2f2));
-		g2.fillRect(0, top, w, h-top);
+		g.fillRect(0, 0, w, top, Color.WHITE);
+		g.fillRect(0, top, w, h-top, new Color(0xf2f2f2));
 		
-		g2.setColor(new Color(0xe4e4e4));
-		g2.fillRect(0, top, 56, viewh);
-		g2.setColor(new Color(0xcccccc));
-		g2.drawLine(0, top, w, top);
-		g2.drawLine(0, top+viewh, 56, top+viewh);
+		g.fillRect(0, top, 56, viewh, new Color(0xe4e4e4));
+		g.setColor(new Color(0xcccccc));
+		g.line(0, top, w, top);
+		g.line(0, top+viewh, 56, top+viewh);
 		
-		g2.setFont(font);
-		g2.setColor(colorText);
-		TextUtils.drawString(g2, "File:", 52, (int)(txtFileName.getY()+txtFileName.getHeight()/2f), TextUtils.RIGHT, TextUtils.CENTER);
+		g.setFont(font);
+		g.setColor(colorText);
+		g.drawString("File:", 52, txtFileName.getY()+txtFileName.getHeight()/2f,
+				GraphAssist.RIGHT, GraphAssist.CENTER);
 	}
 	
 	public static void main(String[] args) {

@@ -1,8 +1,8 @@
 package com.xrbpowered.zoomui.std;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 
 public class UIListBox extends UIScrollContainer {
@@ -75,16 +75,14 @@ public class UIListBox extends UIScrollContainer {
 	}
 	
 	@Override
-	protected void paintSelf(Graphics2D g2) {
-		g2.setColor(colorBackground);
-		g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+	protected void paintSelf(GraphAssist g) {
+		g.fill(this, colorBackground);
 	}
 	
 	@Override
-	protected void paintChildren(Graphics2D g2) {
-		super.paintChildren(g2);
-		g2.setColor(colorBorder);
-		g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
+	protected void paintChildren(GraphAssist g) {
+		super.paintChildren(g);
+		g.border(this, colorBorder);
 	}
 	
 }

@@ -1,7 +1,6 @@
 package com.xrbpowered.zoomui;
 
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 
 public abstract class UIContainer extends UIElement {
@@ -41,24 +40,25 @@ public abstract class UIContainer extends UIElement {
 		}
 	}
 	
-	protected void paintSelf(Graphics2D g2) {
+	protected void paintSelf(GraphAssist g) {
 	}
 	
-	protected void paintChildren(Graphics2D g2) {
+	protected void paintChildren(GraphAssist g) {
+		Rectangle clip = g.graph.getClipBounds();
 		for(UIElement c : children) {
-			if(c.isVisible()) {
-				AffineTransform tx = g2.getTransform();
-				g2.translate(c.getX(), c.getY());
-				c.paint(g2);
-				g2.setTransform(tx);
+			if(c.isVisible(clip)) {
+				g.pushTx();
+				g.translate(c.getX(), c.getY());
+				c.paint(g);
+				g.popTx();
 			}
 		}
 	}
 	
 	@Override
-	public void paint(Graphics2D g2) {
-		paintSelf(g2);
-		paintChildren(g2);
+	public void paint(GraphAssist g) {
+		paintSelf(g);
+		paintChildren(g);
 	}
 	
 	protected UIElement getElementUnderMouse(float x, float y) {

@@ -1,9 +1,7 @@
 package com.xrbpowered.zoomui;
 
-import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
-import java.awt.geom.AffineTransform;
 
 public class BaseContainer extends UIContainer {
 
@@ -86,19 +84,18 @@ public class BaseContainer extends UIContainer {
 	}
 	
 	@Override
-	public void paint(Graphics2D g2) {
-		g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-		// g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		super.paint(g2);
+	public void paint(GraphAssist g) {
+		g.graph.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		super.paint(g);
 	}
 	
 	@Override
-	protected void paintChildren(Graphics2D g2) {
-		AffineTransform tx = g2.getTransform();
-		g2.scale(baseScale, baseScale);
-		super.paintChildren(g2);
-		g2.setTransform(tx);
+	protected void paintChildren(GraphAssist g) {
+		g.pushTx();
+		g.scale(baseScale);
+		super.paintChildren(g);
+		g.popTx();
 	}
 	
 }

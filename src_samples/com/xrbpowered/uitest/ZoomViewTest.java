@@ -1,9 +1,8 @@
 package com.xrbpowered.uitest;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 
-import com.xrbpowered.zoomui.TextUtils;
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIZoomView;
@@ -50,9 +49,9 @@ public class ZoomViewTest extends UIZoomView {
 	}
 	
 	@Override
-	protected void paintSelf(Graphics2D g2) {
-		g2.setColor(Color.WHITE);
-		g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+	protected void paintSelf(GraphAssist g) {
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 	}
 
 	public static void main(String[] args) {
@@ -60,14 +59,13 @@ public class ZoomViewTest extends UIZoomView {
 			private ZoomViewTest top = new ZoomViewTest(this);
 			private UIElement bottom = new UIElement(this) {
 				@Override
-				public void paint(Graphics2D g2) {
-					g2.setColor(new Color(0xeeeeee));
-					g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
-					g2.setColor(new Color(0x999999));
-					g2.drawLine(0, 0, (int)getWidth(), 0);
-					g2.setColor(Color.BLACK);
-					g2.setFont(UIButton.font);
-					TextUtils.drawString(g2, "Test UIZoomView and std controls", 16, (int)(getHeight()/2), TextUtils.LEFT, TextUtils.CENTER);
+				public void paint(GraphAssist g) {
+					g.fill(this, new Color(0xeeeeee));
+					g.hborder(this, GraphAssist.TOP, new Color(0x999999));
+					g.setColor(Color.BLACK);
+					g.setFont(UIButton.font);
+					g.drawString("Test UIZoomView and std controls", 16, getHeight()/2f,
+							GraphAssist.LEFT, GraphAssist.CENTER);
 				}
 			};
 			

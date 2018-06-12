@@ -1,8 +1,5 @@
 package com.xrbpowered.zoomui;
 
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-
 public class UIPanView extends UIContainer {
 
 	public static final int UNLIMITED = -1;
@@ -19,7 +16,8 @@ public class UIPanView extends UIContainer {
 
 		@Override
 		public boolean notifyMouseMove(int dx, int dy) {
-			pan(dx, dy);
+			float pix = getPixelScale();
+			pan(dx / pix, dy / pix);
 			requestRepaint();
 			return true;
 		}
@@ -102,18 +100,19 @@ public class UIPanView extends UIContainer {
 		return super.parentToLocalY(y)+panY;
 	}
 
-	protected void applyTransform(Graphics2D g2) {
-		g2.translate(-panX, -panY);
+	protected void applyTransform(GraphAssist g) {
+		g.translate(-panX, -panY);
 	}
 	
 	@Override
-	protected void paintChildren(Graphics2D g2) {
-		g2.setClip(0, 0, (int)getWidth(), (int)getHeight());
-		AffineTransform tx = g2.getTransform();
-		applyTransform(g2);
-		super.paintChildren(g2);
-		g2.setTransform(tx);
-		g2.setClip(null);
+	protected void paintChildren(GraphAssist g) {
+		if(g.pushClip(0, 0, getWidth(), getHeight())) {
+			g.pushTx();
+			applyTransform(g);
+			super.paintChildren(g);
+			g.popTx();
+			g.popClip();
+		}
 	}
 	
 	@Override

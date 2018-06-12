@@ -227,7 +227,7 @@ public class BasePanel extends JPanel {
 			container.layout();
 			invalidLayout = false;
 		}
-		container.paint((Graphics2D) g);
+		container.paint(new GraphAssist((Graphics2D) g));
 	}
 	
 }

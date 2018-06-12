@@ -1,16 +1,14 @@
 package com.xrbpowered.zoomui.std;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 
-import com.xrbpowered.zoomui.TextUtils;
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
-import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIPanView;
 
 public abstract class UIScrollContainer extends UIContainer {
 
-	public static float scrollStep = 3f*TextUtils.ptToPixels(9f);
+	public static float scrollStep = 3f*GraphAssist.ptToPixels(9f);
 	
 	private UIPanView view;
 	
@@ -36,17 +34,15 @@ public abstract class UIScrollContainer extends UIContainer {
 	protected abstract float layoutView();
 	
 	@Override
-	protected void paintChildren(Graphics2D g2) {
-		super.paintChildren(g2);
+	protected void paintChildren(GraphAssist g) {
+		super.paintChildren(g);
 		// TODO scroll bars
 		if(view.getMaxPanY()>0) {
-			g2.setColor(new Color(0xdddddd));
-			g2.fillRect((int)(getWidth()-4f), 0, 4, (int)getHeight());
+			g.fillRect(getWidth()-4f, 0, 4, getHeight(), new Color(0xdddddd));
 			float s = getHeight()/(view.getMaxPanY()+getHeight());
 			float top = view.getPanY() * s;
 			float h = getHeight() * s;
-			g2.setColor(new Color(0x777777));
-			g2.fillRect((int)(getWidth()-4f), (int)top, 4, (int)h);
+			g.fillRect(getWidth()-4f, top, 4, h, new Color(0x777777));
 		}
 	}
 	

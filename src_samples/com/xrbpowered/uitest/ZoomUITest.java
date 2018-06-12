@@ -3,9 +3,8 @@ package com.xrbpowered.uitest;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
 
-import com.xrbpowered.zoomui.TextUtils;
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.WindowUtils;
@@ -13,7 +12,7 @@ import com.xrbpowered.zoomui.WindowUtils;
 public class ZoomUITest {
 
 	private static final int MAX_LEVEL = 2;
-	private static final Font font = new Font("Tahoma", Font.BOLD, TextUtils.ptToPixels(14f));
+	private static final Font font = new Font("Tahoma", Font.BOLD, GraphAssist.ptToPixels(14f));
 	
 	private static int nextId = 0;
 	
@@ -38,13 +37,13 @@ public class ZoomUITest {
 			this.id = nextId++; 
 		}
 		@Override
-		public void paint(Graphics2D g2) {
-			g2.setColor(down ? new Color(0xcccccc) : hover ? new Color(0xdddddd) : new Color(0xeeeeee));
-			g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
-			g2.setColor(Color.BLACK);
-			g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
-			g2.setFont(font);
-			g2.drawString(String.format("%d:%d", id, clicks), 10, 25);
+		public void paint(GraphAssist g) {
+			g.setColor(down ? new Color(0xcccccc) : hover ? new Color(0xdddddd) : new Color(0xeeeeee));
+			g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+			g.setColor(Color.BLACK);
+			g.drawRect(0, 0, (int)getWidth(), (int)getHeight());
+			g.setFont(font);
+			g.drawString(String.format("%d:%d", id, clicks), 10, 25);
 		}
 		@Override
 		protected void onMouseIn() {
@@ -113,17 +112,17 @@ public class ZoomUITest {
 			super.layout();
 		}
 		@Override
-		protected void paintSelf(Graphics2D g2) {
+		protected void paintSelf(GraphAssist g) {
 			if(level<MAX_LEVEL) {
-				g2.setStroke(new BasicStroke(getPixelScale()));
-				g2.setColor(Color.RED);
-				g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
-				g2.setColor(new Color(0x22ff0000, true));
-				g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+				g.graph.setStroke(new BasicStroke(getPixelScale()));
+				g.setColor(Color.RED);
+				g.drawRect(0, 0, (int)getWidth(), (int)getHeight());
+				g.setColor(new Color(0x22ff0000, true));
+				g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 			}
 			else {
-				g2.setColor(Color.WHITE);
-				g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+				g.setColor(Color.WHITE);
+				g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 			}
 		}
 		public void start() {

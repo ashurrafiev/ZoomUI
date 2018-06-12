@@ -2,9 +2,8 @@ package com.xrbpowered.zoomui.std;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
 
-import com.xrbpowered.zoomui.TextUtils;
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIElement;
 
 public class UIListItem extends UIElement {
@@ -30,13 +29,12 @@ public class UIListItem extends UIElement {
 	}
 	
 	@Override
-	public void paint(Graphics2D g2) {
+	public void paint(GraphAssist g) {
 		boolean sel = (index==list.getSelectedIndex());
-		g2.setColor(sel ? colorSelection : hover ? colorHighlight : Color.WHITE);
-		g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
-		g2.setColor(sel ? colorSelectedText : colorText);
-		g2.setFont(font);
-		TextUtils.drawString(g2, object.toString(), 8, (int)(getHeight()/2f), TextUtils.LEFT, TextUtils.CENTER);
+		g.fill(this, sel ? colorSelection : hover ? colorHighlight : Color.WHITE);
+		g.setColor(sel ? colorSelectedText : colorText);
+		g.setFont(font);
+		g.drawString(object.toString(), 8, getHeight()/2f, GraphAssist.LEFT, GraphAssist.CENTER);
 	}
 	
 	@Override

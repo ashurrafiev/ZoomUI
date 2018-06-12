@@ -4,11 +4,10 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.awt.geom.AffineTransform;
 
 import com.xrbpowered.zoomui.DragActor;
+import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
@@ -76,76 +75,72 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	}
 	
 	@Override
-	public void paint(Graphics2D g2) {
-		g2.setColor(colorBackground);
-		g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+	public void paint(GraphAssist g) {
+		g.fill(this, colorBackground);
 		
 		boolean focused = isFocused();
 		
-		AffineTransform tx = g2.getTransform(); // TODO manual scale as function
-		g2.setTransform(new AffineTransform());
-		g2.translate(tx.getTranslateX(), tx.getTranslateY());
-		float pix = getPixelScale();
-		
-		g2.setFont(font.deriveFont(font.getSize()/pix)); // FIXME check if getSize needs to be pre-calc as float
-		FontMetrics fm = g2.getFontMetrics();
-		if(updateCursor) {
-			cursor = searchCol(fm, (cursorX-4f)/pix);
-			updateCursor = false;
-			if(dragSelecting)
-				modifySelection(selStart);
-		}
-		
-		// FontMetrics fm = new JLabel().getFontMetrics(g2.getFont());
-		
-		// TODO clip
-		// TODO scroll text in textbox to cursor
-		
-		float h = fm.getAscent() - fm.getDescent();
-		float x0 = 4/pix;
-		float y = getHeight()/pix/2f+h/2f;
-		float lh = fm.getHeight();
-		float descent = fm.getDescent();
-		
-		if(selStart<0) {
-			g2.setColor(colorText);
-			g2.drawString(text, x0, y);
-		}
-		else {
-			float x = x0;
-			String s;
-			if(selMin>0) {
-				g2.setColor(colorText);
-				s = text.substring(0, selMin);
-				g2.drawString(s, x, y);
-				x += (float)fm.getStringBounds(s, g2).getWidth();
+		if(g.pushClip(0, 0, getWidth(), getHeight())) {
+			g.pushTx();
+			g.clearTransform();
+			g.translate(g.getTx().getTranslateX(), g.getTx().getTranslateY());
+			float pix = getPixelScale();
+			
+			g.setFont(font.deriveFont(font.getSize()/pix)); // FIXME check if getSize needs to be pre-calc as float
+			FontMetrics fm = g.graph.getFontMetrics();
+			if(updateCursor) {
+				cursor = searchCol(fm, (cursorX-4f)/pix);
+				updateCursor = false;
+				if(dragSelecting)
+					modifySelection(selStart);
 			}
-			s = text.substring(selMin, selMax);
-			float w = (float)fm.getStringBounds(s, g2).getWidth();
-			g2.setColor(colorSelection);
-			g2.fillRect((int)x, (int)(y-lh+descent), (int)(x+w)-(int)x, (int)lh);
-			g2.setColor(colorSelectedText);
-			g2.drawString(s, x, y);
-			x += w;
-			if(selMax<text.length()) {
-				g2.setColor(colorText);
-				s = text.substring(selMax);
-				g2.drawString(s, x, y);
+			
+			// TODO scroll text in textbox to cursor
+			
+			float h = fm.getAscent() - fm.getDescent();
+			float x0 = 4/pix;
+			float y = getHeight()/pix/2f+h/2f;
+			float lh = fm.getHeight();
+			float descent = fm.getDescent();
+			
+			if(selStart<0) {
+				g.setColor(colorText);
+				g.drawString(text, x0, y);
 			}
+			else {
+				float x = x0;
+				String s;
+				if(selMin>0) {
+					g.setColor(colorText);
+					s = text.substring(0, selMin);
+					g.drawString(s, x, y);
+					x += (float)fm.getStringBounds(s, g.graph).getWidth();
+				}
+				s = text.substring(selMin, selMax);
+				float w = (float)fm.getStringBounds(s, g.graph).getWidth();
+				g.fillRect(x, y-lh+descent, (int)(x+w)-(int)x, lh, colorSelection);
+				g.setColor(colorSelectedText);
+				g.drawString(s, x, y);
+				x += w;
+				if(selMax<text.length()) {
+					g.setColor(colorText);
+					s = text.substring(selMax);
+					g.drawString(s, x, y);
+				}
+			}
+			
+			if(focused) {
+				int cx = fm.stringWidth(text.substring(0, cursor));
+				g.graph.setXORMode(Color.BLACK);
+				g.fillRect(x0+cx, y-lh+descent, 2f/pix, lh, Color.WHITE);
+				g.graph.setPaintMode();
+			}
+			
+			g.popTx();
+			g.popClip();
 		}
 		
-		if(focused) {
-			int cx = fm.stringWidth(text.substring(0, cursor));
-			g2.setXORMode(Color.BLACK);
-			g2.setColor(Color.WHITE);
-			g2.fillRect((int)(x0+cx), (int)(y-lh+descent), (int)(2f/pix), (int)lh);
-			g2.setPaintMode();
-		}
-		
-		g2.setTransform(tx);
-		
-		g2.setColor(focused ? colorSelection : hover ? colorText : colorBorder);
-		g2.drawRect(0, 0, (int)getWidth(), (int)getHeight());
+		g.border(this, focused ? colorSelection : hover ? colorText : colorBorder);
 	}
 
 	public boolean isFocused() {

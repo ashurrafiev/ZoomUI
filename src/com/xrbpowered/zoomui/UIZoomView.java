@@ -1,7 +1,5 @@
 package com.xrbpowered.zoomui;
 
-import java.awt.Graphics2D;
-
 public class UIZoomView extends UIPanView {
 
 	protected float scale = 1f; // FIXME integer zoom steps
@@ -44,9 +42,9 @@ public class UIZoomView extends UIPanView {
 	}
 
 	@Override
-	protected void applyTransform(Graphics2D g2) {
-		super.applyTransform(g2);
-		g2.scale(scale, scale);
+	protected void applyTransform(GraphAssist g) {
+		super.applyTransform(g);
+		g.scale(scale);
 	}
 
 	@Override
