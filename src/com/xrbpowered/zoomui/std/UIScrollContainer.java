@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIPanView;
 
 public abstract class UIScrollContainer extends UIContainer {
@@ -23,7 +24,8 @@ public abstract class UIScrollContainer extends UIContainer {
 	}
 	
 	@Override
-	protected void layout() {
+	public
+	final void layout() {
 		view.setLocation(0, 0);
 		view.setSize(getWidth(), getHeight());
 		int pan = (int)(layoutView()-getHeight());
@@ -49,10 +51,14 @@ public abstract class UIScrollContainer extends UIContainer {
 	}
 	
 	@Override
-	protected boolean onMouseScroll(float x, float y, float delta) {
-		view.pan(0, -delta*scrollStep);
-		requestRepaint();
-		return true;
+	protected boolean onMouseScroll(float x, float y, float delta, int modifiers) {
+		if(modifiers==modNone) {
+			view.pan(0, -delta*scrollStep);
+			requestRepaint();
+			return true;
+		}
+		else
+			return false;
 	}
 
 }

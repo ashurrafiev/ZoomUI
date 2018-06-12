@@ -7,12 +7,10 @@ import java.awt.geom.AffineTransform;
 
 public class BaseContainer extends UIContainer {
 
-	private final BasePanel basePanel;
 	private float baseScale = getAutoScale();
 	
 	protected BaseContainer(BasePanel basePanel) {
-		super(null);
-		this.basePanel = basePanel;
+		super(basePanel);
 	}
 	
 	@Override
@@ -26,12 +24,7 @@ public class BaseContainer extends UIContainer {
 		for(UIElement c : children)
 			if(c instanceof KeyInputHandler)
 				e = (KeyInputHandler) c;
-		basePanel.setFocus(e);
-	}
-	
-	@Override
-	protected BasePanel getBasePanel() {
-		return basePanel;
+		getBasePanel().setFocus(e);
 	}
 	
 	public void setBaseScale(float baseScale) {
@@ -59,7 +52,7 @@ public class BaseContainer extends UIContainer {
 	}
 	
 	@Override
-	protected void layout() {
+	public void layout() {
 		for(UIElement c : children) {
 			c.setLocation(0, 0);
 			c.setSize(getWidth(), getHeight());
@@ -69,12 +62,12 @@ public class BaseContainer extends UIContainer {
 	
 	@Override
 	public float getWidth() {
-		return basePanel.getWidth() / baseScale;
+		return getBasePanel().getWidth() / baseScale;
 	}
 	
 	@Override
 	public float getHeight() {
-		return basePanel.getHeight() / baseScale;
+		return getBasePanel().getHeight() / baseScale;
 	}
 	
 	@Override

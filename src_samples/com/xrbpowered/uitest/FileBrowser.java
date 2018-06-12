@@ -2,7 +2,6 @@ package com.xrbpowered.uitest;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
@@ -21,12 +20,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.JFrame;
-
-import com.xrbpowered.zoomui.BasePanel;
 import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.WindowUtils;
 import com.xrbpowered.zoomui.icons.IconPalette;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
@@ -263,7 +260,7 @@ public class FileBrowser extends UIContainer {
 		}
 		
 		@Override
-		protected void layout() {
+		public void layout() {
 			float w = LIST_ITEM_WIDTH;
 			float h = LIST_ITEM_HEIGHT;
 			float maxw = getWidth();
@@ -319,7 +316,7 @@ public class FileBrowser extends UIContainer {
 		}
 		
 		@Override
-		protected void layout() {
+		public void layout() {
 			float w = getWidth();
 			header.setLocation(0, 0);
 			header.setSize(w, font.getSize()+8);
@@ -609,7 +606,7 @@ public class FileBrowser extends UIContainer {
 	}
 	
 	@Override
-	protected void layout() {
+	public void layout() {
 		float w = getWidth();
 		float h = getHeight();
 		float top = txtFileName.getHeight()+16;
@@ -654,25 +651,7 @@ public class FileBrowser extends UIContainer {
 		TextUtils.drawString(g2, "File:", 52, (int)(txtFileName.getY()+txtFileName.getHeight()/2f), TextUtils.RIGHT, TextUtils.CENTER);
 	}
 	
-	/*@Override
-	public void paint(Graphics2D g2) {
-		long t = System.currentTimeMillis();
-		super.paint(g2);
-		System.out.printf("Paint time: %d ms\n", System.currentTimeMillis()-t);
-	}*/
-
 	public static void main(String[] args) {
-		JFrame frame = new JFrame("Open file");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		BasePanel base = new BasePanel();
-		base.setPreferredSize(new Dimension(1040, 600));
-		// base.getBaseContainer().setBaseScale(1f);
-		
-		new FileBrowser(base.getBaseContainer());
-		
-		frame.setContentPane(base);
-		frame.pack();
-		frame.setVisible(true);
-
+		new FileBrowser(WindowUtils.createFrame("Open file", 840, 480)).getBasePanel().showWindow();
 	}
 }

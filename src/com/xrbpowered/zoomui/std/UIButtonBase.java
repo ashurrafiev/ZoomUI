@@ -28,7 +28,7 @@ public abstract class UIButtonBase extends UIElement {
 		down = false;
 		return this;
 	}
-
+	
 	public void onAction() {
 	}
 	

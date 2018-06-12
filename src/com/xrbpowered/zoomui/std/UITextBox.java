@@ -45,7 +45,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 		public boolean notifyMouseDown(int x, int y, int buttons) {
 			if(buttons==mouseLeftMask) {
 				dragSelecting = true;
-				this.x = parentToLocalX(x*getPixelScale());
+				this.x = baseToLocalX(x);
 				cursorX = this.x;
 				updateCursor = true;
 				startSelection();
@@ -56,7 +56,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 
 		@Override
 		public boolean notifyMouseMove(int dx, int dy) {
-			x += dx*getPixelScale();
+			x += dx * getPixelScale();
 			cursorX = x;
 			updateCursor = true;
 			requestRepaint();

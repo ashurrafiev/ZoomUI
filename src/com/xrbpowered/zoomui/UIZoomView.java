@@ -29,6 +29,11 @@ public class UIZoomView extends UIPanView {
 	}
 	
 	@Override
+	public float getPixelScale() {
+		return super.getPixelScale()/scale;
+	}
+	
+	@Override
 	protected float parentToLocalX(float x) {
 		return super.parentToLocalX(x)/scale;
 	}
@@ -45,18 +50,22 @@ public class UIZoomView extends UIPanView {
 	}
 
 	@Override
-	protected boolean onMouseScroll(float x, float y, float delta) {
-		float ds = 1.0f+delta*0.2f;
-		scale *= ds;
-		if(scale<minScale) {
-			ds *= minScale / scale;
-			scale = minScale;
+	protected boolean onMouseScroll(float x, float y, float delta, int modifiers) {
+		if(modifiers==modCtrlMask) {
+			float ds = 1.0f+delta*0.2f;
+			scale *= ds;
+			if(scale<minScale) {
+				ds *= minScale / scale;
+				scale = minScale;
+			}
+			if(scale>maxScale) {
+				ds *= maxScale / scale;
+				scale = maxScale;
+			}
+			requestRepaint();
+			return true;
 		}
-		if(scale>maxScale) {
-			ds *= maxScale / scale;
-			scale = maxScale;
-		}
-		requestRepaint();
-		return true;
+		else
+			return false;
 	}
 }

@@ -1,17 +1,14 @@
 package com.xrbpowered.uitest;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
-import javax.swing.JFrame;
-
-import com.xrbpowered.zoomui.BasePanel;
 import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIPanView;
+import com.xrbpowered.zoomui.WindowUtils;
 
 public class PanViewTest extends UIPanView {
 
@@ -65,7 +62,7 @@ public class PanViewTest extends UIPanView {
 	}
 	
 	@Override
-	protected void layout() {
+	public void layout() {
 		float y = 0f;
 		float w = getWidth();
 		for(int i=0; i<btn.length; i++) {
@@ -99,16 +96,7 @@ public class PanViewTest extends UIPanView {
 	}
 	
 	public static void main(String[] args) {
-		JFrame frame = new JFrame("ZoomUI");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		BasePanel base = new BasePanel();
-		base.setPreferredSize(new Dimension(400, 300));
-		
-		new PanViewTest(base.getBaseContainer());
-		
-		frame.setContentPane(base);
-		frame.pack();
-		frame.setVisible(true);
+		new PanViewTest(WindowUtils.createFrame("PanViewTest", 400, 300)).getBasePanel().showWindow();
 	}
 	
 	

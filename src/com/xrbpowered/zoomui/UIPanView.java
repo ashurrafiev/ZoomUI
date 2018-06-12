@@ -141,9 +141,9 @@ public class UIPanView extends UIContainer {
 	}
 
 	@Override
-	protected UIElement notifyMouseScroll(float x, float y, float delta) {
+	protected UIElement notifyMouseScroll(float x, float y, float delta, int modifiers) {
 		if(isInside(x, y))
-			return super.notifyMouseScroll(x, y, delta);
+			return super.notifyMouseScroll(x, y, delta, modifiers);
 		else
 			return null;
 	}

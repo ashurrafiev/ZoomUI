@@ -1,14 +1,12 @@
 package com.xrbpowered.uitest;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 
-import javax.swing.JFrame;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
@@ -19,10 +17,10 @@ import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
-import com.xrbpowered.zoomui.BasePanel;
 import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.WindowUtils;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 
 public class SvgHtmlTest extends UIElement {
@@ -105,17 +103,7 @@ public class SvgHtmlTest extends UIElement {
 	}
 
 	public static void main(String[] args) {
-		JFrame frame = new JFrame("SvgHtml");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		BasePanel base = new BasePanel();
-		base.setPreferredSize(new Dimension(400, 300));
-		//base.getBaseContainer().setBaseScale(2f);
-		
-		new SvgHtmlTest(base.getBaseContainer());
-		
-		frame.setContentPane(base);
-		frame.pack();
-		frame.setVisible(true);
+		new SvgHtmlTest(WindowUtils.createFrame("SvgHtmlTest", 400, 300)).getBasePanel().showWindow();
 	}
 	
 }

@@ -7,6 +7,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -14,22 +15,26 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 public class BasePanel extends JPanel {
 
+	private final JFrame frame;
 	private final BaseContainer container;
 	
 	private UIElement uiUnderMouse = null;
 	private KeyInputHandler uiFocused = null;
 	
 	private DragActor drag = null;
-	private boolean dragCancelled = false;
 	private UIElement uiInitiator = null;
 	private int initiatorButtons = 0;
 	private Point prevMousePoint = null;
 	
-	public BasePanel() {
+	private boolean invalidLayout = true;
+
+	public BasePanel(JFrame frame) {
+		this.frame = frame;
 		setFocusable(true);
 		container = new BaseContainer(this);
 		
@@ -55,7 +60,7 @@ public class BasePanel extends JPanel {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(uiFocused!=null) {
-					if(uiFocused.onKey(e.getKeyChar(), e.getKeyCode(), getKeyModifiers(e)))
+					if(uiFocused.onKey(e.getKeyChar(), e.getKeyCode(), getModifiers(e)))
 						e.consume();
 				}
 			}
@@ -64,7 +69,8 @@ public class BasePanel extends JPanel {
 		addMouseWheelListener(new MouseWheelListener() {
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				if(container!=null && container.notifyMouseScroll(e.getX(), e.getY(), (float) e.getPreciseWheelRotation())!=null)
+				if(container!=null && container.notifyMouseScroll(e.getX(), e.getY(),
+						(float) e.getPreciseWheelRotation(), getModifiers(e))!=null)
 					return;
 			}
 		});
@@ -83,7 +89,6 @@ public class BasePanel extends JPanel {
 					uiInitiator = ui;
 					if(uiFocused!=null && uiFocused!=uiInitiator)
 						resetFocus();
-					dragCancelled = false;
 					if(uiInitiator!=null)
 						return;
 				}
@@ -118,10 +123,8 @@ public class BasePanel extends JPanel {
 		addMouseMotionListener(new MouseAdapter() {
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				if(drag==null && !dragCancelled && uiInitiator!=null) {
+				if(drag==null && uiInitiator!=null) {
 					drag = uiInitiator.acceptDrag(prevMousePoint.x, prevMousePoint.y, initiatorButtons);
-					if(drag==null)
-						dragCancelled = false;
 				}
 				if(drag!=null) {
 					Point p = e.getPoint();
@@ -155,6 +158,14 @@ public class BasePanel extends JPanel {
 				}
 			}
 		});
+	}
+	
+	public void showWindow() {
+		frame.setVisible(true);
+	}
+	
+	public void invalidateLayout() {
+		invalidLayout = true;
 	}
 	
 	public void resetFocus() {
@@ -191,16 +202,11 @@ public class BasePanel extends JPanel {
 				mb |= UIElement.mouseRightMask;
 				break;
 		}
-		if(e.isControlDown())
-			mb |= UIElement.modCtrlMask;
-		if(e.isAltDown())
-			mb |= UIElement.modAltMask;
-		if(e.isShiftDown())
-			mb |= UIElement.modShiftMask;
+		mb |= getModifiers(e);
 		return mb;
 	}
 	
-	private static int getKeyModifiers(KeyEvent e) {
+	private static int getModifiers(InputEvent e) {
 		int mods = 0;
 		if(e.isControlDown())
 			mods |= UIElement.modCtrlMask;
@@ -217,8 +223,11 @@ public class BasePanel extends JPanel {
 	
 	@Override
 	public void paint(Graphics g) {
-		if(container!=null)
-			container.paint((Graphics2D) g);
+		if(invalidLayout) {
+			container.layout();
+			invalidLayout = false;
+		}
+		container.paint((Graphics2D) g);
 	}
 	
 }

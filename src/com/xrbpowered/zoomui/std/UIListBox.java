@@ -26,7 +26,7 @@ public class UIListBox extends UIScrollContainer {
 		for(int i=0; i<num; i++) {
 			listItems[i] = createItem(i, objects[i]);
 		}
-		selectedIndex = -1;
+		deselect();
 	}
 	
 	protected UIListItem createItem(int index, Object object) {
@@ -37,11 +37,26 @@ public class UIListBox extends UIScrollContainer {
 		return selectedIndex;
 	}
 	
-	public void setSelectedIndex(int index) {
-		this.selectedIndex = index;
+	public UIListItem getSelectedItem() {
+		return selectedIndex<0 ? null : listItems[selectedIndex];
 	}
 	
-	public void onSelect(int index) {
+	public void deselect() {
+		this.selectedIndex = -1;
+		onNothingSelected();
+	}
+	
+	public void select(int index) {
+		if(index>=0 && index<listItems.length) {
+			this.selectedIndex = index;
+			onItemSelected(listItems[index]);
+		}
+	}
+	
+	public void onItemSelected(UIListItem item) {
+	}
+
+	public void onNothingSelected() {
 	}
 
 	public void onClickSelected() {

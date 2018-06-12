@@ -2,16 +2,13 @@ package com.xrbpowered.uitest;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 
-import javax.swing.JFrame;
-
-import com.xrbpowered.zoomui.BasePanel;
 import com.xrbpowered.zoomui.TextUtils;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.WindowUtils;
 
 public class ZoomUITest {
 
@@ -106,7 +103,7 @@ public class ZoomUITest {
 			}
 		}
 		@Override
-		protected void layout() {
+		public void layout() {
 			float w = getWidth()/2;
 			float h = getHeight();
 			left.setLocation(5, 5);
@@ -129,19 +126,13 @@ public class ZoomUITest {
 				g2.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 			}
 		}
+		public void start() {
+			getBasePanel().showWindow();
+		}
 	}
 	
 	public static void main(String[] args) {
-		JFrame frame = new JFrame("ZoomUI");
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		BasePanel base = new BasePanel();
-		base.setPreferredSize(new Dimension(1200, 600));
-		
-		new TestContainer(base.getBaseContainer(), MAX_LEVEL);
-		
-		frame.setContentPane(base);
-		frame.pack();
-		frame.setVisible(true);
+		new TestContainer(WindowUtils.createFrame("ZoomUI", 1200, 600), MAX_LEVEL).start();
 	}
 	
 }

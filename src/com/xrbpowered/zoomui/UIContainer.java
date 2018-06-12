@@ -7,10 +7,13 @@ import java.util.ArrayList;
 public abstract class UIContainer extends UIElement {
 
 	protected ArrayList<UIElement> children = new ArrayList<>();
-	protected boolean invalidLayout = true;
 	
 	public UIContainer(UIContainer parent) {
 		super(parent);
+	}
+	
+	protected UIContainer(BasePanel basePanel) {
+		super(null, basePanel);
 	}
 	
 	protected void addChild(UIElement c) {
@@ -32,13 +35,7 @@ public abstract class UIContainer extends UIElement {
 	}
 	
 	@Override
-	public void invalidateLayout() {
-		invalidLayout = true;
-		super.invalidateLayout();
-	}
-	
-	@Override
-	protected void layout() {
+	public void layout() {
 		for(UIElement c : children) {
 			c.layout();
 		}
@@ -60,10 +57,6 @@ public abstract class UIContainer extends UIElement {
 	
 	@Override
 	public void paint(Graphics2D g2) {
-		if(invalidLayout) {
-			layout();
-			invalidLayout = false;
-		}
 		paintSelf(g2);
 		paintChildren(g2);
 	}
@@ -110,17 +103,17 @@ public abstract class UIContainer extends UIElement {
 	}
 	
 	@Override
-	protected UIElement notifyMouseScroll(float x, float y, float delta) {
+	protected UIElement notifyMouseScroll(float x, float y, float delta, int modifiers) {
 		if(!isVisible())
 			return null;
 		float cx = parentToLocalX(x);
 		float cy = parentToLocalY(y);
 		for(int i=children.size()-1; i>=0; i--) {
-			UIElement e = children.get(i).notifyMouseScroll(cx, cy, delta);
+			UIElement e = children.get(i).notifyMouseScroll(cx, cy, delta, modifiers);
 			if(e!=null)
 				return e;
 		}
-		return super.notifyMouseScroll(x, y, delta);
+		return super.notifyMouseScroll(x, y, delta, modifiers);
 	}
 	
 }

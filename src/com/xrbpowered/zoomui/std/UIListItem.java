@@ -56,10 +56,8 @@ public class UIListItem extends UIElement {
 		if(buttons==mouseLeftMask) {
 			if(list.getSelectedIndex()==index)
 				list.onClickSelected();
-			else {
-				list.setSelectedIndex(index);
-				list.onSelect(index);
-			}
+			else
+				list.select(index);
 			requestRepaint();
 			return true;
 		}

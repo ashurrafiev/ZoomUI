@@ -1,6 +1,11 @@
 package com.xrbpowered.zoomui;
 
 import java.awt.Graphics2D;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.geom.Point2D;
+
+import javax.swing.SwingUtilities;
 
 public abstract class UIElement {
 
@@ -12,16 +17,22 @@ public abstract class UIElement {
 	public static final int modAltMask = 16;
 	public static final int modShiftMask = 32;
 	
-	private UIContainer parent;
+	private final UIContainer parent;
+	private final BasePanel basePanel;
 
 	private boolean visible = true;
 	private float x, y;
 	private float width, height;
 	
-	public UIElement(UIContainer parent) {
+	public UIElement(UIContainer parent, BasePanel basePanel) {
 		this.parent = parent;
+		this.basePanel = basePanel;
 		if(parent!=null)
 			parent.addChild(this);
+	}
+	
+	protected UIElement(UIContainer parent) {
+		this(parent, (parent!=null) ? parent.getBasePanel() : null);
 	}
 
 	public void destroy() {
@@ -38,11 +49,8 @@ public abstract class UIElement {
 		this.height = height;
 	}
 	
-	protected BasePanel getBasePanel() {
-		if(parent!=null)
-			return parent.getBasePanel();
-		else
-			return null;
+	public BasePanel getBasePanel() {
+		return basePanel;
 	}
 	
 	protected float parentToLocalX(float x) {
@@ -61,6 +69,12 @@ public abstract class UIElement {
 		return parentToLocalY(parent==null ? y : parent.baseToLocalY(y));
 	}
 	
+	public Point2D getMousePosition() {
+		Point p = MouseInfo.getPointerInfo().getLocation();
+		SwingUtilities.convertPointFromScreen(p, getBasePanel());
+		return new Point2D.Float(baseToLocalX(p.x), baseToLocalY(p.y));
+	}
+
 	public float getPixelScale() {
 		if(parent!=null)
 			return parent.getPixelScale();
@@ -73,11 +87,10 @@ public abstract class UIElement {
 	}
 	
 	public void invalidateLayout() {
-		if(parent!=null)
-			parent.invalidateLayout();
+		getBasePanel().invalidateLayout();
 	}
 	
-	protected void layout() {
+	public void layout() {
 	}
 	
 	public boolean isVisible() {
@@ -139,8 +152,8 @@ public abstract class UIElement {
 			return null;
 	}
 	
-	protected UIElement notifyMouseScroll(float x, float y, float delta) {
-		if(isInside(x, y) && onMouseScroll(x, y, delta))
+	protected UIElement notifyMouseScroll(float x, float y, float delta, int modifiers) {
+		if(isInside(x, y) && onMouseScroll(x, y, delta, modifiers))
 			return this;
 		else
 			return null;
@@ -163,7 +176,7 @@ public abstract class UIElement {
 		return false;
 	}
 	
-	protected boolean onMouseScroll(float x, float y, float delta) {
+	protected boolean onMouseScroll(float x, float y, float delta, int modifiers) {
 		return false;
 	}
 	
