@@ -7,15 +7,20 @@ import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIZoomView;
 import com.xrbpowered.zoomui.WindowUtils;
+import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UITextBox;
+import com.xrbpowered.zoomui.std.UIToolButton;
 
 public class ZoomViewTest extends UIZoomView {
 
+	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, FileBrowser.iconPalette);
+	
 	private UIButton btn1, btn2, btn3;
 	private UIListBox list;
 	private UITextBox text;
+	private UIToolButton toolBtn;
 	
 	public ZoomViewTest(UIContainer parent) {
 		super(parent);
@@ -34,6 +39,7 @@ public class ZoomViewTest extends UIZoomView {
 		list = new UIListBox(this, items);
 		text = new UITextBox(this);
 		text.text = "Hello world";
+		toolBtn = new UIToolButton(this, fileIcon, 32, 8);
 	}
 	
 	@Override
@@ -46,6 +52,7 @@ public class ZoomViewTest extends UIZoomView {
 		list.layout();
 		text.setLocation(16, 32+48+120);
 		text.setSize(list.getWidth(), text.getHeight());
+		toolBtn.setLocation(-40, list.getY());
 	}
 	
 	@Override

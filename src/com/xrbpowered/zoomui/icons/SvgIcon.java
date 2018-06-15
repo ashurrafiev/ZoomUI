@@ -32,8 +32,9 @@ public class SvgIcon {
 	}
 	
 	public SvgIcon load() {
-		this.fgPath = new SvgFile(uri).getPath("fg", 1);
-		this.bgPath = new SvgFile(uri).getPath("bg", 1);
+		SvgFile svg = new SvgFile(uri);
+		fgPath = svg.getPath("fg", 1);
+		bgPath = svg.getPath("bg", 1);
 		bounds = fgPath.getBounds2D();
 		if(bgPath!=null)
 			bounds.add(bgPath.getBounds2D());
@@ -81,13 +82,13 @@ public class SvgIcon {
 			}
 			AffineTransform tx = g2.getTransform();
 			g2.setTransform(new AffineTransform());
-			g2.translate(tx.getTranslateX()+bounds.getX()*scale+x/pixelScale, tx.getTranslateY()+(bounds.getY()+baseSize)*scale+(y-size/8f)/pixelScale); // FIXME wtf are these coordinates?
+			g2.translate(tx.getTranslateX()+bounds.getX()*scale+x/pixelScale, tx.getTranslateY()+bounds.getY()*scale+y/pixelScale);
 			g2.drawImage(img, -1, -1, null);
 			g2.setTransform(tx);
 		}
 		else {
 			AffineTransform tx = g2.getTransform();
-			g2.translate(x, y+size-4); // FIXME wtf are these coordinates?
+			g2.translate(x, y);
 			double scale = size/(double)baseSize;
 			g2.scale(scale, scale);
 			if(bgPath!=null) {

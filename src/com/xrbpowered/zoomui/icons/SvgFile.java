@@ -25,7 +25,6 @@ public class SvgFile {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			Document doc = dBuilder.parse(uri);
-			doc.getDocumentElement().normalize();
 			root = doc.getDocumentElement();
 		}
 		catch(Exception e) {
@@ -142,6 +141,10 @@ public class SvgFile {
 			if(cur!=null) {
 				dx = cur.x;
 				dy = cur.y;
+			}
+			else {
+				dx = 0.0;
+				dy = 0.0;
 			}
 			switch(cmd) {
 				case 'M':
@@ -348,7 +351,8 @@ public class SvgFile {
 	}
 	
 	public void render(Graphics2D g2, double scale) {
-		render(g2, root, new SvgDefs(), new SvgStyle(), scale);
+		if(root!=null)
+			render(g2, root, new SvgDefs(), new SvgStyle(), scale);
 	}
 	
 	private Path2D getPath(String pathId, AffineTransform transform, Element g, double scale) {
@@ -361,13 +365,8 @@ public class SvgFile {
 				AffineTransform t = new AffineTransform(transform);
 				t.concatenate(getTransform(e.getAttribute("transform"), scale));
 				
-				if(e.getNodeName().equals("g")) {
-					Path2D path = getPath(pathId, t, e, scale);
-					if(path!=null) {
-						path.transform(t);
-						return path;
-					}
-				}
+				if(e.getNodeName().equals("g"))
+					return getPath(pathId, t, e, scale);
 				else if(e.getNodeName().equals("rect")) {
 					// not supported, convert everything to paths
 				}
@@ -389,6 +388,6 @@ public class SvgFile {
 	}
 	
 	public Path2D getPath(String pathId, double scale) {
-		return getPath(pathId, new AffineTransform(), root, scale);
+		return (root==null) ? null : getPath(pathId, new AffineTransform(), root, scale);
 	}
 }
