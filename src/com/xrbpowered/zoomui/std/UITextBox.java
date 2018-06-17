@@ -87,7 +87,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 			float pix = getPixelScale();
 			
 			g.setFont(font.deriveFont(font.getSize()/pix)); // FIXME check if getSize needs to be pre-calc as float
-			FontMetrics fm = g.graph.getFontMetrics();
+			FontMetrics fm = g.getFontMetrics();
 			if(updateCursor) {
 				cursor = searchCol(fm, (cursorX-4f)/pix);
 				updateCursor = false;

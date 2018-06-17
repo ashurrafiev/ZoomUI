@@ -1,11 +1,13 @@
 package com.xrbpowered.zoomui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.util.LinkedList;
 
@@ -23,6 +25,8 @@ public class GraphAssist {
 	public static final int RIGHT = 2;
 	public static final int TOP = 0;
 	public static final int BOTTOM = 2;
+	
+	private static final Stroke defaultStroke = new BasicStroke(1f);
 	
 	public final Graphics2D graph;
 	
@@ -81,8 +85,20 @@ public class GraphAssist {
 		graph.setFont(f);
 	}
 
+	public FontMetrics getFontMetrics() {
+		return graph.getFontMetrics();
+	}
+	
 	public void setPaint(Paint p) {
 		graph.setPaint(p);
+	}
+	
+	public void setStroke(float width) {
+		graph.setStroke(new BasicStroke(width));
+	}
+	
+	public void resetStroke() {
+		graph.setStroke(defaultStroke);
 	}
 	
 	public void fillRect(float x, float y, float w, float h) {

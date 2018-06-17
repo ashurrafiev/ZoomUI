@@ -1,6 +1,5 @@
 package com.xrbpowered.uitest;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 
@@ -114,7 +113,7 @@ public class ZoomUITest {
 		@Override
 		protected void paintSelf(GraphAssist g) {
 			if(level<MAX_LEVEL) {
-				g.graph.setStroke(new BasicStroke(getPixelScale()));
+				g.setStroke(getPixelScale());
 				g.setColor(Color.RED);
 				g.drawRect(0, 0, (int)getWidth(), (int)getHeight());
 				g.setColor(new Color(0x22ff0000, true));

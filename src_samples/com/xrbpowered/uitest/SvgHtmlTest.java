@@ -1,21 +1,36 @@
 package com.xrbpowered.uitest;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
 
+import javax.swing.JEditorPane;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Document;
 import javax.swing.text.Element;
+import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.html.HTML;
+import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
+import javax.swing.text.html.InlineView;
+import javax.swing.text.html.StyleSheet;
+import javax.swing.text.html.parser.DTD;
+import javax.swing.text.html.parser.ParserDelegator;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
@@ -23,34 +38,184 @@ import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.WindowUtils;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 
-public class SvgHtmlTest extends UIElement {
+import sun.awt.AppContext;
 
-	private static final Font font = new Font("Tahoma", Font.PLAIN, GraphAssist.ptToPixels(9f));
+public class SvgHtmlTest extends UIContainer {
+
+	private static final Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(9f));
 	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, FileBrowser.iconPalette);
-	private static final int iconSize = 16;
 
-	public static class SvgImageView extends ImageView {
-		public SvgImageView(Element elem) {
-			super(elem);
+	private static final String html = "<html>Hello <img size=\"16\" src=\"test\"> "
+			+ "<href id=\"world\" hover=\"#0000ff\" style=\"font-weight:bold\">world</href>"
+			+ " and <href id=\"people\" style=\"font-weight:bold\">all people</href>!";
+
+
+	public static class ZoomUIHtmlEditorKit extends HTMLEditorKit {
+		
+		public class SvgImageView extends ImageView {
+			private SvgIcon icon;
+			private int iconSize;
+			public SvgImageView(Element elem) {
+				super(elem);
+				icon = icons.get((String) elem.getAttributes().getAttribute(HTML.Attribute.SRC));
+				iconSize = Integer.parseInt((String) elem.getAttributes().getAttribute(HTML.Attribute.SIZE));
+			}
+
+			@Override
+			public float getPreferredSpan(int axis) {
+				if(axis == View.X_AXIS)
+					return iconSize * scale;
+				else
+					return (iconSize - 4) * scale; // TODO proper align to text baseline?
+			}
+
+			@Override
+			public void paint(Graphics g, Shape a) {
+				Rectangle rect = (Rectangle) a;
+				icon.paint((Graphics2D) g, 0, rect.x, rect.y, iconSize * scale, 1f, false);
+			}
+
 		}
 
-		@Override
-		public float getPreferredSpan(int axis) {
-			if(axis==View.X_AXIS)
-				return iconSize;
-			else
-				return iconSize-4;
+		public class HrefView extends InlineView {
+			private String id;
+			private Color hoverColor = null;
+			public HrefView(Element elem) {
+				super(elem);
+				id = (String) elem.getAttributes().getAttribute(HTML.Attribute.ID);
+				String hover = (String) elem.getAttributes().getAttribute("hover");
+				if(hover!=null)
+					hoverColor = cssStringToColor(hover);
+			}
+
+			@Override
+			public Color getForeground() {
+				if(hoverId==null || !hoverId.equals(id))
+					return super.getForeground();
+				else if(hoverColor!=null)
+					return hoverColor;
+				else if(defaultHoverColor!=null)
+					return defaultHoverColor;
+				else
+					return super.getForeground();
+			}
+			
+			@Override
+			public void paint(Graphics g, Shape a) {
+				Rectangle rect = (Rectangle) a;
+				if(container!=null && rebuildUI) {
+					UIElement ui = new UIElement(container) {
+						@Override
+						protected void onMouseIn() {
+							hoverId = id;
+							getBasePanel().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+							requestRepaint();
+						}
+						@Override
+						protected void onMouseOut() {
+							hoverId = null;
+							getBasePanel().setCursor(Cursor.getDefaultCursor());
+							requestRepaint();
+						}
+						@Override
+						protected boolean onMouseDown(float x, float y, int buttons) {
+							System.out.println("#" + id + " clicked"); // TODO onHrefClicked event
+							return true;
+						}
+						@Override
+						public void paint(GraphAssist g) {
+						}
+					};
+					ui.setLocation(rect.x / scale + 10, rect.y / scale + 10);
+					ui.setSize(rect.width / scale, rect.height / scale);
+				}
+				super.paint(g, a);
+			}
+		}
+
+		// By Stanislav Lapitsky java-sl.com
+		class CustomParserDelegator extends ParserDelegator {
+			public CustomParserDelegator() {
+				try {
+					// for JDK version later than 1.6_26
+					Field f = javax.swing.text.html.parser.ParserDelegator.class.getDeclaredField("DTD_KEY");
+					AppContext appContext = AppContext.getAppContext();
+					f.setAccessible(true);
+					Object dtd_key = f.get(null);
+
+					DTD dtd = (DTD) appContext.get(dtd_key);
+
+					javax.swing.text.html.parser.Element src = dtd.getElement("b");
+					dtd.defineElement("href", src.getType(), false, false, src.getContent(), null, null, src.getAttributes());
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		class CustomHtmlDocument extends HTMLDocument {
+			public CustomHtmlDocument(StyleSheet styles) {
+				super(styles);
+			}
+
+			public HTMLEditorKit.ParserCallback getReader(int pos) {
+				Object desc = getProperty(Document.StreamDescriptionProperty);
+				if(desc instanceof URL) {
+					setBase((URL) desc);
+				}
+				return new HTMLDocument.HTMLReader(pos) {
+					public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
+						if(t.toString().equals("href")) {
+							registerTag(t, new CharacterAction() {
+								public void start(HTML.Tag t, MutableAttributeSet attr) {
+									attr.addAttribute(StyleConstants.NameAttribute, t);
+									ElementSpec es = new ElementSpec(attr.copyAttributes(), ElementSpec.StartTagType);
+									parseBuffer.addElement(es);
+									super.start(t, attr);
+								}
+								public void end(HTML.Tag t) {
+									ElementSpec es = new ElementSpec(null, ElementSpec.EndTagType);
+									parseBuffer.addElement(es);
+									super.end(t);
+								}
+							});
+						}
+						super.handleStartTag(t, a, pos);
+					}
+				};
+			}
+		}
+
+		public final UIContainer container;
+		public float scale = 1f;
+		public Color defaultHoverColor = null;
+		public HashMap<String, SvgIcon> icons = new HashMap<>();
+
+		private boolean rebuildUI = true;
+		private String hoverId = null;
+
+		private Parser defaultParser = null;
+		
+		public ZoomUIHtmlEditorKit(UIContainer container) {
+			this.container = container;
 		}
 		
-		@Override
-		public void paint(Graphics g, Shape a) {
-			Rectangle rect = (Rectangle) a;
-			testIcon.paint((Graphics2D) g, 0, rect.x, rect.y, iconSize, htmlBaseScale, false);
+		public Document createDefaultDocument() {
+			StyleSheet styles = getStyleSheet();
+			StyleSheet ss = new StyleSheet();
+			ss.addStyleSheet(styles);
+			CustomHtmlDocument doc = new CustomHtmlDocument(ss);
+			doc.setParser(getParser());
+			return doc;
 		}
-		
-	}
-	
-	public static HTMLEditorKit htmlKit = new HTMLEditorKit() {
+
+		protected Parser getParser() {
+			if(defaultParser == null) {
+				defaultParser = new CustomParserDelegator();
+			}
+			return defaultParser;
+		}
+
 		@Override
 		public ViewFactory getViewFactory() {
 			return new HTMLEditorKit.HTMLFactory() {
@@ -59,51 +224,107 @@ public class SvgHtmlTest extends UIElement {
 					AttributeSet attrs = elem.getAttributes();
 					Object elementName = attrs.getAttribute(AbstractDocument.ElementNameAttribute);
 					Object o = (elementName != null) ? null : attrs.getAttribute(StyleConstants.NameAttribute);
+					View res = null;
 					if(o instanceof HTML.Tag) {
 						HTML.Tag kind = (HTML.Tag) o;
 						if(kind == HTML.Tag.IMG) {
-							return new SvgImageView(elem);
+							res = new SvgImageView(elem);
+						} else if(kind instanceof HTML.UnknownTag && elem.getName().equals("href")) {
+							res = new HrefView(elem);
 						}
 					}
-					return super.create(elem);
+					if(res == null)
+						res = super.create(elem);
+					return res;
 				}
 			};
 		}
-	};
-	
-	private static float htmlBaseScale = -1f;
-	private String html;
-	
-	public SvgHtmlTest(UIContainer parent) {
-		super(parent);
 	}
 	
+	public static void printAttr(AttributeSet attr) {
+		System.out.println("[");
+		Enumeration<?> an = attr.getAttributeNames();
+		while(an.hasMoreElements()) {
+			Object key = an.nextElement();
+			Object val = attr.getAttribute(key);
+			System.out.printf("\t%s %s : %s %s\n", key.getClass().getName(), key.toString(), val.getClass().getName(), val.toString());
+		}
+		System.out.println("]");
+	}
+	
+	public static Color cssStringToColor(String s) {
+		// *facepalm*
+		try {
+			Method m = javax.swing.text.html.CSS.class.getDeclaredMethod("stringToColor", String.class);
+			m.setAccessible(true);
+			return (Color) m.invoke(null, s);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	private ZoomUIHtmlEditorKit htmlKit;
+	private JEditorPane htmlAssist = null;
+
+	public void drawFormattedString(Graphics2D g2, float pixelScale, String htmlStr, int x, int y, int w, int h) {
+		if(htmlAssist == null) {
+			htmlAssist = new JEditorPane();
+			htmlAssist.setOpaque(false);
+			htmlAssist.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+		}
+
+		htmlAssist.setEditorKit(htmlKit);
+		
+		AffineTransform tx = g2.getTransform();
+		g2.setTransform(new AffineTransform());
+		g2.translate(x/pixelScale, y/pixelScale);
+		Font font = g2.getFont();
+		htmlAssist.setFont(font.deriveFont(font.getSize()/pixelScale));
+		htmlAssist.setForeground(g2.getColor());
+		htmlAssist.setBounds(0, 0, (int)(w/pixelScale), (int)(h/pixelScale));
+		htmlAssist.invalidate();
+
+		htmlAssist.setText(html);
+
+		htmlKit.scale = 1/pixelScale;
+		if(htmlKit.rebuildUI && htmlKit.container!=null)
+			htmlKit.container.removeAllChildren();
+		htmlAssist.paint(g2);
+		htmlKit.rebuildUI = false;
+		
+		g2.setTransform(tx);
+	}
+
+	public SvgHtmlTest(UIContainer parent) {
+		super(parent);
+		htmlKit = new ZoomUIHtmlEditorKit(this);
+		htmlKit.defaultHoverColor = Color.RED;
+		htmlKit.icons.put("test", testIcon);
+	}
+
 	@Override
 	protected boolean onMouseDown(float x, float y, int buttons) {
 		requestRepaint();
 		return true;
 	}
+	
+	@Override
+	public void layout() {
+		htmlKit.rebuildUI = true;
+		super.layout();
+	}
 
 	@Override
-	public void paint(GraphAssist g) {
-		float baseScale = getPixelScale();
-		if(baseScale!=htmlBaseScale) {
-			html = "<html>Hello <img> <a style=\"font-weight:bold;color:#0077ff;text-decoration:underline\">world</a>!";
-			//html = "<html>Hello <img src=\"data:image/png;base64,"+diskIcon.createBase64ImageData(0, 16, getPixelScale())+"\"> <b>world</b>!";
-			htmlBaseScale = baseScale;
-			
-			GraphAssist.htmlKit = htmlKit;
-		}
-		
-		g.setColor(new Color(0xfff6e6));
-		g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+	public void paintSelf(GraphAssist g) {
+		g.fill(this, new Color(0xfff6e6));
 		g.setFont(font);
 		g.setColor(Color.BLACK);
-		g.drawFormattedString(html, 10, 10, (int)(getWidth()-20), (int)(getHeight()-20));
+		drawFormattedString(g.graph, getPixelScale(), html, 10, 10, (int) (getWidth() - 20), (int) (getHeight() - 20));
 	}
 
 	public static void main(String[] args) {
-		new SvgHtmlTest(WindowUtils.createFrame("SvgHtmlTest", 400, 300)).getBasePanel().showWindow();
+		new SvgHtmlTest(WindowUtils.createFrame("SvgHtmlTest", 400, 300, 2f, true)).getBasePanel().showWindow();
 	}
-	
+
 }

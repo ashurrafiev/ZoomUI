@@ -1,11 +1,9 @@
 package com.xrbpowered.uitest;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GradientPaint;
-import java.awt.Stroke;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -131,7 +129,7 @@ public class FileBrowser extends UIContainer {
 			g.setFont(font);
 			g.setColor(sel ? colorSelectedText : colorText);
 			if(textWidth<0) {
-				FontMetrics fm = g.graph.getFontMetrics();
+				FontMetrics fm = g.getFontMetrics();
 				textWidth = fm.stringWidth(fileName);
 				textHeight = fm.getAscent() - fm.getDescent();
 			}
@@ -198,12 +196,11 @@ public class FileBrowser extends UIContainer {
 			
 			g.setColor(open ? colorSelection : colorDisabledText);
 			String str = String.format("%s (%d)", grp.title, grp.getNumFiles());
-			FontMetrics fm = g.graph.getFontMetrics();
+			FontMetrics fm = g.getFontMetrics();
 			int textWidth = fm.stringWidth(str);
 			g.drawString(str, 20, 2+font.getSize());
 			
-			Stroke stroke = g.graph.getStroke();
-			g.graph.setStroke(new BasicStroke(2f));
+			g.setStroke(2f);
 			g.setColor(colorText);
 			int w = (int)(getHeight()/2f);
 			if(open)
@@ -211,7 +208,7 @@ public class FileBrowser extends UIContainer {
 			else
 				g.graph.drawPolyline(new int[] {8, 12, 8}, new int[] {w-4, w, w+4}, 3);
 			
-			g.graph.setStroke(stroke);
+			g.resetStroke();
 			g.setColor(colorBorderLight);
 			g.line(textWidth+28, w, getWidth()-8, w);
 		}
