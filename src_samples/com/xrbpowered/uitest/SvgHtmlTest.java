@@ -8,7 +8,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Enumeration;
@@ -29,8 +28,6 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 import javax.swing.text.html.InlineView;
 import javax.swing.text.html.StyleSheet;
-import javax.swing.text.html.parser.DTD;
-import javax.swing.text.html.parser.ParserDelegator;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
@@ -38,18 +35,20 @@ import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.WindowUtils;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 
-import sun.awt.AppContext;
-
 public class SvgHtmlTest extends UIContainer {
 
 	private static final Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(9f));
 	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, FileBrowser.iconPalette);
 
 	private static final String html = "<html>Hello <img size=\"16\" src=\"test\"> "
-			+ "<href id=\"world\" hover=\"#0000ff\" style=\"font-weight:bold\">world</href>"
-			+ " and <href id=\"people\" style=\"font-weight:bold\">all people</href>!";
+			+ "<a href=\"world\" hover=\"#0099ff\" style=\"font-weight:bold\">world</a>"
+			+ " and <a href=\"people\" style=\"font-weight:bold\">all people</a>!";
+	private static final String css = "a { text-decoration: none; color: #0077dd }";
 
-
+	// Known issues (unable to resolve):
+	// * Always rendered at 1x zoom. All sizes in HTML/CSS ignore scaling
+	// * Hover color has to be done via custom "hover" attribute. CSS ":hover" selector will not work.
+	
 	public static class ZoomUIHtmlEditorKit extends HTMLEditorKit {
 		
 		public class SvgImageView extends ImageView {
@@ -78,11 +77,11 @@ public class SvgHtmlTest extends UIContainer {
 		}
 
 		public class HrefView extends InlineView {
-			private String id;
+			private String href;
 			private Color hoverColor = null;
 			public HrefView(Element elem) {
 				super(elem);
-				id = (String) elem.getAttributes().getAttribute(HTML.Attribute.ID);
+				href = (String) elem.getAttributes().getAttribute(HTML.Attribute.HREF);
 				String hover = (String) elem.getAttributes().getAttribute("hover");
 				if(hover!=null)
 					hoverColor = cssStringToColor(hover);
@@ -90,7 +89,7 @@ public class SvgHtmlTest extends UIContainer {
 
 			@Override
 			public Color getForeground() {
-				if(hoverId==null || !hoverId.equals(id))
+				if(hoverHref==null || !hoverHref.equals(href))
 					return super.getForeground();
 				else if(hoverColor!=null)
 					return hoverColor;
@@ -107,19 +106,19 @@ public class SvgHtmlTest extends UIContainer {
 					UIElement ui = new UIElement(container) {
 						@Override
 						protected void onMouseIn() {
-							hoverId = id;
+							hoverHref = href;
 							getBasePanel().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 							requestRepaint();
 						}
 						@Override
 						protected void onMouseOut() {
-							hoverId = null;
+							hoverHref = null;
 							getBasePanel().setCursor(Cursor.getDefaultCursor());
 							requestRepaint();
 						}
 						@Override
 						protected boolean onMouseDown(float x, float y, int buttons) {
-							System.out.println("#" + id + " clicked"); // TODO onHrefClicked event
+							System.out.println("#" + href + " clicked"); // TODO onHrefClicked event
 							return true;
 						}
 						@Override
@@ -130,26 +129,6 @@ public class SvgHtmlTest extends UIContainer {
 					ui.setSize(rect.width / scale, rect.height / scale);
 				}
 				super.paint(g, a);
-			}
-		}
-
-		// By Stanislav Lapitsky java-sl.com
-		class CustomParserDelegator extends ParserDelegator {
-			public CustomParserDelegator() {
-				try {
-					// for JDK version later than 1.6_26
-					Field f = javax.swing.text.html.parser.ParserDelegator.class.getDeclaredField("DTD_KEY");
-					AppContext appContext = AppContext.getAppContext();
-					f.setAccessible(true);
-					Object dtd_key = f.get(null);
-
-					DTD dtd = (DTD) appContext.get(dtd_key);
-
-					javax.swing.text.html.parser.Element src = dtd.getElement("b");
-					dtd.defineElement("href", src.getType(), false, false, src.getContent(), null, null, src.getAttributes());
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
 			}
 		}
 
@@ -165,7 +144,7 @@ public class SvgHtmlTest extends UIContainer {
 				}
 				return new HTMLDocument.HTMLReader(pos) {
 					public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
-						if(t.toString().equals("href")) {
+						if(t.toString().equals("a")) {
 							registerTag(t, new CharacterAction() {
 								public void start(HTML.Tag t, MutableAttributeSet attr) {
 									attr.addAttribute(StyleConstants.NameAttribute, t);
@@ -192,10 +171,8 @@ public class SvgHtmlTest extends UIContainer {
 		public HashMap<String, SvgIcon> icons = new HashMap<>();
 
 		private boolean rebuildUI = true;
-		private String hoverId = null;
+		private String hoverHref = null;
 
-		private Parser defaultParser = null;
-		
 		public ZoomUIHtmlEditorKit(UIContainer container) {
 			this.container = container;
 		}
@@ -207,13 +184,6 @@ public class SvgHtmlTest extends UIContainer {
 			CustomHtmlDocument doc = new CustomHtmlDocument(ss);
 			doc.setParser(getParser());
 			return doc;
-		}
-
-		protected Parser getParser() {
-			if(defaultParser == null) {
-				defaultParser = new CustomParserDelegator();
-			}
-			return defaultParser;
 		}
 
 		@Override
@@ -229,7 +199,7 @@ public class SvgHtmlTest extends UIContainer {
 						HTML.Tag kind = (HTML.Tag) o;
 						if(kind == HTML.Tag.IMG) {
 							res = new SvgImageView(elem);
-						} else if(kind instanceof HTML.UnknownTag && elem.getName().equals("href")) {
+						} else if(kind == HTML.Tag.A) {
 							res = new HrefView(elem);
 						}
 					}
@@ -300,6 +270,7 @@ public class SvgHtmlTest extends UIContainer {
 		super(parent);
 		htmlKit = new ZoomUIHtmlEditorKit(this);
 		htmlKit.defaultHoverColor = Color.RED;
+		htmlKit.getStyleSheet().addRule(css);
 		htmlKit.icons.put("test", testIcon);
 	}
 
