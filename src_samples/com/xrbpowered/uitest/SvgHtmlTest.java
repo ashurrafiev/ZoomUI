@@ -29,19 +29,18 @@ import javax.swing.text.html.ImageView;
 import javax.swing.text.html.InlineView;
 import javax.swing.text.html.StyleSheet;
 
-import com.xrbpowered.zoomui.BaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIWindow.UIFactory;
 import com.xrbpowered.zoomui.icons.SvgIcon;
+import com.xrbpowered.zoomui.std.UIToolButton;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class SvgHtmlTest extends UIContainer {
 
 	private static final Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(9f));
-	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, FileBrowser.iconPalette);
+	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, UIToolButton.palette);
 
 	private static final String html = "<html>Hello <img size=\"16\" src=\"test\"> "
 			+ "<a href=\"world\" hover=\"#0099ff\" style=\"font-weight:bold\">world</a>"
@@ -299,12 +298,9 @@ public class SvgHtmlTest extends UIContainer {
 
 	public static void main(String[] args) {
 		UIWindow.setBaseScale(2f);
-		SwingFrame.show("SvgHtmlTest", 400, 300, true, new UIFactory<SvgHtmlTest, BaseContainer>() {
-			@Override
-			public SvgHtmlTest create(BaseContainer base) {
-				return new SvgHtmlTest(base);
-			}
-		});
+		UIWindow frame = new SwingFrame("SvgHtmlTest", 400, 300);
+		new SvgHtmlTest(frame.getContainer());
+		frame.show();
 	}
 
 }

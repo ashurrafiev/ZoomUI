@@ -3,12 +3,11 @@ package com.xrbpowered.uitest;
 import java.awt.Color;
 import java.awt.Font;
 
-import com.xrbpowered.zoomui.BaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIElement.Button;
-import com.xrbpowered.zoomui.UIWindow.UIFactory;
+import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomUITest {
@@ -130,12 +129,9 @@ public class ZoomUITest {
 	}
 	
 	public static void main(String[] args) {
-		SwingFrame.show("ZoomUI", 1200, 600, true, new UIFactory<TestContainer, BaseContainer>() {
-			@Override
-			public TestContainer create(BaseContainer base) {
-				return new TestContainer(base, MAX_LEVEL);
-			}
-		});
+		UIWindow frame = new SwingFrame("ZoomUI", 1200, 600);
+		new TestContainer(frame.getContainer(), MAX_LEVEL);
+		frame.show();
 	}
 	
 }

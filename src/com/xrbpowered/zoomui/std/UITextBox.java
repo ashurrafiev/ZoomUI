@@ -11,8 +11,9 @@ import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.UIHoverElement;
 
-public class UITextBox extends UIElement implements KeyInputHandler {
+public class UITextBox extends UIHoverElement implements KeyInputHandler {
 
 	public static Font font = UIButton.font;
 
@@ -24,8 +25,6 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 
 	public static int defaultWidth = 120;
 	public static int defaultHeight = 20;
-
-	protected boolean hover = false;
 
 	public String text = "";
 	private int cursor = 0;
@@ -243,16 +242,14 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	
 	@Override
 	public void onMouseIn() {
-		hover = true;
 		getBase().getWindow().setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-		repaint();
+		super.onMouseIn();
 	}
 	
 	@Override
 	public void onMouseOut() {
-		hover = false;
 		getBase().getWindow().setCursor(Cursor.getDefaultCursor());
-		repaint();
+		super.onMouseOut();
 	}
 	
 	@Override

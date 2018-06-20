@@ -5,10 +5,6 @@ import java.awt.Toolkit;
 
 public abstract class UIWindow {
 
-	public static interface UIFactory<A extends UIElement, B extends BaseContainer> {
-		public A create(B base);
-	}
-	
 	protected BaseContainer createContainer() {
 		return new BaseContainer(this, getBaseScale());
 	}

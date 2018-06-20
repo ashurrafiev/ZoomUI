@@ -2,11 +2,11 @@ package com.xrbpowered.zoomui.std;
 
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.UIHoverElement;
 
-public abstract class UIButtonBase extends UIElement {
+public abstract class UIButtonBase extends UIHoverElement {
 
-	protected boolean hover = false;
-	protected boolean down = false;
+	public boolean down = false;
 	private boolean disabled = false;
 	
 	public UIButtonBase(UIContainer parent) {
@@ -15,6 +15,14 @@ public abstract class UIButtonBase extends UIElement {
 	
 	public boolean isDisabled() {
 		return disabled;
+	}
+	
+	public boolean isEnabled() {
+		return !disabled;
+	}
+	
+	public void setEnabled(boolean enabled) {
+		this.disabled = !enabled;
 	}
 	
 	public UIButtonBase enable() {
@@ -34,16 +42,8 @@ public abstract class UIButtonBase extends UIElement {
 	
 	@Override
 	public void onMouseIn() {
-		if(isDisabled())
-			return;
-		hover = true;
-		repaint();
-	}
-	
-	@Override
-	public void onMouseOut() {
-		hover = false;
-		repaint();
+		if(isEnabled())
+			super.onMouseIn();
 	}
 	
 	@Override

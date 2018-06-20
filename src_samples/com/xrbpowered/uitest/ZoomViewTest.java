@@ -2,11 +2,10 @@ package com.xrbpowered.uitest;
 
 import java.awt.Color;
 
-import com.xrbpowered.zoomui.BaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
-import com.xrbpowered.zoomui.UIWindow.UIFactory;
+import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
@@ -17,7 +16,7 @@ import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomViewTest extends UIZoomView {
 
-	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, FileBrowser.iconPalette);
+	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, UIToolButton.palette);
 	
 	private UIButton btn1, btn2, btn3;
 	private UIListBox list;
@@ -92,11 +91,8 @@ public class ZoomViewTest extends UIZoomView {
 	}
 	
 	public static void main(String[] args) {
-		SwingFrame.show("ZoomViewTest", 800, 600, true, new UIFactory<ZoomViewTop, BaseContainer>() {
-			@Override
-			public ZoomViewTop create(BaseContainer base) {
-				return new ZoomViewTop(base);
-			}
-		});
+		UIWindow frame = new SwingFrame("ZoomViewTest", 800, 600);
+		new ZoomViewTop(frame.getContainer());
+		frame.show();
 	}
 }

@@ -4,22 +4,25 @@ import java.awt.Cursor;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.WindowConstants;
 
-import com.xrbpowered.zoomui.UIWindow;
+import com.xrbpowered.zoomui.UIModalWindow;
 
-public class SwingFrame extends UIWindow {
+public class SwingModalDialog<A> extends UIModalWindow<A> {
 
-	public final JFrame frame;
+	public final JDialog dialog;
 	public final BasePanel panel;
-	
-	public SwingFrame(String title, int w, int h) {
-		frame = new JFrame();
-		frame.setTitle(title);
-		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+
+	public SwingModalDialog(String title, int w, int h, boolean canResize, A defaultResult) {
+		super(defaultResult);
+		dialog = new JDialog();
+		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		dialog.setTitle(title);
+		dialog.setResizable(canResize);
+		dialog.setModal(true);
 		
-		frame.addWindowListener(new WindowAdapter() {
+		dialog.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				requestClosing();
@@ -27,11 +30,11 @@ public class SwingFrame extends UIWindow {
 		});
 		
 		panel = new BasePanel(this);
-		frame.setContentPane(panel);
+		dialog.setContentPane(panel);
 		setClientSize(w, h);
 		center();
 	}
-	
+
 	@Override
 	public int getClientWidth() {
 		return panel.getWidth();
@@ -49,12 +52,12 @@ public class SwingFrame extends UIWindow {
 
 	@Override
 	public void center() {
-		frame.setLocationRelativeTo(null);
+		dialog.setLocationRelativeTo(null);
 	}
 
 	@Override
 	public void show() {
-		frame.setVisible(true);
+		dialog.setVisible(true);
 	}
 
 	@Override
@@ -68,10 +71,9 @@ public class SwingFrame extends UIWindow {
 	}
 	
 	@Override
-	public void close() {
-		frame.dispose();
-		super.close();
-		System.exit(0);
+	public void closeWithResult(A result) {
+		dialog.dispose();
+		super.closeWithResult(result);
 	}
 
 }
