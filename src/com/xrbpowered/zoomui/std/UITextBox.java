@@ -41,8 +41,8 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	private DragActor dragSelectActor = new DragActor() {
 		private float x;
 		@Override
-		public boolean notifyMouseDown(int x, int y, int buttons) {
-			if(buttons==mouseLeftMask) {
+		public boolean notifyMouseDown(float x, float y, Button button, int mods) {
+			if(button==Button.left) {
 				dragSelecting = true;
 				this.x = baseToLocalX(x);
 				cursorX = this.x;
@@ -54,16 +54,16 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 		}
 
 		@Override
-		public boolean notifyMouseMove(int dx, int dy) {
+		public boolean notifyMouseMove(float dx, float dy) {
 			x += dx * getPixelScale();
 			cursorX = x;
 			updateCursor = true;
-			requestRepaint();
+			repaint();
 			return true;
 		}
 
 		@Override
-		public boolean notifyMouseUp(int x, int y, int buttons, UIElement target) {
+		public boolean notifyMouseUp(float x, float y, Button button, int mods, UIElement target) {
 			dragSelecting = false;
 			return true;
 		}
@@ -144,7 +144,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	}
 
 	public boolean isFocused() {
-		return getBasePanel().getFocus()==this;
+		return getBase().getFocus()==this;
 	}
 	
 	public void deselect() {
@@ -242,30 +242,30 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	}
 	
 	@Override
-	protected void onMouseIn() {
+	public void onMouseIn() {
 		hover = true;
-		getBasePanel().setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
-		requestRepaint();
+		getBase().getWindow().setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
+		repaint();
 	}
 	
 	@Override
-	protected void onMouseOut() {
+	public void onMouseOut() {
 		hover = false;
-		getBasePanel().setCursor(Cursor.getDefaultCursor());
-		requestRepaint();
+		getBase().getWindow().setCursor(Cursor.getDefaultCursor());
+		repaint();
 	}
 	
 	@Override
-	protected boolean onMouseDown(float x, float y, int buttons) {
-		if(buttons==mouseLeftMask) {
+	public boolean onMouseDown(float x, float y, Button button, int mods) {
+		if(button==Button.left) {
 			if(isFocused()) {
 				cursorX = parentToLocalX(x);
 				updateCursor = true;
 				deselect();
-				requestRepaint();
+				repaint();
 			}
 			else {
-				getBasePanel().setFocus(this);
+				getBase().setFocus(this);
 			}
 			return true;
 		}
@@ -274,16 +274,16 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 	}
 	
 	@Override
-	public DragActor acceptDrag(int x, int y, int buttons) {
+	public DragActor acceptDrag(float x, float y, Button button, int mods) {
 		// FIXME initial drag
-		if(dragSelectActor.notifyMouseDown(x, y, buttons))
+		if(dragSelectActor.notifyMouseDown(x, y, button, mods))
 			return dragSelectActor;
 		else
 			return null;
 	}
 
 	@Override
-	public boolean onKey(char c, int code, int modifiers) {
+	public boolean onKeyPressed(char c, int code, int modifiers) {
 		switch(code) {
 			case KeyEvent.VK_LEFT:
 				if(modifiers==UIElement.modShiftMask)
@@ -341,7 +341,7 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 				}
 				break;
 			case KeyEvent.VK_ENTER:
-				getBasePanel().resetFocus();
+				getBase().resetFocus();
 				break;
 			default: {
 				if(!Character.isISOControl(c) && c!=KeyEvent.CHAR_UNDEFINED) {
@@ -352,20 +352,20 @@ public class UITextBox extends UIElement implements KeyInputHandler {
 				}
 			}
 		}
-		requestRepaint();
+		repaint();
 		return true;
 	}
 
 	@Override
-	public void onFocus() {
+	public void onFocusGained() {
 		selectAll();
 		cursor = text.length();
-		requestRepaint();
+		repaint();
 	}
 
 	@Override
 	public void onFocusLost() {
 		deselect();
-		requestRepaint();
+		repaint();
 	}
 }

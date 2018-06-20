@@ -33,32 +33,32 @@ public abstract class UIButtonBase extends UIElement {
 	}
 	
 	@Override
-	protected void onMouseIn() {
+	public void onMouseIn() {
 		if(isDisabled())
 			return;
 		hover = true;
-		requestRepaint();
+		repaint();
 	}
 	
 	@Override
-	protected void onMouseOut() {
+	public void onMouseOut() {
 		hover = false;
-		requestRepaint();
+		repaint();
 	}
 	
 	@Override
-	protected void onMouseReleased() {
+	public void onMouseReleased() {
 		down = false;
-		requestRepaint();
+		repaint();
 	}
 	
 	@Override
-	protected boolean onMouseDown(float x, float y, int buttons) {
-		if(buttons==mouseLeftMask) {
+	public boolean onMouseDown(float x, float y, Button button, int mods) {
+		if(button==Button.left) {
 			if(isDisabled())
 				return true;
 			down = true;
-			requestRepaint();
+			repaint();
 			return true;
 		}
 		else
@@ -66,14 +66,14 @@ public abstract class UIButtonBase extends UIElement {
 	}
 	
 	@Override
-	protected boolean onMouseUp(float x, float y, int buttons, UIElement initiator) {
+	public boolean onMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
 		if(initiator!=this)
 			return false;
-		if(buttons==mouseLeftMask) {
+		if(button==Button.left) {
 			down = false;
 			if(!isDisabled())
 				onAction();
-			requestRepaint();
+			repaint();
 			return true;
 		}
 		else

@@ -16,10 +16,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.xrbpowered.zoomui.BaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
-import com.xrbpowered.zoomui.WindowUtils;
+import com.xrbpowered.zoomui.UIWindow.UIFactory;
 import com.xrbpowered.zoomui.icons.IconPalette;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
@@ -29,6 +30,7 @@ import com.xrbpowered.zoomui.std.UIListItem;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class FileBrowser extends UIContainer {
 
@@ -150,20 +152,20 @@ public class FileBrowser extends UIContainer {
 		}
 		
 		@Override
-		protected void onMouseIn() {
+		public void onMouseIn() {
 			hover = true;
-			requestRepaint();
+			repaint();
 		}
 		
 		@Override
-		protected void onMouseOut() {
+		public void onMouseOut() {
 			hover = false;
-			requestRepaint();
+			repaint();
 		}
 		
 		@Override
-		protected boolean onMouseDown(float x, float y, int buttons) {
-			if(buttons==mouseLeftMask) {
+		public boolean onMouseDown(float x, float y, Button button, int mods) {
+			if(button==Button.left) {
 				FileViewPane fileView = fileBrowser.view;
 				if(fileView.getSelectedFile()==file)
 					fileView.onClickSelected();
@@ -171,7 +173,7 @@ public class FileBrowser extends UIContainer {
 					fileView.setSelectedFile(file);
 					fileView.onSelect(file);
 				}
-				requestRepaint();
+				repaint();
 				return true;
 			}
 			else
@@ -214,23 +216,23 @@ public class FileBrowser extends UIContainer {
 		}
 	
 		@Override
-		protected void onMouseIn() {
+		public void onMouseIn() {
 			hover = true;
-			requestRepaint();
+			repaint();
 		}
 		
 		@Override
-		protected void onMouseOut() {
+		public void onMouseOut() {
 			hover = false;
-			requestRepaint();
+			repaint();
 		}
 		
 		@Override
-		protected boolean onMouseDown(float x, float y, int buttons) {
-			if(buttons==mouseLeftMask) {
+		public boolean onMouseDown(float x, float y, Button button, int mods) {
+			if(button==Button.left) {
 				FileGroupBox grp = (FileGroupBox) getParent();
 				grp.toggleView();
-				requestRepaint();
+				repaint();
 				return true;
 			}
 			else
@@ -477,7 +479,7 @@ public class FileBrowser extends UIContainer {
 		
 		public void onSelect(File file) {
 			((FileBrowser) getParent()).txtFileName.text = file==null ? "" : file.getName();
-			requestRepaint();
+			repaint();
 		}
 		
 		public void onClickSelected() {
@@ -524,7 +526,7 @@ public class FileBrowser extends UIContainer {
 					if(historyIndex<history.size()-1)
 						btnFwd.enable();
 				}
-				requestRepaint();
+				repaint();
 			}
 		}.disable();
 		btnFwd = new UIToolButton(this, new SvgIcon("svg/forward.svg", 160, iconPalette), 16, 2) {
@@ -537,34 +539,34 @@ public class FileBrowser extends UIContainer {
 					if(historyIndex>0)
 						btnBack.enable();
 				}
-				requestRepaint();
+				repaint();
 			}
 		}.disable();
 		btnRefresh = new UIToolButton(this, new SvgIcon("svg/refresh.svg", 160, iconPalette), 16, 2) {
 			public void onAction() {
 				view.refresh();				
-				requestRepaint();
+				repaint();
 			}
 		};
 		btnUp = new UIToolButton(this, new SvgIcon("svg/up.svg", 160, iconPalette), 32, 8) {
 			public void onAction() {
 				if(view.upDirectory())
 					pushHistory();
-				requestRepaint();
+				repaint();
 			}
 		};
 		btnHome = new UIToolButton(this, new SvgIcon("svg/home.svg", 160, iconPalette), 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(new File(System.getProperty("user.home"))))
 					pushHistory();
-				requestRepaint();
+				repaint();
 			}
 		};
 		btnRoots = new UIToolButton(this, new SvgIcon("svg/roots.svg", 160, iconPalette), 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(null))
 					pushHistory();
-				requestRepaint();
+				repaint();
 			}
 		};
 		btnOk = new UIButton(this, "OK");
@@ -633,6 +635,11 @@ public class FileBrowser extends UIContainer {
 	}
 	
 	public static void main(String[] args) {
-		new FileBrowser(WindowUtils.createFrame("Open file", 840, 480)).getBasePanel().showWindow();
+		SwingFrame.show("Open file", 840, 480, true, new UIFactory<FileBrowser, BaseContainer>() {
+			@Override
+			public FileBrowser create(BaseContainer base) {
+				return new FileBrowser(base);
+			}
+		});
 	}
 }

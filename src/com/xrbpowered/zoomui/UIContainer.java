@@ -11,10 +11,6 @@ public abstract class UIContainer extends UIElement {
 		super(parent);
 	}
 	
-	protected UIContainer(BasePanel basePanel) {
-		super(null, basePanel);
-	}
-	
 	protected void addChild(UIElement c) {
 		children.add(c);
 		invalidateLayout();
@@ -22,13 +18,10 @@ public abstract class UIContainer extends UIElement {
 	
 	protected void removeChild(UIElement c) {
 		if(children.remove(c))
-			c.onRemove();
-		invalidateLayout();
+			invalidateLayout();
 	}
 	
 	public void removeAllChildren() {
-		for(UIElement c : children)
-			c.onRemove();
 		children.clear();
 		invalidateLayout();
 	}
@@ -61,59 +54,59 @@ public abstract class UIContainer extends UIElement {
 		paintChildren(g);
 	}
 	
-	protected UIElement getElementUnderMouse(float x, float y) {
+	public UIElement getElementAt(float x, float y) {
 		if(!isVisible())
 			return null;
 		float cx = parentToLocalX(x);
 		float cy = parentToLocalY(y);
 		for(int i=children.size()-1; i>=0; i--) {
-			UIElement e = children.get(i).getElementUnderMouse(cx, cy);
+			UIElement e = children.get(i).getElementAt(cx, cy);
 			if(e!=null)
 				return e;
 		}
-		return super.getElementUnderMouse(x, y);
+		return super.getElementAt(x, y);
 	}
 	
 	@Override
-	protected UIElement notifyMouseDown(float x, float y, int buttons) {
+	public UIElement notifyMouseDown(float x, float y, Button button, int mods) {
 		if(!isVisible())
 			return null;
 		float cx = parentToLocalX(x);
 		float cy = parentToLocalY(y);
 		for(int i=children.size()-1; i>=0; i--) {
-			UIElement e = children.get(i).notifyMouseDown(cx, cy, buttons);
+			UIElement e = children.get(i).notifyMouseDown(cx, cy, button, mods);
 			if(e!=null)
 				return e;
 		}
-		return super.notifyMouseDown(x, y, buttons);
+		return super.notifyMouseDown(x, y, button, mods);
 	}
 	
 	@Override
-	protected UIElement notifyMouseUp(float x, float y, int buttons, UIElement initiator) {
+	public UIElement notifyMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
 		if(!isVisible())
 			return null;
 		float cx = parentToLocalX(x);
 		float cy = parentToLocalY(y);
 		for(int i=children.size()-1; i>=0; i--) {
-			UIElement e = children.get(i).notifyMouseUp(cx, cy, buttons, initiator);
+			UIElement e = children.get(i).notifyMouseUp(cx, cy, button, mods, initiator);
 			if(e!=null)
 				return e;
 		}
-		return super.notifyMouseUp(x, y, buttons, initiator);
+		return super.notifyMouseUp(x, y, button, mods, initiator);
 	}
 	
 	@Override
-	protected UIElement notifyMouseScroll(float x, float y, float delta, int modifiers) {
+	public UIElement notifyMouseScroll(float x, float y, float delta, int mods) {
 		if(!isVisible())
 			return null;
 		float cx = parentToLocalX(x);
 		float cy = parentToLocalY(y);
 		for(int i=children.size()-1; i>=0; i--) {
-			UIElement e = children.get(i).notifyMouseScroll(cx, cy, delta, modifiers);
+			UIElement e = children.get(i).notifyMouseScroll(cx, cy, delta, mods);
 			if(e!=null)
 				return e;
 		}
-		return super.notifyMouseScroll(x, y, delta, modifiers);
+		return super.notifyMouseScroll(x, y, delta, mods);
 	}
 	
 }

@@ -7,23 +7,23 @@ public class UIPanView extends UIContainer {
 	
 	private DragActor panActor = new DragActor() {
 		@Override
-		public boolean notifyMouseDown(int x, int y, int buttons) {
-			if(buttons==mouseRightMask) {
+		public boolean notifyMouseDown(float x, float y, Button button, int mods) {
+			if(button==Button.right) {
 				return true;
 			}
 			return false;
 		}
 
 		@Override
-		public boolean notifyMouseMove(int dx, int dy) {
+		public boolean notifyMouseMove(float dx, float dy) {
 			float pix = getPixelScale();
 			pan(dx / pix, dy / pix);
-			requestRepaint();
+			repaint();
 			return true;
 		}
 
 		@Override
-		public boolean notifyMouseUp(int x, int y, int buttons, UIElement target) {
+		public boolean notifyMouseUp(float x, float y, Button button, int mods, UIElement target) {
 			return true;
 		}
 	};
@@ -116,48 +116,48 @@ public class UIPanView extends UIContainer {
 	}
 	
 	@Override
-	protected UIElement getElementUnderMouse(float x, float y) {
+	public UIElement getElementAt(float x, float y) {
 		if(isInside(x, y))
-			return super.getElementUnderMouse(x, y);
+			return super.getElementAt(x, y);
 		else
 			return null;
 	}
 	
 	@Override
-	protected UIElement notifyMouseDown(float x, float y, int buttons) {
+	public UIElement notifyMouseDown(float x, float y, Button button, int mods) {
 		if(isInside(x, y))
-			return super.notifyMouseDown(x, y, buttons);
+			return super.notifyMouseDown(x, y, button, mods);
 		else
 			return null;
 	}
 	
 	@Override
-	protected UIElement notifyMouseUp(float x, float y, int buttons, UIElement initiator) {
+	public UIElement notifyMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
 		if(isInside(x, y))
-			return super.notifyMouseUp(x, y, buttons, initiator);
+			return super.notifyMouseUp(x, y, button, mods, initiator);
 		else
 			return null;
 	}
 
 	@Override
-	protected UIElement notifyMouseScroll(float x, float y, float delta, int modifiers) {
+	public UIElement notifyMouseScroll(float x, float y, float delta, int mods) {
 		if(isInside(x, y))
-			return super.notifyMouseScroll(x, y, delta, modifiers);
+			return super.notifyMouseScroll(x, y, delta, mods);
 		else
 			return null;
 	}
 
 	@Override
-	public DragActor acceptDrag(int x, int y, int buttons) {
-		if(panActor.notifyMouseDown(x, y, buttons))
+	public DragActor acceptDrag(float x, float y, Button button, int mods) {
+		if(panActor.notifyMouseDown(x, y, button, mods))
 			return panActor;
 		else
 			return null;
 	}
 	
 	@Override
-	protected boolean onMouseDown(float x, float y, int buttons) {
-		if(buttons==mouseRightMask)
+	public boolean onMouseDown(float x, float y, Button button, int mods) {
+		if(button==Button.right)
 			return true;
 		return false;
 	}

@@ -3,10 +3,13 @@ package com.xrbpowered.uitest;
 import java.awt.Color;
 import java.awt.Font;
 
+import com.xrbpowered.zoomui.BaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
-import com.xrbpowered.zoomui.WindowUtils;
+import com.xrbpowered.zoomui.UIElement.Button;
+import com.xrbpowered.zoomui.UIWindow.UIFactory;
+import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomUITest {
 
@@ -15,14 +18,14 @@ public class ZoomUITest {
 	
 	private static int nextId = 0;
 	
-	private static String buttonsToString(int buttons) {
+	private static String buttonsToString(Button button, int mods) {
 		String s = "";
-		if((buttons&UIElement.modCtrlMask)!=0) { if(!s.isEmpty()) s += "+"; s += "Ctrl"; }
-		if((buttons&UIElement.modAltMask)!=0) { if(!s.isEmpty()) s += "+"; s += "Alt"; }
-		if((buttons&UIElement.modShiftMask)!=0) { if(!s.isEmpty()) s += "+"; s += "Shift"; }
-		if((buttons&UIElement.mouseLeftMask)!=0) { if(!s.isEmpty()) s += "+"; s += "LMB"; }
-		if((buttons&UIElement.mouseMiddleMask)!=0) { if(!s.isEmpty()) s += "+"; s += "MMB"; }
-		if((buttons&UIElement.mouseRightMask)!=0) { if(!s.isEmpty()) s += "+"; s += "RMB"; }
+		if((mods&UIElement.modCtrlMask)!=0) { if(!s.isEmpty()) s += "+"; s += "Ctrl"; }
+		if((mods&UIElement.modAltMask)!=0) { if(!s.isEmpty()) s += "+"; s += "Alt"; }
+		if((mods&UIElement.modShiftMask)!=0) { if(!s.isEmpty()) s += "+"; s += "Shift"; }
+		if(button==Button.left) { if(!s.isEmpty()) s += "+"; s += "LMB"; }
+		if(button==Button.middle) { if(!s.isEmpty()) s += "+"; s += "MMB"; }
+		if(button==Button.right) { if(!s.isEmpty()) s += "+"; s += "RMB"; }
 		return s;
 	}
 	
@@ -45,41 +48,41 @@ public class ZoomUITest {
 			g.drawString(String.format("%d:%d", id, clicks), 10, 25);
 		}
 		@Override
-		protected void onMouseIn() {
+		public void onMouseIn() {
 			System.out.printf("%d: in\n", id);
 			hover = true;
-			requestRepaint();
+			repaint();
 		}
 		@Override
-		protected void onMouseOut() {
+		public void onMouseOut() {
 			System.out.printf("%d: out\n", id);
 			hover = false;
-			requestRepaint();
+			repaint();
 		}
 		@Override
-		protected void onMouseReleased() {
+		public void onMouseReleased() {
 			System.out.printf("%d: released\n", id);
 			down = false;
-			requestRepaint();
+			repaint();
 		}
 		@Override
-		protected boolean onMouseDown(float x, float y, int buttons) {
-			System.out.printf("%d: down[%s]\n", id, buttonsToString(buttons));
-			if(buttons==mouseLeftMask) {
+		public boolean onMouseDown(float x, float y, Button button, int mods) {
+			System.out.printf("%d: down[%s]\n", id, buttonsToString(button, mods));
+			if(button==Button.left) {
 				down = true;
-				requestRepaint();
+				repaint();
 			}
 			return true;
 		}
 		@Override
-		protected boolean onMouseUp(float x, float y, int buttons, UIElement initiator) {
+		public boolean onMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
 			if(initiator!=this)
 				return false;
-			System.out.printf("%d: up[%s]\n", id, buttonsToString(buttons));
-			if(buttons==mouseLeftMask) {
+			System.out.printf("%d: up[%s]\n", id, buttonsToString(button, mods));
+			if(button==Button.left) {
 				down = false;
 				clicks++;
-				requestRepaint();
+				repaint();
 			}
 			return true;
 		}
@@ -124,13 +127,15 @@ public class ZoomUITest {
 				g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 			}
 		}
-		public void start() {
-			getBasePanel().showWindow();
-		}
 	}
 	
 	public static void main(String[] args) {
-		new TestContainer(WindowUtils.createFrame("ZoomUI", 1200, 600), MAX_LEVEL).start();
+		SwingFrame.show("ZoomUI", 1200, 600, true, new UIFactory<TestContainer, BaseContainer>() {
+			@Override
+			public TestContainer create(BaseContainer base) {
+				return new TestContainer(base, MAX_LEVEL);
+			}
+		});
 	}
 	
 }

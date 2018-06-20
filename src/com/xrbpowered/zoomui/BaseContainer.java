@@ -3,26 +3,172 @@ package com.xrbpowered.zoomui;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 
-public class BaseContainer extends UIContainer {
+public class BaseContainer extends UIContainer implements KeyInputHandler {
 
-	private float baseScale = getAutoScale();
-	
-	protected BaseContainer(BasePanel basePanel) {
-		super(basePanel);
+	public static class ModalBaseContainer<A> extends BaseContainer {
+		protected ModalBaseContainer(UIModalWindow<A> window, float scale) {
+			super(window, scale);
+		}
+		@SuppressWarnings("unchecked")
+		@Override
+		public UIModalWindow<A> getWindow() {
+			return (UIModalWindow<A>) super.getWindow();
+		}
 	}
 	
+	private float baseScale;
+	private UIWindow window;
+	
+	protected BaseContainer(UIWindow window, float scale) {
+		super(null);
+		this.baseScale = scale;
+		this.window = window;
+	}
+	
+	@Override
+	public BaseContainer getBase() {
+		return this;
+	}
+	
+	public UIWindow getWindow() {
+		return window;
+	}
+	
+	private UIElement uiUnderMouse = null;
+	private KeyInputHandler uiFocused = null;
+	
+	private DragActor drag = null;
+	private UIElement uiInitiator = null;
+	private Button initiatorButton = Button.left;
+	private int initiatorMods = 0;
+	private float prevMouseX = 0f;
+	private float prevMouseY = 0f;
+	
+	private boolean invalidLayout = true;
+
+	public void invalidateLayout() {
+		invalidLayout = true;
+	}
+
+	@Override
+	public void onFocusGained() {
+	}
+	
+	@Override
+	public void onFocusLost() {
+		resetFocus();
+	}
+	
+	@Override
+	public boolean onKeyPressed(char c, int code, int mods) {
+		if(uiFocused!=null)
+			return uiFocused.onKeyPressed(c, code, mods);
+		else
+			return false;
+	}
+	
+	@Override
+	public UIElement notifyMouseDown(float x, float y, Button button, int mods) {
+		if(drag==null) {
+			prevMouseX = x;
+			prevMouseY = y;
+			initiatorButton = button;
+			initiatorMods = mods;
+			UIElement ui = super.notifyMouseDown(x, y, button, mods);
+			if(ui!=uiInitiator && uiInitiator!=null)
+				uiInitiator.onMouseReleased();
+			uiInitiator = ui;
+			if(uiFocused!=null && uiFocused!=uiInitiator)
+				resetFocus();
+		}
+		return this;
+	}
+	
+	@Override
+	public UIElement notifyMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
+		if(drag!=null) {
+			UIElement ui = getElementAt(x, y);
+			if(drag.notifyMouseUp(x, y, button, mods, ui))
+				drag = null;
+		}
+		else {
+			if(super.notifyMouseUp(x, y, button, mods, uiInitiator)!=uiInitiator && uiInitiator!=null)
+				uiInitiator.onMouseReleased(); // FIXME release for multi-button scenarios
+		}
+		return this;
+	}
+	
+	@Override
+	public void onMouseOut() {
+		if(drag==null && uiUnderMouse!=null) {
+			uiUnderMouse.onMouseOut();
+			uiUnderMouse = null;
+		}
+	}
+	
+	private void updateMouseMove(float x, float y) {
+		UIElement ui = getElementAt(x, y);
+		if(ui!=uiUnderMouse) {
+			if(uiUnderMouse!=null)
+				uiUnderMouse.onMouseOut();
+			if(ui!=null)
+				ui.onMouseIn();
+			uiUnderMouse = ui;
+		}
+	}
+	
+	@Override
+	public void onMouseMoved(float x, float y, int mods) {
+		if(drag==null) {
+			updateMouseMove(x, y);
+			if(uiUnderMouse!=null)
+				uiUnderMouse.onMouseMoved(x, y, mods);
+		}
+	}
+	
+	public void onMouseDragged(float x, float y) {
+		if(drag==null && uiInitiator!=null) {
+			drag = uiInitiator.acceptDrag(prevMouseX, prevMouseY, initiatorButton, initiatorMods);
+		}
+		if(drag!=null) {
+			if(!drag.notifyMouseMove(x-prevMouseX, y-prevMouseY))
+				drag = null;
+			prevMouseX = x;
+			prevMouseY = y;
+		}
+		updateMouseMove(x, y);
+	}
+	
+	public void resetFocus() {
+		if(uiFocused!=null)
+			uiFocused.onFocusLost();
+		KeyInputHandler e = null;
+		for(UIElement c : children)
+			if(c instanceof KeyInputHandler)
+				e = (KeyInputHandler) c;
+		uiFocused = e;
+	}
+
+	public void setFocus(KeyInputHandler handler) {
+		if(uiFocused!=null && uiFocused!=handler)
+			resetFocus();
+		uiFocused = handler;
+		if(uiFocused!=null)
+			uiFocused.onFocusGained();
+	}
+	
+	public KeyInputHandler getFocus() {
+		return uiFocused;
+	}
+
 	@Override
 	protected void addChild(UIElement c) {
 		super.addChild(c);
 		resetFocus();
 	}
 
-	public void resetFocus() {
-		KeyInputHandler e = null;
-		for(UIElement c : children)
-			if(c instanceof KeyInputHandler)
-				e = (KeyInputHandler) c;
-		getBasePanel().setFocus(e);
+	public float getBaseScale() {
+		return baseScale;
 	}
 	
 	public void setBaseScale(float baseScale) {
@@ -56,16 +202,17 @@ public class BaseContainer extends UIContainer {
 			c.setSize(getWidth(), getHeight());
 			c.layout();
 		}
+		invalidLayout = false;
 	}
 	
 	@Override
 	public float getWidth() {
-		return getBasePanel().getWidth() / baseScale;
+		return getWindow().getClientWidth() / baseScale;
 	}
 	
 	@Override
 	public float getHeight() {
-		return getBasePanel().getHeight() / baseScale;
+		return getWindow().getClientHeight() / baseScale;
 	}
 	
 	@Override
@@ -85,6 +232,8 @@ public class BaseContainer extends UIContainer {
 	
 	@Override
 	public void paint(GraphAssist g) {
+		if(invalidLayout)
+			layout();
 		g.graph.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		super.paint(g);

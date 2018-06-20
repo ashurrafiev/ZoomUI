@@ -2,16 +2,18 @@ package com.xrbpowered.uitest;
 
 import java.awt.Color;
 
+import com.xrbpowered.zoomui.BaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.UIWindow.UIFactory;
 import com.xrbpowered.zoomui.UIZoomView;
-import com.xrbpowered.zoomui.WindowUtils;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomViewTest extends UIZoomView {
 
@@ -61,30 +63,40 @@ public class ZoomViewTest extends UIZoomView {
 		g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
 	}
 
-	public static void main(String[] args) {
-		UIContainer root = new UIContainer(WindowUtils.createFrame("ZoomViewTest", 800, 600)) {
-			private ZoomViewTest top = new ZoomViewTest(this);
-			private UIElement bottom = new UIElement(this) {
-				@Override
-				public void paint(GraphAssist g) {
-					g.fill(this, new Color(0xeeeeee));
-					g.hborder(this, GraphAssist.TOP, new Color(0x999999));
-					g.setColor(Color.BLACK);
-					g.setFont(UIButton.font);
-					g.drawString("Test UIZoomView and std controls", 16, getHeight()/2f,
-							GraphAssist.LEFT, GraphAssist.CENTER);
-				}
-			};
-			
+	private static class ZoomViewTop extends UIContainer {
+		public ZoomViewTop(UIContainer parent) {
+			super(parent);
+		}
+		
+		private ZoomViewTest top = new ZoomViewTest(this);
+		private UIElement bottom = new UIElement(this) {
 			@Override
-			public void layout() {
-				bottom.setSize(getWidth(), 100);
-				bottom.setLocation(0, getHeight() - bottom.getHeight());
-				top.setSize(getWidth(), bottom.getY());
-				top.setLocation(0, 0);
-				top.layout();
+			public void paint(GraphAssist g) {
+				g.fill(this, new Color(0xeeeeee));
+				g.hborder(this, GraphAssist.TOP, new Color(0x999999));
+				g.setColor(Color.BLACK);
+				g.setFont(UIButton.font);
+				g.drawString("Test UIZoomView and std controls", 16, getHeight()/2f,
+						GraphAssist.LEFT, GraphAssist.CENTER);
 			}
 		};
-		root.getBasePanel().showWindow();
+		
+		@Override
+		public void layout() {
+			bottom.setSize(getWidth(), 100);
+			bottom.setLocation(0, getHeight() - bottom.getHeight());
+			top.setSize(getWidth(), bottom.getY());
+			top.setLocation(0, 0);
+			top.layout();
+		}
+	}
+	
+	public static void main(String[] args) {
+		SwingFrame.show("ZoomViewTest", 800, 600, true, new UIFactory<ZoomViewTop, BaseContainer>() {
+			@Override
+			public ZoomViewTop create(BaseContainer base) {
+				return new ZoomViewTop(base);
+			}
+		});
 	}
 }

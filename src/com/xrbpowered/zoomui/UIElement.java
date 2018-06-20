@@ -1,42 +1,29 @@
 package com.xrbpowered.zoomui;
 
-import java.awt.MouseInfo;
-import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.Point2D;
-
-import javax.swing.SwingUtilities;
 
 public abstract class UIElement {
 
-	public static final int mouseLeftMask = 1;
-	public static final int mouseRightMask = 2;
-	public static final int mouseMiddleMask = 4;
+	public enum Button {
+		left, right, middle, unknown
+	}
 	public static final int modNone = 0;
-	public static final int modCtrlMask = 8;
-	public static final int modAltMask = 16;
-	public static final int modShiftMask = 32;
+	public static final int modCtrlMask = 1;
+	public static final int modAltMask = 2;
+	public static final int modShiftMask = 4;
 	
 	private final UIContainer parent;
-	private final BasePanel basePanel;
+	private final BaseContainer base;
 
 	private boolean visible = true;
 	private float x, y;
 	private float width, height;
 	
-	public UIElement(UIContainer parent, BasePanel basePanel) {
+	public UIElement(UIContainer parent) {
 		this.parent = parent;
-		this.basePanel = basePanel;
+		this.base = (parent!=null) ? parent.getBase() : null;
 		if(parent!=null)
 			parent.addChild(this);
-	}
-	
-	protected UIElement(UIContainer parent) {
-		this(parent, (parent!=null) ? parent.getBasePanel() : null);
-	}
-
-	public void destroy() {
-		getParent().removeChild(this);
 	}
 	
 	public void setLocation(float x, float y) {
@@ -49,8 +36,8 @@ public abstract class UIElement {
 		this.height = height;
 	}
 	
-	public BasePanel getBasePanel() {
-		return basePanel;
+	public BaseContainer getBase() {
+		return base;
 	}
 	
 	protected float parentToLocalX(float x) {
@@ -68,12 +55,6 @@ public abstract class UIElement {
 	public float baseToLocalY(float y) {
 		return parentToLocalY(parent==null ? y : parent.baseToLocalY(y));
 	}
-	
-	public Point2D getMousePosition() {
-		Point p = MouseInfo.getPointerInfo().getLocation();
-		SwingUtilities.convertPointFromScreen(p, getBasePanel());
-		return new Point2D.Float(baseToLocalX(p.x), baseToLocalY(p.y));
-	}
 
 	public float getPixelScale() {
 		if(parent!=null)
@@ -82,12 +63,12 @@ public abstract class UIElement {
 			return 1f;
 	}
 	
-	protected void requestRepaint() {
-		getBasePanel().repaint();
+	protected void repaint() {
+		getBase().getWindow().repaint();
 	}
 	
 	public void invalidateLayout() {
-		getBasePanel().invalidateLayout();
+		getBase().invalidateLayout();
 	}
 	
 	public void layout() {
@@ -99,6 +80,7 @@ public abstract class UIElement {
 	
 	public void setVisible(boolean visible) {
 		this.visible = visible;
+		repaint();
 	}
 	
 	public boolean isVisible(Rectangle clip) {
@@ -133,60 +115,60 @@ public abstract class UIElement {
 	
 	public abstract void paint(GraphAssist g);
 	
-	public DragActor acceptDrag(int x, int y, int buttons) {
+	public DragActor acceptDrag(float x, float y, Button button, int mods) {
 		return null;
 	}
 
-	protected UIElement getElementUnderMouse(float x, float y) {
+	public UIElement getElementAt(float x, float y) {
 		if(isInside(x, y))
 			return this;
 		else
 			return null;
 	}
 	
-	protected UIElement notifyMouseDown(float x, float y, int buttons) {
-		if(isInside(x, y) && onMouseDown(x, y, buttons))
+	public UIElement notifyMouseDown(float x, float y, Button button, int mods) {
+		if(isInside(x, y) && onMouseDown(x, y, button, mods))
 			return this;
 		else
 			return null;
 	}
 	
-	protected UIElement notifyMouseUp(float x, float y, int buttons, UIElement initiator) {
-		if(isInside(x, y) && onMouseUp(x, y, buttons, initiator))
+	public UIElement notifyMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
+		if(isInside(x, y) && onMouseUp(x, y, button, mods, initiator))
 			return this;
 		else
 			return null;
 	}
 	
-	protected UIElement notifyMouseScroll(float x, float y, float delta, int modifiers) {
-		if(isInside(x, y) && onMouseScroll(x, y, delta, modifiers))
+	public UIElement notifyMouseScroll(float x, float y, float delta, int mods) {
+		if(isInside(x, y) && onMouseScroll(x, y, delta, mods))
 			return this;
 		else
 			return null;
 	}
 
-	protected void onMouseIn() {
+	public void onMouseIn() {
 	}
 	
-	protected void onMouseOut() {
+	public void onMouseOut() {
 	}
 	
-	protected void onMouseReleased() {
+	public void onMouseReleased() {
 	}
 	
-	protected boolean onMouseDown(float x, float y, int buttons) {
+	public void onMouseMoved(float x, float y, int mods) {
+	}
+	
+	public boolean onMouseDown(float x, float y, Button button, int mods) {
 		return false;
 	}
 	
-	protected boolean onMouseUp(float x, float y, int buttons, UIElement initiator) {
+	public boolean onMouseUp(float x, float y, Button button, int mods, UIElement initiator) {
 		return false;
 	}
 	
-	protected boolean onMouseScroll(float x, float y, float delta, int modifiers) {
+	public boolean onMouseScroll(float x, float y, float delta, int mods) {
 		return false;
-	}
-	
-	protected void onRemove() {
 	}
 	
 }

@@ -38,25 +38,25 @@ public class UIListItem extends UIElement {
 	}
 	
 	@Override
-	protected void onMouseIn() {
+	public void onMouseIn() {
 		hover = true;
-		requestRepaint();
+		repaint();
 	}
 	
 	@Override
-	protected void onMouseOut() {
+	public void onMouseOut() {
 		hover = false;
-		requestRepaint();
+		repaint();
 	}
 	
 	@Override
-	protected boolean onMouseDown(float x, float y, int buttons) {
-		if(buttons==mouseLeftMask) {
+	public boolean onMouseDown(float x, float y, Button button, int mods) {
+		if(button==Button.left) {
 			if(list.getSelectedIndex()==index)
 				list.onClickSelected();
 			else
 				list.select(index);
-			requestRepaint();
+			repaint();
 			return true;
 		}
 		else

@@ -48,8 +48,8 @@ public class UIZoomView extends UIPanView {
 	}
 
 	@Override
-	protected boolean onMouseScroll(float x, float y, float delta, int modifiers) {
-		if(modifiers==modCtrlMask) {
+	public boolean onMouseScroll(float x, float y, float delta, int mods) {
+		if(mods==modCtrlMask) {
 			float ds = 1.0f+delta*0.2f;
 			scale *= ds;
 			if(scale<minScale) {
@@ -60,7 +60,7 @@ public class UIZoomView extends UIPanView {
 				ds *= maxScale / scale;
 				scale = maxScale;
 			}
-			requestRepaint();
+			repaint();
 			return true;
 		}
 		else
