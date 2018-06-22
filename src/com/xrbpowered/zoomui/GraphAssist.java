@@ -11,13 +11,6 @@ import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.util.LinkedList;
 
-import javax.swing.JEditorPane;
-import javax.swing.text.Element;
-import javax.swing.text.View;
-import javax.swing.text.ViewFactory;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.ImageView;
-
 public class GraphAssist {
 	
 	public static final int LEFT = 0;
@@ -176,49 +169,6 @@ public class GraphAssist {
 		float ty = y + h - align(h, valign);
 		graph.drawString(str, tx, ty);
 		return y + fm.getHeight();
-	}
-	
-	public static HTMLEditorKit htmlKit = new HTMLEditorKit() {
-		@Override
-		public ViewFactory getViewFactory() {
-			return new HTMLEditorKit.HTMLFactory() {
-				@Override
-				public View create(Element elem) {
-					View view = super.create(elem);
-		            if (view instanceof ImageView) {
-		                ((ImageView)view).setLoadsSynchronously(true);
-		            }
-		            return view;
-				}
-			};
-		}
-	};
-	private static JEditorPane htmlAssist = null;
-	
-	public void drawFormattedString(String htmlStr, int x, int y, int w, int h) {
-		if(htmlAssist==null) {
-			htmlAssist = new JEditorPane();
-			htmlAssist.setOpaque(false);
-			htmlAssist.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-		}
-
-		htmlAssist.setEditorKit(htmlKit);
-
-		graph.translate(x, y);
-		htmlAssist.setFont(graph.getFont());
-		htmlAssist.setForeground(graph.getColor());
-		htmlAssist.setBounds(0, 0, w, h);
-		htmlAssist.invalidate();
-		htmlAssist.setText(htmlStr);
-		htmlAssist.paint(graph);
-		graph.translate(-x, -y);
-	}
-	
-	public static String htmlString(String str) {
-		str = str.replaceAll("\\&", "&amp;");
-		str = str.replaceAll("\\<", "&lt;");
-		str = str.replaceAll("\\>", "&gt;");
-		return "<html>"+str;
 	}
 
 	public static int ptToPixels(float pt) {

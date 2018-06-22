@@ -2,7 +2,7 @@ package com.xrbpowered.zoomui;
 
 public class UIZoomView extends UIPanView {
 
-	protected float scale = 1f; // FIXME integer zoom steps
+	protected float scale = 1f; // TODO integer zoom steps
 	private float minScale = 0.1f;
 	private float maxScale = 3.0f;
 

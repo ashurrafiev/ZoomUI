@@ -6,12 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Base64;
 import java.util.HashMap;
-
-import javax.imageio.ImageIO;
 
 public class SvgIcon {
 
@@ -98,18 +93,6 @@ public class SvgIcon {
 			g2.setPaint(palette.getFgPaint(style, -baseSize, 0));
 			g2.fill(fgPath);
 			g2.setTransform(tx);
-		}
-	}
-	
-	public String createBase64ImageData(int style, float size, float pixelScale) {
-		try {
-			BufferedImage img = createImage(style, size, pixelScale);
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			ImageIO.write(img, "PNG", out);
-			return Base64.getEncoder().encodeToString(out.toByteArray());
-		}
-		catch(IOException e) {
-			return null;
 		}
 	}
 	

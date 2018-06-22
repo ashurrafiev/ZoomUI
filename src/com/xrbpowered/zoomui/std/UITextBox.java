@@ -85,7 +85,7 @@ public class UITextBox extends UIHoverElement implements KeyInputHandler {
 			g.translate(g.getTx().getTranslateX(), g.getTx().getTranslateY());
 			float pix = getPixelScale();
 			
-			g.setFont(font.deriveFont(font.getSize()/pix)); // FIXME check if getSize needs to be pre-calc as float
+			g.setFont(font.deriveFont(font.getSize()/pix));
 			FontMetrics fm = g.getFontMetrics();
 			if(updateCursor) {
 				cursor = searchCol(fm, (cursorX-4f)/pix);
