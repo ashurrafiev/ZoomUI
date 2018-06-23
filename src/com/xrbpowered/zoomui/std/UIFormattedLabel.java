@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.swing.JEditorPane;
@@ -34,10 +35,64 @@ import com.xrbpowered.zoomui.icons.SvgIcon;
 
 public class UIFormattedLabel extends UIContainer {
 
+	// Known issues (unable to resolve):
+	// * Always rendered at 1x zoom. All sizes in HTML/CSS ignore scaling
+	// * Hover color has to be done via "hover" custom attribute. CSS ":hover" selector will not work.
+	// * Img vertical alignment is done via "dy" custom attribute. CSS "vertical-align" will not work.
+	// * Element height will be properly set only after repaint.
+
+	public static class ZoomableCss {
+		
+		public static class ZoomRule {
+			public final String format;
+			public final float value;
+			public ZoomRule(String selector, String property, float value) {
+				this.format = String.format("%s {%s: %%d}", selector, property);
+				this.value = value;
+			}
+			public int getValue(float scale) {
+				return Math.round(value*scale);
+			}
+			public String getRule(float scale) {
+				return String.format(format, getValue(scale));
+			}
+		}
+		public static class PtZoomRule extends ZoomRule {
+			public PtZoomRule(String selector, String property, float value) {
+				super(selector, property, value);
+			}
+			@Override
+			public int getValue(float scale) {
+				return Math.round(GraphAssist.ptToPixels(value*scale));
+			}
+		}
+		
+		public final StyleSheet baseCss;
+		protected final ArrayList<ZoomRule> zoomRules = new ArrayList<>();
+		
+		public ZoomableCss(String css) {
+			baseCss = new StyleSheet();
+			baseCss.addRule(css);
+		}
+		
+		public void addZoomRule(String selector, String property, float value) {
+			zoomRules.add(new ZoomRule(selector, property, value));
+		}
+
+		public void addPtZoomRule(String selector, String property, float value) {
+			zoomRules.add(new PtZoomRule(selector, property, value));
+		}
+
+		public StyleSheet makeZoomedStyle(float scale) {
+			StyleSheet css = new StyleSheet();
+			css.addStyleSheet(baseCss);
+			for(ZoomRule r : zoomRules)
+				css.addRule(r.getRule(scale));
+			return css;
+		}
+	}
+	
 	public static class ZoomUIHtmlEditorKit extends HTMLEditorKit {
-		// Known issues (unable to resolve):
-		// * Always rendered at 1x zoom. All sizes in HTML/CSS ignore scaling
-		// * Hover color has to be done via custom "hover" attribute. CSS ":hover" selector will not work.
 
 		public class SvgImageView extends ImageView {
 			public final SvgIcon icon;
@@ -158,7 +213,7 @@ public class UIFormattedLabel extends UIContainer {
 		}
 
 		public final UIFormattedLabel container;
-		public float scale = 1f;
+		public ZoomableCss zoomableCss = null;
 		public Color defaultHoverColor = null;
 		public Color defaultColor = Color.BLACK;
 		public Font defaultFont = UIButton.font;
@@ -166,6 +221,7 @@ public class UIFormattedLabel extends UIContainer {
 
 		private boolean rebuildUI = true;
 		private String hoverHref = null;
+		private float scale = 0f;
 
 		public ZoomUIHtmlEditorKit(UIFormattedLabel container) {
 			this.container = container;
@@ -204,6 +260,22 @@ public class UIFormattedLabel extends UIContainer {
 			};
 		}
 		
+		public float getScale() {
+			return scale;
+		}
+		
+		public boolean setScale(float scale) {
+			if(this.scale!=scale) {
+				this.scale = scale;
+				rebuildUI = true;
+				if(zoomableCss!=null) {
+					setStyleSheet(zoomableCss.makeZoomedStyle(scale));
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		public static Color cssStringToColor(String s) {
 			// *facepalm*
 			try {
@@ -234,10 +306,9 @@ public class UIFormattedLabel extends UIContainer {
 			htmlAssist.setBounds(0, 0, (int)(w * scale), 1);
 			htmlAssist.invalidate();
 		
+			if(htmlKit.setScale(scale))
+				htmlAssist.setEditorKit(htmlKit);
 			htmlAssist.setText(html);
-		
-			htmlKit.scale = scale;
-			htmlKit.rebuildUI = true;
 		}
 		
 		if(htmlKit.rebuildUI)
@@ -253,7 +324,7 @@ public class UIFormattedLabel extends UIContainer {
 	public UIFormattedLabel(UIContainer parent, String html) {
 		super(parent);
 		this.html = html;
-		htmlKit = new ZoomUIHtmlEditorKit(this); // TODO scalable css
+		htmlKit = new ZoomUIHtmlEditorKit(this);
 		setupHtmlKit();
 		
 		htmlAssist = new JEditorPane();

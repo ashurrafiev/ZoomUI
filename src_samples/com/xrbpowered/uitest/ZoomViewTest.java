@@ -56,6 +56,8 @@ public class ZoomViewTest extends UIZoomView {
 				System.out.printf("[%s] clicked\n", href);
 			}
 		};
+		
+		pan(64, 0);
 	}
 	
 	@Override
