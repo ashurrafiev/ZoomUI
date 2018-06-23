@@ -16,7 +16,7 @@ public class SvgHtmlTest extends UIContainer {
 	private static final Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(9f));
 	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, UIToolButton.palette);
 
-	private static final String html = "<html>Hello <a href=\"world\" hover=\"#0099ff\" style=\"font-weight:bold\">world</a>"
+	private static final String html = "Hello <a href=\"world\" hover=\"#0099ff\" style=\"font-weight:bold\">world</a>"
 			+ " and <img size=\"16\" dy=\"-3\" src=\"test\"> <a href=\"people\" style=\"font-weight:bold\">all people</a>!";
 	private static final String css = "a { text-decoration: none; color: #0077dd }";
 	
@@ -28,18 +28,13 @@ public class SvgHtmlTest extends UIContainer {
 			@Override
 			public void setupHtmlKit() {
 				htmlKit.defaultHoverColor = Color.RED;
+				htmlKit.defaultFont = font;
 				htmlKit.getStyleSheet().addRule(css);
 				htmlKit.icons.put("test", testIcon);
 			}
 			@Override
 			public void onHrefClicked(String href) {
 				System.out.printf("#%s clicked\n", href);
-			}
-			@Override
-			public void paintSelf(GraphAssist g) {
-				g.setFont(font);
-				g.setColor(Color.BLACK);
-				super.paintSelf(g);
 			}
 		};
 	}

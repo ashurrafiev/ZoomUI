@@ -9,6 +9,7 @@ import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
+import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
@@ -22,6 +23,7 @@ public class ZoomViewTest extends UIZoomView {
 	private UIListBox list;
 	private UITextBox text;
 	private UIToolButton toolBtn;
+	private UIFormattedLabel html;
 	
 	public ZoomViewTest(UIContainer parent) {
 		super(parent);
@@ -41,6 +43,19 @@ public class ZoomViewTest extends UIZoomView {
 		text = new UITextBox(this);
 		text.text = "Hello world";
 		toolBtn = new UIToolButton(this, fileIcon, 32, 8);
+		
+		html = new UIFormattedLabel(this, "This is an example of a <b>formatted label</b>. Click <a href=\"link\">here</a> to test if the link works or not.") {
+			@Override
+			public void setupHtmlKit() {
+				htmlKit.defaultHoverColor = new Color(0x0099ff);
+				htmlKit.defaultColor = UIButton.colorBorder;
+				htmlKit.getStyleSheet().addRule("a { text-decoration: none; color: #0077dd }");
+			}
+			@Override
+			public void onHrefClicked(String href) {
+				System.out.printf("[%s] clicked\n", href);
+			}
+		};
 	}
 	
 	@Override
@@ -54,6 +69,9 @@ public class ZoomViewTest extends UIZoomView {
 		text.setLocation(16, 32+48+120);
 		text.setSize(list.getWidth(), text.getHeight());
 		toolBtn.setLocation(-40, list.getY());
+		
+		html.setLocation(16, 64+48+120);
+		html.setSize(list.getWidth(), 0);
 	}
 	
 	@Override

@@ -7,7 +7,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.HashMap;
@@ -125,7 +124,7 @@ public class UIFormattedLabel extends UIContainer {
 			}
 		}
 
-		class CustomHtmlDocument extends HTMLDocument {
+		private class CustomHtmlDocument extends HTMLDocument {
 			public CustomHtmlDocument(StyleSheet styles) {
 				super(styles);
 			}
@@ -161,6 +160,8 @@ public class UIFormattedLabel extends UIContainer {
 		public final UIFormattedLabel container;
 		public float scale = 1f;
 		public Color defaultHoverColor = null;
+		public Color defaultColor = Color.BLACK;
+		public Font defaultFont = UIButton.font;
 		public HashMap<String, SvgIcon> icons = new HashMap<>();
 
 		private boolean rebuildUI = true;
@@ -217,47 +218,48 @@ public class UIFormattedLabel extends UIContainer {
 	}
 	
 	public final ZoomUIHtmlEditorKit htmlKit;
-	private JEditorPane htmlAssist = null;
+	private final JEditorPane htmlAssist;
 	private String html = null;
 	
-	public float drawFormattedString(Graphics2D g2, float pixelScale, String html, float x, float y, float w, float h) {
-		if(htmlAssist == null) {
-			htmlAssist = new JEditorPane();
-			htmlAssist.setOpaque(false);
-			htmlAssist.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-			htmlAssist.setEditorKit(htmlKit);
-		}
+	public float drawFormattedString(GraphAssist g, String html, float pixelScale, float x, float y, float w) {
+		g.pushTx();
+		g.clearTransform();
+		g.translate(g.getTx().getTranslateX(), g.getTx().getTranslateY());
 		
-		AffineTransform tx = g2.getTransform();
-		g2.setTransform(new AffineTransform());
-		g2.translate(x/pixelScale, y/pixelScale);
-		
-		if(htmlKit.rebuildUI && htmlKit.container!=null) {
-			Font font = g2.getFont();
-			htmlAssist.setFont(font.deriveFont(font.getSize()/pixelScale));
-			htmlAssist.setForeground(g2.getColor());
-			htmlAssist.setBounds(0, 0, (int)(w/pixelScale), 1);
+		float scale = 1/pixelScale;
+		if(htmlKit.rebuildUI || htmlKit.scale!=scale) {
+			Font font = htmlKit.defaultFont;
+			htmlAssist.setFont(font.deriveFont(font.getSize() * scale));
+			htmlAssist.setForeground(htmlKit.defaultColor);
+			htmlAssist.setBounds(0, 0, (int)(w * scale), 1);
 			htmlAssist.invalidate();
 		
 			htmlAssist.setText(html);
 		
-			htmlKit.scale = 1/pixelScale;
-			htmlKit.container.removeAllChildren();
+			htmlKit.scale = scale;
+			htmlKit.rebuildUI = true;
 		}
 		
-		htmlAssist.paint(g2);
+		if(htmlKit.rebuildUI)
+			htmlKit.container.removeAllChildren();
+		
+		htmlAssist.paint(g.graph);
 		htmlKit.rebuildUI = false;
 		
-		g2.setTransform(tx);
-		
+		g.popTx();
 		return (float)htmlAssist.getPreferredSize().getHeight() * pixelScale;
 	}
 
 	public UIFormattedLabel(UIContainer parent, String html) {
 		super(parent);
 		this.html = html;
-		htmlKit = new ZoomUIHtmlEditorKit(this);
+		htmlKit = new ZoomUIHtmlEditorKit(this); // TODO scalable css
 		setupHtmlKit();
+		
+		htmlAssist = new JEditorPane();
+		htmlAssist.setOpaque(false);
+		htmlAssist.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+		htmlAssist.setEditorKit(htmlKit);
 	}
 	
 	@Override
@@ -279,7 +281,8 @@ public class UIFormattedLabel extends UIContainer {
 
 	@Override
 	public void paintSelf(GraphAssist g) {
-		drawFormattedString(g.graph, getPixelScale(), html, getX(), getY(), getWidth(), getHeight());
+		float h = drawFormattedString(g, html, getPixelScale(), getX(), getY(), getWidth());
+		setSize(getWidth(), h);
 	}
 
 	public void onHrefMouseIn(String href) {
