@@ -11,8 +11,10 @@ import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIListBox;
+import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomViewTest extends UIZoomView {
@@ -28,7 +30,13 @@ public class ZoomViewTest extends UIZoomView {
 	public ZoomViewTest(UIContainer parent) {
 		super(parent);
 		
-		btn1 = new UIButton(this, "Browse...");
+		btn1 = new UIButton(this, "Browse...") {
+			@Override
+			public void onAction() {
+				UIMessageBox.show("Error", "This function is not supported.",
+						UIMessageBox.iconError, new MessageResult[] {MessageResult.ok});
+			}
+		};
 		btn2 = new UIButton(this, "OK") {
 			@Override
 			public void onAction() {
@@ -91,8 +99,8 @@ public class ZoomViewTest extends UIZoomView {
 		private UIElement bottom = new UIElement(this) {
 			@Override
 			public void paint(GraphAssist g) {
-				g.fill(this, new Color(0xeeeeee));
-				g.hborder(this, GraphAssist.TOP, new Color(0x999999));
+				g.fill(this, new Color(0xf2f2f2));
+				g.hborder(this, GraphAssist.TOP, new Color(0xcccccc));
 				g.setColor(Color.BLACK);
 				g.setFont(UIButton.font);
 				g.drawString("Test UIZoomView and std controls", 16, getHeight()/2f,

@@ -22,8 +22,10 @@ import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UIListItem;
+import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
 
 public class UIFileView extends UIScrollContainer {
 
@@ -416,6 +418,8 @@ public class UIFileView extends UIScrollContainer {
 			if(selectedFile.isDirectory()) {
 				if(setDirectory(selectedFile))
 					onBrowse();
+				else
+					UIMessageBox.show("Error", "Access denied.", UIMessageBox.iconError, new MessageResult[] {MessageResult.ok});
 			}
 			else
 				onSelectedFileClicked();

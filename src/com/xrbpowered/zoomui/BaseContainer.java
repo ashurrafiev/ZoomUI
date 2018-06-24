@@ -101,7 +101,8 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	@Override
 	public void onMouseOut() {
 		if(drag==null && uiUnderMouse!=null) {
-			uiUnderMouse.onMouseOut();
+			if(uiUnderMouse!=this)
+				uiUnderMouse.onMouseOut();
 			uiUnderMouse = null;
 		}
 	}
