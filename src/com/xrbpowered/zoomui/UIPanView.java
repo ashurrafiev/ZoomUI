@@ -17,7 +17,7 @@ public class UIPanView extends UIContainer {
 		@Override
 		public boolean notifyMouseMove(float dx, float dy) {
 			float pix = getPixelScale();
-			pan(dx / pix, dy / pix);
+			pan(dx*pix, dy*pix);
 			repaint();
 			return true;
 		}
@@ -57,9 +57,8 @@ public class UIPanView extends UIContainer {
 	}
 	
 	public void pan(float dx, float dy) {
-		float scale = getPixelScale();
-		panX -= dx * scale;
-		panY -= dy * scale;
+		panX -= dx;
+		panY -= dy;
 		checkPanRange();
 	}
 	

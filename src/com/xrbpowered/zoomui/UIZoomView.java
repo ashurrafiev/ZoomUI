@@ -27,6 +27,11 @@ public class UIZoomView extends UIPanView {
 	}
 	
 	@Override
+	public void pan(float dx, float dy) {
+		super.pan(dx*scale, dy*scale);
+	}
+	
+	@Override
 	public float getPixelScale() {
 		return super.getPixelScale()/scale;
 	}

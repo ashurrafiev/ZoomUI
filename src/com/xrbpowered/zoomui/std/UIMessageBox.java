@@ -32,7 +32,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		{new Color(0xeeeeee), new Color(0xeecccc), new Color(0xaa0000), Color.RED}
 	}));
 	public static final SvgIcon iconAlert = new SvgIcon("svg/alert.svg", 160, new IconPalette(new Color[][] {
-		{new Color(0xeeeeee), new Color(0xeeddbb), new Color(0xee9900), new Color(0xffdd55)}
+		{new Color(0xeeeeee), new Color(0xeeddbb), new Color(0xdd5500), new Color(0xffaa00)}
 	}));
 	public static final SvgIcon iconQuestion = new SvgIcon("svg/question.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xccddee), new Color(0x0077dd), new Color(0x00bbff)}
@@ -96,7 +96,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 	
 	@Override
 	public void layout() {
-		float x = (icon==null) ? 0 : iconSize+16; 
+		float x = (icon==null) ? 0 : iconSize+12; 
 		float h = Math.max(label.getHeight(), (icon==null) ? 0 : iconSize+8);
 		label.setLocation(x+16, (h-label.getHeight())/2f+8);
 		label.setSize(getWidth()-x-32, 0);

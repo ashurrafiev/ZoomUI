@@ -18,7 +18,7 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 		super(defaultResult);
 		dialog = new JDialog();
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		dialog.setTitle(title);
+		dialog.setTitle(" "+title);
 		dialog.setResizable(canResize);
 		dialog.setModal(true);
 		
