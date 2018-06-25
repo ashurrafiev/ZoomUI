@@ -31,6 +31,15 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 	public static final SvgIcon iconError = new SvgIcon("svg/error.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xeecccc), new Color(0xaa0000), Color.RED}
 	}));
+	public static final SvgIcon iconAlert = new SvgIcon("svg/alert.svg", 160, new IconPalette(new Color[][] {
+		{new Color(0xeeeeee), new Color(0xeeddbb), new Color(0xee9900), new Color(0xffdd55)}
+	}));
+	public static final SvgIcon iconQuestion = new SvgIcon("svg/question.svg", 160, new IconPalette(new Color[][] {
+		{new Color(0xeeeeee), new Color(0xccddee), new Color(0x0077dd), new Color(0x00bbff)}
+	}));
+	public static final SvgIcon iconOk = new SvgIcon("svg/ok.svg", 160, new IconPalette(new Color[][] {
+		{new Color(0xeeeeee), new Color(0xcceecc), new Color(0x007700), new Color(0x00ee00)}
+	}));
 	
 	public static final int iconSize = 32;
 	
@@ -122,7 +131,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 	}
 	
 	public static void show(String title, String message, SvgIcon icon, MessageResult[] options) {
-		int width = Math.max(options.length+1, 3) * (UIButton.defaultWidth+4) + 32;
+		int width = Math.max(options.length*2+1, 6) * (UIButton.defaultWidth+4) / 2 + 32;
 		UIModalWindow<MessageResult> dlg = new SwingModalDialog<MessageResult>(title, width, UIButton.defaultHeight+40, false, MessageResult.cancel);
 		new UIMessageBox(dlg.getContainer(), message, icon, options);
 		dlg.show();

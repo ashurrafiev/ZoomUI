@@ -40,17 +40,31 @@ public class ZoomViewTest extends UIZoomView {
 		btn2 = new UIButton(this, "OK") {
 			@Override
 			public void onAction() {
-				System.out.println("OK");
+				UIMessageBox.show("Done", "<b>OK</b> button has been clicked.",
+						UIMessageBox.iconOk, new MessageResult[] {MessageResult.ok});
 			}
 		};
-		btn3 = new UIButton(this, "Cancel");
+		btn3 = new UIButton(this, "Cancel") {
+			@Override
+			public void onAction() {
+				UIMessageBox.show("Exit", "Save file before closing the application?",
+						UIMessageBox.iconQuestion, new MessageResult[] {MessageResult.yes, MessageResult.no, MessageResult.cancel});
+			}
+		};
 		String[] items = new String[20];
 		for(int i=0; i<20; i++)
 			items[i] = "List item "+i;
 		list = new UIListBox(this, items);
 		text = new UITextBox(this);
 		text.text = "Hello world";
-		toolBtn = new UIToolButton(this, fileIcon, 32, 8);
+		toolBtn = new UIToolButton(this, fileIcon, 32, 8) {
+			@Override
+			public void onAction() {
+				UIMessageBox.show("Alert", "An instance of <b>UIToolButton</b> has been clicked "
+						+ "invoking <b>UIMessageBox</b> via <b>onAction</b> handler.",
+						UIMessageBox.iconAlert, new MessageResult[] {MessageResult.ok});
+			}
+		};
 		
 		html = new UIFormattedLabel(this, "This is an example of a <b>formatted label</b>. Click <a href=\"link\">here</a> to test if the link works or not.") {
 			@Override
