@@ -11,15 +11,19 @@ public class UIZoomView extends UIPanView {
 		super(parent);
 	}
 	
+	private void checkScaleRange() {
+		if(scale<minScale)
+			scale = minScale;
+		if(scale>maxScale)
+			scale = maxScale;
+	}
+	
 	public void setScaleRange(float min, float max) {
 		if(min>1f) min = 1f;
 		if(max<1f) max = 1f;
 		this.minScale = min;
 		this.maxScale = max;
-		if(scale<minScale)
-			scale = minScale;
-		if(scale>maxScale)
-			scale = maxScale;
+		checkScaleRange();
 	}
 
 	public void resetScale() {
@@ -55,16 +59,8 @@ public class UIZoomView extends UIPanView {
 	@Override
 	public boolean onMouseScroll(float x, float y, float delta, int mods) {
 		if(mods==modCtrlMask) {
-			float ds = 1.0f+delta*0.2f;
-			scale *= ds;
-			if(scale<minScale) {
-				ds *= minScale / scale;
-				scale = minScale;
-			}
-			if(scale>maxScale) {
-				ds *= maxScale / scale;
-				scale = maxScale;
-			}
+			scale *= 1.0f+delta*0.2f;
+			checkScaleRange();
 			repaint();
 			return true;
 		}

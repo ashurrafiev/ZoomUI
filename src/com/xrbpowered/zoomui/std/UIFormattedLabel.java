@@ -165,8 +165,12 @@ public class UIFormattedLabel extends UIContainer {
 						}
 						@Override
 						public boolean onMouseDown(float x, float y, Button button, int mods) {
-							container.onHrefClicked(href);
-							return true;
+							if(button==Button.left && mods==UIElement.modNone) {
+								container.onHrefClicked(href);
+								return true;
+							}
+							else
+								return false;
 						}
 						@Override
 						public void paint(GraphAssist g) {
@@ -184,21 +188,25 @@ public class UIFormattedLabel extends UIContainer {
 				super(styles);
 			}
 
+			@Override
 			public HTMLEditorKit.ParserCallback getReader(int pos) {
 				Object desc = getProperty(Document.StreamDescriptionProperty);
 				if(desc instanceof URL) {
 					setBase((URL) desc);
 				}
 				return new HTMLDocument.HTMLReader(pos) {
+					@Override
 					public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
 						if(t.toString().equals("a")) {
 							registerTag(t, new CharacterAction() {
+								@Override
 								public void start(HTML.Tag t, MutableAttributeSet attr) {
 									attr.addAttribute(StyleConstants.NameAttribute, t);
 									ElementSpec es = new ElementSpec(attr.copyAttributes(), ElementSpec.StartTagType);
 									parseBuffer.addElement(es);
 									super.start(t, attr);
 								}
+								@Override
 								public void end(HTML.Tag t) {
 									ElementSpec es = new ElementSpec(null, ElementSpec.EndTagType);
 									parseBuffer.addElement(es);
@@ -228,10 +236,9 @@ public class UIFormattedLabel extends UIContainer {
 		}
 		
 		public Document createDefaultDocument() {
-			StyleSheet styles = getStyleSheet();
-			StyleSheet ss = new StyleSheet();
-			ss.addStyleSheet(styles);
-			CustomHtmlDocument doc = new CustomHtmlDocument(ss);
+			StyleSheet css = new StyleSheet();
+			css.addStyleSheet(getStyleSheet());
+			CustomHtmlDocument doc = new CustomHtmlDocument(css);
 			doc.setParser(getParser());
 			return doc;
 		}

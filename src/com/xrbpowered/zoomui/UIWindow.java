@@ -3,6 +3,10 @@ package com.xrbpowered.zoomui;
 import java.awt.Cursor;
 import java.awt.Toolkit;
 
+import com.xrbpowered.zoomui.std.UIMessageBox;
+import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
+import com.xrbpowered.zoomui.std.UIMessageBox.MessageResultHandler;
+
 public abstract class UIWindow {
 
 	protected BaseContainer createContainer() {
@@ -62,6 +66,18 @@ public abstract class UIWindow {
 	
 	public static float getSystemScale() {
 		return Toolkit.getDefaultToolkit().getScreenResolution() / 96f;
+	}
+	
+	public void confirmClosing() {
+		UIMessageBox.show("Exit", "Do you want to close the application?",
+			UIMessageBox.iconQuestion, new MessageResult[] {MessageResult.ok, MessageResult.cancel},
+			new MessageResultHandler() {
+				@Override
+				public void onResult(UIModalWindow<MessageResult> dlg, MessageResult result) {
+					if(result==MessageResult.ok)
+						close();
+				}
+			});
 	}
 	
 }

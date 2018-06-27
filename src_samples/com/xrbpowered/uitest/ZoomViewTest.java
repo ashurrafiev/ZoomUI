@@ -12,9 +12,9 @@ import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UIMessageBox;
+import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
 import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
-import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomViewTest extends UIZoomView {
@@ -34,21 +34,21 @@ public class ZoomViewTest extends UIZoomView {
 			@Override
 			public void onAction() {
 				UIMessageBox.show("Error", "This function is not supported.",
-						UIMessageBox.iconError, new MessageResult[] {MessageResult.ok});
+						UIMessageBox.iconError, new MessageResult[] {MessageResult.ok}, null);
 			}
 		};
 		btn2 = new UIButton(this, "OK") {
 			@Override
 			public void onAction() {
 				UIMessageBox.show("Done", "<b>OK</b> button has been clicked.",
-						UIMessageBox.iconOk, new MessageResult[] {MessageResult.ok});
+						UIMessageBox.iconOk, new MessageResult[] {MessageResult.ok}, null);
 			}
 		};
 		btn3 = new UIButton(this, "Cancel") {
 			@Override
 			public void onAction() {
 				UIMessageBox.show("Exit", "Save file before closing the application?",
-						UIMessageBox.iconQuestion, new MessageResult[] {MessageResult.yes, MessageResult.no, MessageResult.cancel});
+						UIMessageBox.iconQuestion, new MessageResult[] {MessageResult.yes, MessageResult.no, MessageResult.cancel}, null);
 			}
 		};
 		String[] items = new String[20];
@@ -62,7 +62,7 @@ public class ZoomViewTest extends UIZoomView {
 			public void onAction() {
 				UIMessageBox.show("Alert", "An instance of <b>UIToolButton</b> has been clicked "
 						+ "invoking <b>UIMessageBox</b> via <b>onAction</b> handler.",
-						UIMessageBox.iconAlert, new MessageResult[] {MessageResult.ok});
+						UIMessageBox.iconAlert, new MessageResult[] {MessageResult.ok}, null);
 			}
 		};
 		
@@ -133,7 +133,13 @@ public class ZoomViewTest extends UIZoomView {
 	}
 	
 	public static void main(String[] args) {
-		UIWindow frame = new SwingFrame("ZoomViewTest", 800, 600);
+		UIWindow frame = new SwingFrame("ZoomViewTest", 800, 600) {
+			@Override
+			public boolean onClosing() {
+				confirmClosing();
+				return false;
+			}
+		};
 		new ZoomViewTop(frame.getContainer());
 		frame.show();
 	}

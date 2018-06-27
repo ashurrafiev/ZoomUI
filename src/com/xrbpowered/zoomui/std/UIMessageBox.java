@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import com.sun.glass.events.KeyEvent;
 import com.xrbpowered.zoomui.BaseContainer.ModalBaseContainer;
+import com.xrbpowered.zoomui.UIModalWindow.ResultHandler;
 import com.xrbpowered.zoomui.icons.IconPalette;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.GraphAssist;
@@ -27,6 +28,8 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 			this.keyCode = keyCode;
 		}
 	}
+	
+	public static interface MessageResultHandler extends ResultHandler<MessageResult> { }
 	
 	public static final SvgIcon iconError = new SvgIcon("svg/error.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xeecccc), new Color(0xaa0000), Color.RED}
@@ -130,9 +133,11 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		g.line(0, y, w, y);
 	}
 	
-	public static void show(String title, String message, SvgIcon icon, MessageResult[] options) {
+	public static void show(String title, String message, SvgIcon icon,
+			MessageResult[] options, MessageResultHandler onResult) {
 		int width = Math.max(options.length*2+1, 6) * (UIButton.defaultWidth+4) / 2 + 32;
 		UIModalWindow<MessageResult> dlg = new SwingModalDialog<MessageResult>(title, width, UIButton.defaultHeight+40, false, MessageResult.cancel);
+		dlg.onResult = onResult;
 		new UIMessageBox(dlg.getContainer(), message, icon, options);
 		dlg.show();
 	}
