@@ -147,7 +147,9 @@ public class UIFormattedLabel extends UIContainer {
 			@Override
 			public void paint(Graphics g, Shape a) {
 				Rectangle rect = (Rectangle) a;
-				if(container!=null && rebuildUI) { // FIXME only painted hrefs get created, rebuildUI is not working as intended
+				// Important: paint is called only when the view is visible within clip,
+				// hence it is unknown when href element will be created
+				if(!hrefMap.containsKey(href)) {
 					UIElement ui = new UIElement(container) {
 						@Override
 						public void onMouseIn() {
@@ -176,6 +178,7 @@ public class UIFormattedLabel extends UIContainer {
 						public void paint(GraphAssist g) {
 						}
 					};
+					hrefMap.put("href", ui);
 					ui.setLocation(rect.x / scale, rect.y / scale);
 					ui.setSize(rect.width / scale, rect.height / scale);
 				}
@@ -228,6 +231,7 @@ public class UIFormattedLabel extends UIContainer {
 		public HashMap<String, SvgIcon> icons = new HashMap<>();
 
 		private boolean rebuildUI = true;
+		private HashMap<String, UIElement> hrefMap = new HashMap<>();
 		private String hoverHref = null;
 		private float scale = 0f;
 
@@ -283,6 +287,12 @@ public class UIFormattedLabel extends UIContainer {
 			return false;
 		}
 		
+		public void resetUI() {
+			container.removeAllChildren();
+			hrefMap.clear();
+			rebuildUI = false;
+		}
+		
 		public static Color cssStringToColor(String s) {
 			// *facepalm*
 			try {
@@ -319,10 +329,9 @@ public class UIFormattedLabel extends UIContainer {
 		}
 		
 		if(htmlKit.rebuildUI)
-			htmlKit.container.removeAllChildren();
+			htmlKit.resetUI();
 		
 		htmlAssist.paint(g.graph);
-		htmlKit.rebuildUI = false;
 		
 		g.popTx();
 		return (float)htmlAssist.getPreferredSize().getHeight() * pixelScale;
