@@ -5,6 +5,9 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +27,11 @@ public class SvgFile {
 		try {
 			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(uri);
+			InputStream in = ClassLoader.getSystemResourceAsStream(uri);
+			if(in==null)
+				in = new FileInputStream(new File(uri));
+			Document doc = dBuilder.parse(in);
+			in.close();
 			root = doc.getDocumentElement();
 		}
 		catch(Exception e) {

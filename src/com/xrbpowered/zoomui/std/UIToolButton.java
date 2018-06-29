@@ -16,6 +16,8 @@ public class UIToolButton extends UIButtonBase {
 		{new Color(0x4298f3), new Color(0x2c8de8), new Color(0x90c4f3), new Color(0xa6d0f3)},
 	});
 
+	public static String iconPath = "com/xrbpowered/zoomui/std/icons/";
+	
 	public static Color colorDown = UIButton.colorDown;
 	public static Color colorHover = new Color(0xe8e8e8);
 	public static Color colorBorder = UIButton.colorBorder;

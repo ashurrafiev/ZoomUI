@@ -15,7 +15,7 @@ import com.xrbpowered.zoomui.swing.SwingFrame;
 public class SvgHtmlTest extends UIZoomView {
 
 	private static final Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(11f));
-	private static final SvgIcon testIcon = new SvgIcon("svg/folder.svg", 160, UIToolButton.palette);
+	private static final SvgIcon testIcon = new SvgIcon(UIToolButton.iconPath+"folder.svg", 160, UIToolButton.palette);
 
 	private static final String html = "Hello <a href=\"world\" hover=\"#0099ff\" style=\"font-weight:bold\">world</a>"
 			+ " and <img size=\"16\" dy=\"-3\" src=\"test\"> <a href=\"people\" style=\"font-weight:bold\">all people</a>!"

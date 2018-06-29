@@ -1,7 +1,6 @@
 package com.xrbpowered.zoomui;
 
 import java.awt.RenderingHints;
-import java.awt.Toolkit;
 
 public class BaseContainer extends UIContainer implements KeyInputHandler {
 
@@ -172,13 +171,9 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 		return baseScale;
 	}
 	
-	public void setBaseScale(float baseScale) {
-		this.baseScale = (baseScale>0f) ? baseScale : getAutoScale();
+	public void setBaseScale(float scale) {
+		this.baseScale = (scale>0f) ? scale :UIWindow.getSystemScale();
 		invalidateLayout();
-	}
-	
-	public static float getAutoScale() {
-		return Toolkit.getDefaultToolkit().getScreenResolution() / 96f; // 96 for px, 72 for pt
 	}
 	
 	@Override

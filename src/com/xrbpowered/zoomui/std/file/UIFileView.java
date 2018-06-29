@@ -41,9 +41,9 @@ public class UIFileView extends UIScrollContainer {
 	public static Color colorDisabledSelectedText = new Color(0x99ccff);
 	public static Color colorDisabledText = new Color(0x888888);
 
-	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, UIToolButton.palette);
-	private static final SvgIcon folderIcon = new SvgIcon("svg/folder.svg", 160, UIToolButton.palette);
-	private static final SvgIcon diskIcon = new SvgIcon("svg/disk.svg", 160, UIToolButton.palette);
+	private static final SvgIcon fileIcon = new SvgIcon(UIToolButton.iconPath+"file.svg", 160, UIToolButton.palette);
+	private static final SvgIcon folderIcon = new SvgIcon(UIToolButton.iconPath+"folder.svg", 160, UIToolButton.palette);
+	private static final SvgIcon diskIcon = new SvgIcon(UIToolButton.iconPath+"disk.svg", 160, UIToolButton.palette);
 	
 	private static final int LIST_ITEM_WIDTH = 256;
 	private static final int LIST_ITEM_HEIGHT = 48;

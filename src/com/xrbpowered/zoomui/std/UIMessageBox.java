@@ -31,16 +31,16 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 	
 	public static interface MessageResultHandler extends ResultHandler<MessageResult> { }
 	
-	public static final SvgIcon iconError = new SvgIcon("svg/error.svg", 160, new IconPalette(new Color[][] {
+	public static final SvgIcon iconError = new SvgIcon(UIToolButton.iconPath+"error.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xeecccc), new Color(0xaa0000), Color.RED}
 	}));
-	public static final SvgIcon iconAlert = new SvgIcon("svg/alert.svg", 160, new IconPalette(new Color[][] {
+	public static final SvgIcon iconAlert = new SvgIcon(UIToolButton.iconPath+"alert.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xeeddbb), new Color(0xdd5500), new Color(0xffaa00)}
 	}));
-	public static final SvgIcon iconQuestion = new SvgIcon("svg/question.svg", 160, new IconPalette(new Color[][] {
+	public static final SvgIcon iconQuestion = new SvgIcon(UIToolButton.iconPath+"question.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xccddee), new Color(0x0077dd), new Color(0x00bbff)}
 	}));
-	public static final SvgIcon iconOk = new SvgIcon("svg/ok.svg", 160, new IconPalette(new Color[][] {
+	public static final SvgIcon iconOk = new SvgIcon(UIToolButton.iconPath+"ok.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xcceecc), new Color(0x007700), new Color(0x00ee00)}
 	}));
 	

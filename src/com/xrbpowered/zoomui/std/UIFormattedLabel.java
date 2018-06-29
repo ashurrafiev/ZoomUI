@@ -147,7 +147,7 @@ public class UIFormattedLabel extends UIContainer {
 			@Override
 			public void paint(Graphics g, Shape a) {
 				Rectangle rect = (Rectangle) a;
-				if(container!=null && rebuildUI) {
+				if(container!=null && rebuildUI) { // FIXME only painted hrefs get created, rebuildUI is not working as intended
 					UIElement ui = new UIElement(container) {
 						@Override
 						public void onMouseIn() {

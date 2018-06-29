@@ -16,7 +16,7 @@ public abstract class UIContainer extends UIElement {
 		invalidateLayout();
 	}
 	
-	protected void removeChild(UIElement c) {
+	public void removeChild(UIElement c) {
 		if(children.remove(c))
 			invalidateLayout();
 	}

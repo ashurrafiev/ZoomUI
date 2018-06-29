@@ -19,7 +19,7 @@ import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomViewTest extends UIZoomView {
 
-	private static final SvgIcon fileIcon = new SvgIcon("svg/file.svg", 160, UIToolButton.palette);
+	private static final SvgIcon fileIcon = new SvgIcon(UIToolButton.iconPath+"file.svg", 160, UIToolButton.palette);
 	
 	private UIButton btn1, btn2, btn3;
 	private UIListBox list;
@@ -100,8 +100,7 @@ public class ZoomViewTest extends UIZoomView {
 	
 	@Override
 	protected void paintSelf(GraphAssist g) {
-		g.setColor(Color.WHITE);
-		g.fillRect(0, 0, (int)getWidth(), (int)getHeight());
+		g.fill(this, Color.WHITE);
 	}
 
 	private static class ZoomViewTop extends UIContainer {
