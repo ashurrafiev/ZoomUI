@@ -47,7 +47,7 @@ public class UIFileBrowser extends UIContainer {
 		
 		// top pane
 		txtPath = new UITextBox(this);
-		btnBack = new UIToolButton(this, "svg/back.svg", 16, 2) {
+		btnBack = new UIToolButton(this, UIToolButton.iconPath+"back.svg", 16, 2) {
 			public void onAction() {
 				if(historyIndex>0) {
 					setHistory(historyIndex-1);
@@ -55,7 +55,7 @@ public class UIFileBrowser extends UIContainer {
 				}
 			}
 		}.disable();
-		btnFwd = new UIToolButton(this, "svg/forward.svg", 16, 2) {
+		btnFwd = new UIToolButton(this, UIToolButton.iconPath+"forward.svg", 16, 2) {
 			public void onAction() {
 				if(historyIndex<history.size()-1) {
 					setHistory(historyIndex+1);
@@ -63,7 +63,7 @@ public class UIFileBrowser extends UIContainer {
 				}
 			}
 		}.disable();
-		btnRefresh = new UIToolButton(this, "svg/refresh.svg", 16, 2) {
+		btnRefresh = new UIToolButton(this, UIToolButton.iconPath+"refresh.svg", 16, 2) {
 			public void onAction() {
 				view.refresh();				
 				repaint();
@@ -71,21 +71,21 @@ public class UIFileBrowser extends UIContainer {
 		};
 		
 		// left pane
-		btnUp = new UIToolButton(this, "svg/up.svg", 32, 8) {
+		btnUp = new UIToolButton(this, UIToolButton.iconPath+"up.svg", 32, 8) {
 			public void onAction() {
 				if(view.upDirectory())
 					pushHistory();
 				repaint();
 			}
 		};
-		btnHome = new UIToolButton(this,"svg/home.svg", 32, 8) {
+		btnHome = new UIToolButton(this, UIToolButton.iconPath+"home.svg", 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(new File(System.getProperty("user.home"))))
 					pushHistory();
 				repaint();
 			}
 		};
-		btnRoots = new UIToolButton(this, "svg/roots.svg", 32, 8) {
+		btnRoots = new UIToolButton(this, UIToolButton.iconPath+"roots.svg", 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(null))
 					pushHistory();
