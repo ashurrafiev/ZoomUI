@@ -56,6 +56,12 @@ public class UIPanView extends UIContainer {
 			panY = 0;
 	}
 	
+	public void setPan(float x, float y) {
+		panX = x;
+		panY = y;
+		checkPanRange();
+	}
+	
 	public void pan(float dx, float dy) {
 		panX -= dx;
 		panY -= dy;

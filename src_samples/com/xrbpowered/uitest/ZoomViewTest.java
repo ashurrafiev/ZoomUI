@@ -79,7 +79,7 @@ public class ZoomViewTest extends UIZoomView {
 			}
 		};
 		
-		pan(64, 0);
+		setPan(-64, 0);
 	}
 	
 	@Override

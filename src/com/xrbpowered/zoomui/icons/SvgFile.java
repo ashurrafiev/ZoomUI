@@ -3,15 +3,17 @@ package com.xrbpowered.zoomui.icons;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
@@ -25,12 +27,10 @@ public class SvgFile {
 	public SvgFile(String uri) {
 		Element root;
 		try {
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 			InputStream in = ClassLoader.getSystemResourceAsStream(uri);
 			if(in==null)
 				in = new FileInputStream(new File(uri));
-			Document doc = dBuilder.parse(in);
+			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(in);
 			in.close();
 			root = doc.getDocumentElement();
 		}
@@ -244,6 +244,48 @@ public class SvgFile {
 		return path;
 	}
 
+	private Path2D createRect(Element e, double scale) {
+		int x = getAttrValue(e, "x", scale);
+		int y =  getAttrValue(e, "y", scale);
+		int width =  getAttrValue(e, "width", scale);
+		int height =  getAttrValue(e, "height", scale);
+		int rx =  getAttrValue(e, "rx", scale*2.0);
+		int ry =  getAttrValue(e, "ry", scale*2.0);
+		if(rx<=0)
+			rx = ry;
+
+		Path2D.Double path = new Path2D.Double();
+		if(ry<=0)
+			path.append(new Rectangle2D.Double(x, y, width, height), false);
+		else
+			path.append(new RoundRectangle2D.Double(x, y, width, height, rx, ry), false);
+		return path;
+	}
+	
+	private Path2D createCircle(Element e, double scale) {
+		double cx = Double.parseDouble(e.getAttribute("cx")) * scale;
+		double cy = Double.parseDouble(e.getAttribute("cy")) * scale;
+		double r = Double.parseDouble(e.getAttribute("r")) * scale;
+		int x = (int) (cx - r);
+		int y = (int) (cy - r);
+		int width = (int) (r * 2.0);
+
+		Path2D.Double path = new Path2D.Double();
+		path.append(new Ellipse2D.Double(x, y, width, width), false);
+		return path;
+	}
+	
+	private void render(Graphics2D g2, SvgStyle style, double scale, Path2D path) {
+		if(style.hasFill()) {
+			style.setFillStyle(g2);
+			g2.fill(path);
+		}
+		if(style.hasStroke()) {
+			style.setStrokeStyle(g2, scale);
+			g2.draw(path);
+		}
+	}
+	
 	public static AffineTransform getTransform(String tr, double scale) {
 		AffineTransform tx = new AffineTransform();
 		if(tr==null || tr.isEmpty())
@@ -299,57 +341,12 @@ public class SvgFile {
 					render(g2, e, defs, style, scale);
 				else if(e.getNodeName().equals("defs"))
 					defs.addDefs(e, scale);
-				else if(e.getNodeName().equals("rect")) {
-					int x = getAttrValue(e, "x", scale);
-					int y =  getAttrValue(e, "y", scale);
-					int width =  getAttrValue(e, "width", scale);
-					int height =  getAttrValue(e, "height", scale);
-					int rx =  getAttrValue(e, "rx", scale*2.0);
-					int ry =  getAttrValue(e, "ry", scale*2.0);
-					if(rx<=0)
-						rx = ry;
-					if(style.hasFill()) {
-						style.setFillStyle(g2);
-						if(ry<=0)
-							g2.fillRect(x, y, width, height);
-						else
-							g2.fillRoundRect(x, y, width, height, rx, ry);
-					}
-					if(style.hasStroke()) {
-						style.setStrokeStyle(g2, scale);
-						if(ry<=0)
-							g2.drawRect(x, y, width, height);
-						else
-							g2.drawRoundRect(x, y, width, height, rx, ry);
-					}
-				}
-				else if(e.getNodeName().equals("circle")) {
-					double cx = Double.parseDouble(e.getAttribute("cx")) * scale;
-					double cy = Double.parseDouble(e.getAttribute("cy")) * scale;
-					double r = Double.parseDouble(e.getAttribute("r")) * scale;
-					int x = (int) (cx - r);
-					int y = (int) (cy - r);
-					int width = (int) (r * 2.0);
-					if(style.hasFill()) {
-						style.setFillStyle(g2);
-						g2.fillOval(x, y, width, width);
-					}
-					if(style.hasStroke()) {
-						style.setStrokeStyle(g2, scale);
-						g2.drawOval(x, y, width, width);
-					}
-				}
-				else if(e.getNodeName().equals("path")) {
-					Path2D path = createPath(e.getAttribute("d"), scale);
-					if(style.hasFill()) {
-						style.setFillStyle(g2);
-						g2.fill(path);
-					}
-					if(style.hasStroke()) {
-						style.setStrokeStyle(g2, scale);
-						g2.draw(path);
-					}
-				}
+				else if(e.getNodeName().equals("rect"))
+					render(g2, style, scale, createRect(e, scale));
+				else if(e.getNodeName().equals("circle"))
+					render(g2, style, scale, createCircle(e, scale));
+				else if(e.getNodeName().equals("path"))
+					render(g2, style, scale, createPath(e.getAttribute("d"), scale));
 				g2.setTransform(t);
 			}
 			
@@ -360,6 +357,11 @@ public class SvgFile {
 	public void render(Graphics2D g2, double scale) {
 		if(root!=null)
 			render(g2, root, new SvgDefs(), new SvgStyle(), scale);
+	}
+	
+	private Path2D transformed(AffineTransform t, Path2D path) {
+		path.transform(t);
+		return path;
 	}
 	
 	private Path2D getPath(String pathId, AffineTransform transform, Element g, double scale) {
@@ -374,18 +376,13 @@ public class SvgFile {
 				
 				if(e.getNodeName().equals("g"))
 					return getPath(pathId, t, e, scale);
-				else if(e.getNodeName().equals("rect")) {
-					// not supported, convert everything to paths
-				}
-				else if(e.getNodeName().equals("circle")) {
-					// not supported, convert everything to paths
-				}
-				else if(e.getNodeName().equals("path")) {
-					if(e.getAttribute("id").equals(pathId)) {
-						Path2D path = createPath(e.getAttribute("d"), scale);
-						path.transform(t);
-						return path;
-					}
+				else if(e.getAttribute("id").equals(pathId)) {
+					if(e.getNodeName().equals("rect"))
+						return transformed(t, createRect(e, scale));
+					else if(e.getNodeName().equals("circle"))
+						return transformed(t, createCircle(e, scale));
+					else if(e.getNodeName().equals("path"))
+						return transformed(t, createPath(e.getAttribute("d"), scale));
 				}
 			}
 			
