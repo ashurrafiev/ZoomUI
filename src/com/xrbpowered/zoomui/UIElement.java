@@ -80,7 +80,6 @@ public abstract class UIElement {
 	
 	public void setVisible(boolean visible) {
 		this.visible = visible;
-		repaint();
 	}
 	
 	public boolean isVisible(Rectangle clip) {

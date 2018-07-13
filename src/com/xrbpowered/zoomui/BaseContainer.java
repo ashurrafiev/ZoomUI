@@ -109,11 +109,11 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	private void updateMouseMove(float x, float y) {
 		UIElement ui = getElementAt(x, y);
 		if(ui!=uiUnderMouse) {
-			if(uiUnderMouse!=null)
+			if(uiUnderMouse!=null && uiUnderMouse!=this)
 				uiUnderMouse.onMouseOut();
-			if(ui!=null)
-				ui.onMouseIn();
 			uiUnderMouse = ui;
+			if(uiUnderMouse!=null && uiUnderMouse!=this)
+				uiUnderMouse.onMouseIn();
 		}
 	}
 	
@@ -121,7 +121,7 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	public void onMouseMoved(float x, float y, int mods) {
 		if(drag==null) {
 			updateMouseMove(x, y);
-			if(uiUnderMouse!=null)
+			if(uiUnderMouse!=null && uiUnderMouse!=this)
 				uiUnderMouse.onMouseMoved(x, y, mods);
 		}
 	}

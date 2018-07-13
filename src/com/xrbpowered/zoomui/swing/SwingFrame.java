@@ -15,9 +15,14 @@ public class SwingFrame extends UIWindow {
 	public final BasePanel panel;
 	
 	public SwingFrame(String title, int w, int h) {
+		this(title, w, h, true);
+	}
+	
+	public SwingFrame(String title, int w, int h, boolean canResize) {
 		frame = new JFrame();
 		frame.setTitle(title);
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		frame.setResizable(canResize);
 		
 		frame.addWindowListener(new WindowAdapter() {
 			@Override

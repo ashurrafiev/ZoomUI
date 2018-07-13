@@ -30,6 +30,7 @@ public class BasePanel extends JPanel {
 	public BasePanel(final UIWindow window) {
 		this.window = window;
 		setFocusable(true);
+		setFocusTraversalKeysEnabled(false);
 		
 		addComponentListener(new ComponentAdapter() {
 			@Override
@@ -100,7 +101,7 @@ public class BasePanel extends JPanel {
 	}
 	
 	@Override
-	public void paint(Graphics g) {
+	protected void paintComponent(Graphics g) {
 		window.getContainer().paint(new GraphAssist((Graphics2D) g));
 	}
 	
