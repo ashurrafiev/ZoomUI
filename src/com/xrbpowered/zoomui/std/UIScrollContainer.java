@@ -26,9 +26,7 @@ public abstract class UIScrollContainer extends UIContainer {
 	final void layout() {
 		view.setLocation(0, 0);
 		view.setSize(getWidth(), getHeight());
-		int pan = (int)(layoutView()-getHeight());
-		if(pan<0) pan = 0;
-		view.setPanRange(0, pan);
+		view.setPanRangeForClient(0, layoutView());
 	}
 	
 	protected abstract float layoutView();

@@ -25,6 +25,8 @@ public class UIZoomView extends UIPanView {
 		this.maxScale = max;
 		checkScaleRange();
 	}
+	
+	// FIXME scaled setPanRange? getPanRangeForClient?
 
 	public void resetScale() {
 		scale = 1f;

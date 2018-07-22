@@ -95,6 +95,14 @@ public class UIPanView extends UIContainer {
 		checkPanRange();
 	}
 	
+	public void setPanRangeForClient(float width, float height) {
+		int h = (int)(width-getWidth());
+		if(h<0) h = 0;
+		int v = (int)(height-getHeight());
+		if(v<0) v = 0;
+		setPanRange(h, v);
+	}
+	
 	@Override
 	protected float parentToLocalX(float x) {
 		return super.parentToLocalX(x)+panX;
