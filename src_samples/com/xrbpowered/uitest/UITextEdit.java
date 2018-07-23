@@ -293,7 +293,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			lineIndex++;
 		}
 		if(y-lineHeight<maxy)
-			g.fillRect(minx, y-lineHeight, maxx, maxy-y+lineHeight, colorBackground);
+			g.fillRect(minx, y-lineHeight+descent, maxx, maxy-y+lineHeight-descent, colorBackground);
 		
 		w = (w+x0*2)*pixelScale+4; // FIXME progress bar width
 		float h = (lineHeight*lines.size()+descent)*pixelScale;
@@ -319,7 +319,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	private int drawString(GraphAssist g, String s, int x, int y, Color bg, Color fg) {
 		int w = fm.stringWidth(s);
 		if(x<maxx && x+w>minx) {
-			g.fillRect(x, y-lineHeight+descent, (int)(x+w)-(int)x, lineHeight, bg);
+			g.fillRect(x, y-lineHeight+descent, w, lineHeight, bg);
 			g.setColor(fg);
 			g.drawString(s, x, y);
 		}
@@ -342,8 +342,9 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					String s = text.substring(col, t);
 					x = drawString(g, s, x, y, bg, fg);
 				}
-				g.fillRect(x, y-lineHeight+descent, (int)(x+tabWidth)-(int)x, lineHeight, bg);
-				x += tabWidth;
+				int w = ((x-x0)+tabWidth)/tabWidth*tabWidth-(x-x0);
+				g.fillRect(x, y-lineHeight+descent, w, lineHeight, bg);
+				x += w;
 				col = t+1;
 			}
 		}
@@ -352,6 +353,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	private int stringWidth(int c0, int c1) {
 		int x = 0;
 		int col = c0;
+		c1 = Math.min(c1, text.length());
 		for(;;) {
 			int t = text.indexOf('\t', col);
 			if(t<0 || t>=c1) {
@@ -366,7 +368,8 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					String s = text.substring(col, t);
 					x += fm.stringWidth(s);
 				}
-				x += tabWidth;
+				int w = (x+tabWidth)/tabWidth*tabWidth-x;
+				x += w;
 				col = t+1;
 			}
 		}
@@ -417,7 +420,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		if(cursor.line<0)
 			cursor.line = 0;
 		if(cursor.line>=lines.size())
-			cursor.line = lines.size();
+			cursor.line = lines.size()-1;
 		cursorX = x;
 		updateCursor();
 	}
@@ -534,7 +537,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		}
 	}
 	
-	protected void deleteSelection() {
+	public void deleteSelection() {
 		if(selStart!=null) {
 			cursor.set(selMin);
 			if(selMin.line==selMax.line) {
@@ -547,6 +550,46 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				setText(text);
 			}
 			deselect();
+		}
+	}
+	
+	public void indentSelection(String indent) {
+		if(selStart!=null) {
+			int indentLen = indent.length();
+			Line startLine = lines.get(selMin.line);
+			int pos = startLine.calcStart()-startLine.offs;
+			for(int i=selMin.line; i<=selMax.line; i++) {
+				Line line = lines.get(i);
+				pos += line.offs;
+				if(line.length>0 && !(i==selMax.line && selMax.col==0)) {
+					modify(pos, indent, pos);
+					line.length += indentLen;
+				}
+				pos += line.length;
+			}
+			if(selMin.col>0) selMin.col += indentLen;
+			if(selMax.col>0) selMax.col += indentLen;
+			if(cursor.col>0) cursor.col += indentLen;
+		}
+	}
+	
+	public void unindentSelection() {
+		if(selStart!=null) {
+			Line startLine = lines.get(selMin.line);
+			int pos = startLine.calcStart()-startLine.offs;
+			for(int i=selMin.line; i<=selMax.line; i++) {
+				Line line = lines.get(i);
+				pos += line.offs;
+				if(line.length>0 && !(i==selMax.line && selMax.col==0) &&
+						Character.isWhitespace(text.charAt(pos))) {
+					modify(pos, "", pos+1);
+					line.length--;
+					if(i==selMin.line && selMin.col>0) selMin.col--;
+					if(i==selMax.line && selMax.col>0) selMax.col--;
+					if(i==cursor.line && cursor.col>0) cursor.col--;
+				}
+				pos += line.length;
+			}
 		}
 	}
 	
@@ -605,52 +648,67 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		line.width = -1;
 	}
 
+	protected boolean isCursorAtWordBoundary() {
+		checkCursorLineCache();
+		if(cursor.col==0 || cursor.col==cursorLine.length)
+			return true;
+		else {
+			char ch = cursorLineStart+cursor.col==0 ? ' ' : text.charAt(cursorLineStart+cursor.col-1);
+			char ch1 = text.charAt(cursorLineStart+cursor.col);
+			return Character.isWhitespace(ch) && !Character.isWhitespace(ch1) ||
+					(Character.isAlphabetic(ch) || Character.isDigit(ch))!=(Character.isAlphabetic(ch1) || Character.isDigit(ch1)) ||
+					Character.isLowerCase(ch) && Character.isUpperCase(ch1);
+		}
+	}
+	
 	@Override
 	public boolean onKeyPressed(char c, int code, int modifiers) {
 		switch(code) {
 			case KeyEvent.VK_LEFT:
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else {
 					if(selMin!=null)
 						cursor.set(selMin);
 					deselect();
 				}
-				if(cursor.col>0) {
-					if(cursor.col>lines.get(cursor.line).length)
+				do {
+					if(cursor.col>0) {
+						if(cursor.col>lines.get(cursor.line).length)
+							cursor.col = lines.get(cursor.line).length;
+						cursor.col--;
+						cursorX = -1;
+					}
+					else if(cursor.line>0) {
+						cursor.line--;
 						cursor.col = lines.get(cursor.line).length;
-					cursor.col--;
-					cursorX = -1;
-				}
-				else if(cursor.line>0) {
-					cursor.line--;
-					cursor.col = lines.get(cursor.line).length;
-				}
+					}
+				} while((modifiers&UIElement.modCtrlMask)>0 && !isCursorAtWordBoundary());
 				scrollToCursor();
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					modifySelection();
 				break;
 				
 			case KeyEvent.VK_RIGHT:
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else {
 					if(selMax!=null)
 						cursor.set(selMax);
 					deselect();
 				}
-				if(cursor.col<lines.get(cursor.line).length) {
-					cursor.col++;
-					cursorX = -1;
-					if(modifiers==UIElement.modShiftMask)
-						modifySelection();
-				}
-				else if(cursor.line<lines.size()-1) {
-					cursor.line++;
-					cursor.col = 0;
-				}
-				scrollToCursor();
-				if(modifiers==UIElement.modShiftMask)
+				do {
+					if(cursor.col<lines.get(cursor.line).length) {
+						cursor.col++;
+						cursorX = -1;
+					}
+					else if(cursor.line<lines.size()-1) {
+						cursor.line++;
+						cursor.col = 0;
+					}
+					scrollToCursor();
+				} while((modifiers&UIElement.modCtrlMask)>0 && !isCursorAtWordBoundary());
+				if((modifiers&UIElement.modShiftMask)>0)
 					modifySelection();
 				break;
 				
@@ -723,34 +781,34 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_HOME:
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else
 					deselect();
-				if(modifiers==UIElement.modCtrlMask) {
+				if((modifiers&UIElement.modCtrlMask)>0) {
 					cursor.line = 0;
 					scrollToCursor();
 				}
 				cursor.col = 0;
 				cursorX = -1;
 				scrollToCursor();
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					modifySelection();
 				break;
 				
 			case KeyEvent.VK_END:
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else
 					deselect();
-				if(modifiers==UIElement.modCtrlMask) {
+				if((modifiers&UIElement.modCtrlMask)>0) {
 					cursor.line = lines.size()-1;
 					scrollToCursor();
 				}
 				cursor.col = lines.get(cursor.line).length;
 				cursorX = -1;
 				scrollToCursor();
-				if(modifiers==UIElement.modShiftMask)
+				if((modifiers&UIElement.modShiftMask)>0)
 					modifySelection();
 				break;
 				
@@ -804,7 +862,10 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					}
 				}
 				else {
-					// TODO indent selection
+					if(modifiers==UIElement.modShiftMask)
+						unindentSelection();
+					else
+						indentSelection("\t");
 				}
 				break;
 				
