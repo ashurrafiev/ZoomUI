@@ -36,19 +36,20 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 
 	private static final String TEST_INPUT = "src_samples/com/xrbpowered/uitest/UITextEdit.java";
 	
-	public static Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
-
-	public static Color colorBackground = UITextBox.colorBackground;
-	public static Color colorHighlight = UIListItem.colorHighlight;
-	public static Color colorText = UITextBox.colorText;
-	public static Color colorSelection = UITextBox.colorSelection;
-	public static Color colorSelectedText = UITextBox.colorSelectedText;
-	public static Color colorBorder = UITextBox.colorBorder;
-
 	public static final Pattern newlineRegex = Pattern.compile("\\r?\\n");
 	public static final Pattern indentRegex = Pattern.compile("\\s*");
 	public static String newline = System.lineSeparator();
+
+	public Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
+
+	public Color colorBackground = UITextBox.colorBackground;
+	public Color colorHighlight = UIListItem.colorHighlight;
+	public Color colorText = UITextBox.colorText;
+	public Color colorSelection = UITextBox.colorSelection;
+	public Color colorSelectedText = UITextBox.colorSelectedText;
 	
+	public static Color colorBorder = UITextBox.colorBorder;
+
 	public static class Position {
 		public int line;
 		public int col;
@@ -119,6 +120,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	};
 	
 	public boolean autoIndent = true;
+	public boolean singleLine = false;
 	
 	private String text = "";
 	private ArrayList<Line> lines = new ArrayList<>();
@@ -147,8 +149,13 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	
 	private FontMetrics fm = null;
 	
-	public UITextEdit(UIPanView parent) {
+	public UITextEdit(UIPanView parent, boolean singleLine) {
 		super(parent);
+		this.singleLine = singleLine;
+		setupStyle();
+	}
+	
+	protected void setupStyle() {
 	}
 	
 	public UIPanView panView() {
@@ -166,12 +173,15 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		else if(cx+4+x0>maxx) // FIXME progress bar width
 			panx += (cx+4+x0-maxx)*pixelScale;
 		
-		int topLine = (int)(pany / pixelScale / lineHeight);
-		if(topLine>=cursor.line)
-			pany = (cursor.line*lineHeight+descent)*pixelScale;
-		else if(topLine+page<=cursor.line) {
-			float dy = getParent().getHeight()/pixelScale-descent-page*lineHeight;
-			pany = ((cursor.line-page)*lineHeight+dy)*pixelScale;  // FIXME error in this branch
+		if(singleLine) {
+			pany = 0;
+		}
+		else {
+			if(displayLine>cursor.line)
+				pany = (cursor.line*lineHeight+descent)*pixelScale;
+			else if(displayLine+page<=cursor.line) {
+				pany = (lineHeight*(cursor.line+1)+descent)*pixelScale - getParent().getHeight();
+			}
 		}
 		
 		panView().setPan(panx, pany);
@@ -179,21 +189,30 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	}
 	
 	public void setText(String text) {
-		this.text = text;
 		lines.clear();
 		Matcher m = newlineRegex.matcher(text);
-		Line line = new Line();
-		lines.add(line);
-		line.offs = 0;
-		int pos = 0;
-		while(m.find()) {
-			line.length = m.start()-pos;
-			line = new Line();
+		if(singleLine) {
+			this.text = m.replaceAll("").replaceAll("\\t", "");
+			Line line = new Line();
 			lines.add(line);
-			pos = m.end();
-			line.offs = pos-m.start();
+			line.offs = 0;
+			line.length = this.text.length();
 		}
-		line.length = text.length()-pos;
+		else {
+			this.text = text;
+			Line line = new Line();
+			lines.add(line);
+			line.offs = 0;
+			int pos = 0;
+			while(m.find()) {
+				line.length = m.start()-pos;
+				line = new Line();
+				lines.add(line);
+				pos = m.end();
+				line.offs = pos-m.start();
+			}
+			line.length = text.length()-pos;
+		}
 		cursorLine = null;
 	}
 	
@@ -220,7 +239,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	@Override
 	public void paint(GraphAssist g) {
 		boolean focused = isFocused();
-		if(lineHeight>0)
+		if(lineHeight>0 && !singleLine)
 			displayLine = (int)(panView().getPanY() / pixelScale / lineHeight);
 		
 		Object aa = g.graph.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
@@ -234,11 +253,16 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		g.setFont(font.deriveFont(font.getSize()/pixelScale));
 		updateMetrics(g);
 		
-		g.fillRect(minx, y0-lineHeight, maxx, descent, colorBackground);
-		if(x0>minx)
-			g.fillRect(minx, y0-lineHeight, x0-minx, maxy-y0+lineHeight, colorBackground);
+		if(singleLine) {
+			g.fillRect(minx, y0-lineHeight, maxx-minx, maxy-y0+lineHeight, colorBackground);
+		}
+		else {
+			g.fillRect(minx, y0-lineHeight, maxx, descent, colorBackground);
+			if(x0>minx)
+				g.fillRect(minx, y0-lineHeight, x0-minx, maxy-y0+lineHeight, colorBackground);
+		}
 
-		int y = y0;
+		int y = singleLine ? (int)(getParent().getHeight()/pixelScale/2f-(fm.getAscent()-fm.getDescent())/2f) : y0;
 		int pos = 0;
 		float w = 0;
 		int lineIndex = 0;
@@ -250,53 +274,20 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			if(line.width>w)
 				w = line.width;
 			
-			if(lineIndex>=displayLine && y-lineHeight<maxy) {
-				Color bg = (lineIndex==cursor.line && focused) ? colorHighlight : colorBackground;
-				
-				int x = x0;
-				if(selMin==null || lineIndex<selMin.line || lineIndex>selMax.line) {
-					x = drawText(g, x, y, lineStart, lineEnd, bg, colorText);
-					drawRemainder(g, x, y, bg);
-				}
-				else {
-					int col = lineStart;
-					if(lineIndex==selMin.line && selMin.col>0) {
-						col = Math.min(lineStart+selMin.col, lineEnd);
-						x = drawText(g, x, y, lineStart, col, bg, colorText);
-					}
-					if(lineIndex==selMax.line && selMax.col<line.length) {
-						int cmax = lineStart+selMax.col;
-						if(col<cmax)
-							x = drawText(g, x, y, col, cmax, colorSelection, colorSelectedText);
-						x = drawText(g, x, y, cmax, lineEnd, bg, colorText);
-						drawRemainder(g, x, y, bg);
-					}
-					else {
-						x = drawText(g, x, y, col, lineEnd, colorSelection, colorSelectedText);
-						drawRemainder(g, x, y, lineIndex<selMax.line ? colorSelection : bg);
-					}
-				}
-				
-				if(focused && cursor.line==lineIndex) {
-					int cx = stringWidth(lineStart, lineStart+cursor.col);
-					g.graph.setXORMode(Color.BLACK);
-					g.fillRect(x0+cx, y-lineHeight+descent, 2f/pixelScale, lineHeight, Color.WHITE);
-					g.graph.setPaintMode();
-					if(cursorX<0)
-						cursorX = (x0+cx)*pixelScale;
-				}
-				
+			if(singleLine || lineIndex>=displayLine && y-lineHeight<maxy) {
+				Color bg = (lineIndex==cursor.line && focused && !singleLine) ? colorHighlight : colorBackground;
+				drawLine(g, lineIndex, lineStart, lineEnd, y, bg, focused);
 				y += lineHeight;
 			}
 			
 			pos = lineEnd;
 			lineIndex++;
 		}
-		if(y-lineHeight<maxy)
+		if(!singleLine && y-lineHeight<maxy)
 			g.fillRect(minx, y-lineHeight+descent, maxx, maxy-y+lineHeight-descent, colorBackground);
 		
 		w = (w+x0*2)*pixelScale+4; // FIXME progress bar width
-		float h = (lineHeight*lines.size()+descent)*pixelScale;
+		float h = singleLine ? 0 : (lineHeight*lines.size()+descent)*pixelScale;
 		if(updateSize || getWidth()!=w || getHeight()!=h) {
 			panView().setPanRangeForClient(w, h);
 			if(w<getParent().getWidth())
@@ -309,6 +300,41 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		
 		g.popTx();
 		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa);
+	}
+	
+	private void drawLine(GraphAssist g, int lineIndex, int lineStart, int lineEnd, int y, Color bg, boolean drawCursor) {
+		int x = x0;
+		if(selMin==null || lineIndex<selMin.line || lineIndex>selMax.line) {
+			x = drawText(g, x, y, lineStart, lineEnd, bg, colorText);
+			drawRemainder(g, x, y, bg);
+		}
+		else {
+			int col = lineStart;
+			if(lineIndex==selMin.line && selMin.col>0) {
+				col = Math.min(lineStart+selMin.col, lineEnd);
+				x = drawText(g, x, y, lineStart, col, bg, colorText);
+			}
+			if(lineIndex==selMax.line && selMax.col<lineEnd-lineStart) {
+				int cmax = lineStart+selMax.col;
+				if(col<cmax)
+					x = drawText(g, x, y, col, cmax, colorSelection, colorSelectedText);
+				x = drawText(g, x, y, cmax, lineEnd, bg, colorText);
+				drawRemainder(g, x, y, bg);
+			}
+			else {
+				x = drawText(g, x, y, col, lineEnd, colorSelection, colorSelectedText);
+				drawRemainder(g, x, y, lineIndex<selMax.line ? colorSelection : bg);
+			}
+		}
+		
+		if(drawCursor && cursor.line==lineIndex) {
+			int cx = stringWidth(lineStart, lineStart+cursor.col);
+			g.graph.setXORMode(Color.BLACK);
+			g.fillRect(x0+cx, y-lineHeight+descent, 2f/pixelScale, lineHeight, Color.WHITE);
+			g.graph.setPaintMode();
+			if(cursorX<0)
+				cursorX = (x0+cx)*pixelScale;
+		}
 	}
 	
 	private void drawRemainder(GraphAssist g, int x, int y, Color bg) {
@@ -416,7 +442,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	}
 	
 	private void cursorToMouse(float x, float y) {
-		cursor.line = (int)(y / pixelScale / lineHeight);
+		cursor.line = singleLine ? 0 : (int)(y / pixelScale / lineHeight);
 		if(cursor.line<0)
 			cursor.line = 0;
 		if(cursor.line>=lines.size())
@@ -517,6 +543,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	public void cutSelection() {
 		copySelection();
 		deleteSelection();
+		scrollToCursor();
 	}
 	
 	public void pasteAtCursor() {
@@ -529,12 +556,14 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			try {
 				String add = (String) clipboard.getData(DataFlavor.stringFlavor);
 				modify(pos, add, pos);
+				// setText may strip newlines and tabs, setCursor must consider the difference
+				int len = text.length();
 				setText(text);
-				setCursor(pos+add.length());
-				scrollToCursor();
+				setCursor(pos+add.length()-(len-text.length()));
 			} catch(UnsupportedFlavorException | IOException e) {
 			}
 		}
+		scrollToCursor();
 	}
 	
 	public void deleteSelection() {
@@ -594,6 +623,8 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	}
 	
 	private void joinLineWithNext() {
+		if(singleLine)
+			return;
 		checkCursorLineCache();
 		Line line = cursorLine;
 		int lineStart = cursorLineStart;
@@ -605,6 +636,8 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	}
 
 	private int splitLineAtCursor() {
+		if(singleLine)
+			return cursor.col;
 		checkCursorLineCache();
 		Line line = cursorLine;
 		int lineStart = cursorLineStart;
@@ -815,6 +848,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			case KeyEvent.VK_BACK_SPACE:
 				if(selStart!=null) {
 					deleteSelection();
+					scrollToCursor();
 				}
 				else {
 					if(cursor.col>0) {
@@ -834,6 +868,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			case KeyEvent.VK_DELETE:
 				if(selStart!=null) {
 					deleteSelection();
+					scrollToCursor();
 				}
 				else {
 					if(cursor.col<lines.get(cursor.line).length) {
@@ -846,26 +881,37 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_ENTER:
-				if(selStart!=null)
-					deleteSelection();
-				cursor.col = splitLineAtCursor();
-				cursor.line++;
-				scrollToCursor();
+				if(!singleLine) {
+					if(selStart!=null)
+						deleteSelection();
+					cursor.col = splitLineAtCursor();
+					cursor.line++;
+					scrollToCursor();
+				}
+				else {
+					getBase().resetFocus();
+				}
+				break;
+
+			case KeyEvent.VK_ESCAPE:
+				getBase().resetFocus();
 				break;
 				
 			case KeyEvent.VK_TAB:
-				if(selStart==null) {
-					if(modifiers==UIElement.modNone) {
-						modify(cursor.line, cursor.col, "\t", cursor.col);
-						cursor.col++;
-						scrollToCursor();
+				if(!singleLine) {
+					if(selStart==null) {
+						if(modifiers==UIElement.modNone) {
+							modify(cursor.line, cursor.col, "\t", cursor.col);
+							cursor.col++;
+							scrollToCursor();
+						}
 					}
-				}
-				else {
-					if(modifiers==UIElement.modShiftMask)
-						unindentSelection();
-					else
-						indentSelection("\t");
+					else {
+						if(modifiers==UIElement.modShiftMask)
+							unindentSelection();
+						else
+							indentSelection("\t");
+					}
 				}
 				break;
 				
@@ -954,7 +1000,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		public final UITextEdit edit;
 		public UITextEditScrollPane(UIContainer parent) {
 			super(parent);
-			edit = new UITextEdit(getView());
+			edit = new UITextEdit(getView(), false);
 		}
 		@Override
 		protected float layoutView() {
