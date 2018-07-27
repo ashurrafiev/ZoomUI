@@ -3,11 +3,11 @@ package com.xrbpowered.zoomui.std.file;
 import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
-import java.util.LinkedList;
 
 import com.xrbpowered.zoomui.BaseContainer.ModalBaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.std.History;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIButtonBase;
 import com.xrbpowered.zoomui.std.UITextBox;
@@ -22,8 +22,21 @@ public class UIFileBrowser extends UIContainer {
 	public final UITextBox txtFileName, txtPath;
 	public final UIButtonBase btnBack, btnFwd, btnRefresh, btnUp, btnHome, btnRoots, btnOk, btnCancel;
 	
-	public final LinkedList<File> history = new LinkedList<>();
-	public int historyIndex = -1;
+	public final History<File> history = new History<File>(64) {
+		@Override
+		protected void apply(File item) {
+			view.setDirectory(item);
+		}
+		@Override
+		public void push() {
+			push(view.getDirectory());
+		}
+		@Override
+		protected void onUpdate() {
+			btnBack.setEnabled(canUndo());
+			btnFwd.setEnabled(canRedo());
+		}
+	};
 	
 	public UIFileBrowser(final ModalBaseContainer<File> parent) {
 		super(parent);
@@ -37,7 +50,7 @@ public class UIFileBrowser extends UIContainer {
 			}
 			@Override
 			public void onBrowse() {
-				pushHistory();
+				history.push();
 			}
 			@Override
 			public void onFileSelected(File file) {
@@ -49,18 +62,14 @@ public class UIFileBrowser extends UIContainer {
 		txtPath = new UITextBox(this);
 		btnBack = new UIToolButton(this, UIToolButton.iconPath+"back.svg", 16, 2) {
 			public void onAction() {
-				if(historyIndex>0) {
-					setHistory(historyIndex-1);
+				if(history.undo())
 					repaint();
-				}
 			}
 		}.disable();
 		btnFwd = new UIToolButton(this, UIToolButton.iconPath+"forward.svg", 16, 2) {
 			public void onAction() {
-				if(historyIndex<history.size()-1) {
-					setHistory(historyIndex+1);
+				if(history.redo())
 					repaint();
-				}
 			}
 		}.disable();
 		btnRefresh = new UIToolButton(this, UIToolButton.iconPath+"refresh.svg", 16, 2) {
@@ -74,21 +83,21 @@ public class UIFileBrowser extends UIContainer {
 		btnUp = new UIToolButton(this, UIToolButton.iconPath+"up.svg", 32, 8) {
 			public void onAction() {
 				if(view.upDirectory())
-					pushHistory();
+					history.push();
 				repaint();
 			}
 		};
 		btnHome = new UIToolButton(this, UIToolButton.iconPath+"home.svg", 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(new File(System.getProperty("user.home"))))
-					pushHistory();
+					history.push();
 				repaint();
 			}
 		};
 		btnRoots = new UIToolButton(this, UIToolButton.iconPath+"roots.svg", 32, 8) {
 			public void onAction() {
 				if(view.setDirectory(null))
-					pushHistory();
+					history.push();
 				repaint();
 			}
 		};
@@ -109,24 +118,7 @@ public class UIFileBrowser extends UIContainer {
 		};
 		
 		view.setDirectory(new File("."));
-		pushHistory();
-	}
-	
-	private void setHistory(int index) {
-		historyIndex = index;
-		view.setDirectory(history.get(index));
-		btnBack.setEnabled(index > 0);
-		btnFwd.setEnabled(index < history.size()-1);
-	}
-
-	private void pushHistory() {
-		historyIndex++;
-		while(history.size()>historyIndex)
-			history.removeLast();
-		history.add(view.getDirectory());
-		if(historyIndex>0)
-			btnBack.enable();
-		btnFwd.disable();
+		history.push();
 	}
 	
 	@Override

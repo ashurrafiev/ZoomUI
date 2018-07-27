@@ -27,6 +27,7 @@ import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIPanView;
 import com.xrbpowered.zoomui.UIWindow;
+import com.xrbpowered.zoomui.std.History;
 import com.xrbpowered.zoomui.std.UIListItem;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UITextBox;
@@ -73,6 +74,10 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		}
 	}
 	
+	public static Position copyPosition(Position pos) {
+		return pos==null ? null : new Position(pos);
+	}
+	
 	public class Line {
 		public int offs, length;
 		public int width = -1;
@@ -93,6 +98,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		@Override
 		public boolean notifyMouseDown(float x, float y, Button button, int mods) {
 			if(button==Button.left) {
+				checkPushHistory(HistoryAction.unspecified);
 				this.x = baseToLocalX(x);
 				this.y = baseToLocalY(y);
 				cursorToMouse(this.x, this.y);
@@ -118,7 +124,46 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			return true;
 		}
 	};
+
+	private class HistoryState {
+		public Position cursor;
+		public Position selStart;
+		public Position selEnd;
+		public String text;
+		
+		public HistoryState() {
+			text = UITextEdit.this.text;
+			cursor = new Position(UITextEdit.this.cursor);
+			selStart = copyPosition(UITextEdit.this.selStart);
+			selEnd = copyPosition(UITextEdit.this.selEnd);
+		}
+		
+		public void restore() {
+			setText(text, false);
+			UITextEdit.this.cursor.set(cursor);
+			UITextEdit.this.selStart = copyPosition(selStart);
+			UITextEdit.this.selEnd = copyPosition(selEnd);
+			updateSelRange();
+			scrollToCursor();
+		}
+	}
 	
+	private enum HistoryAction {
+		unspecified, typing, deleting
+	}
+	
+	private HistoryAction historyAction = HistoryAction.unspecified;
+	public History<HistoryState> history = new History<HistoryState>(32) {
+		@Override
+		protected void apply(HistoryState item) {
+			item.restore();
+		}
+		@Override
+		public void push() {
+			push(new HistoryState());
+		}
+	};
+
 	public boolean autoIndent = true;
 	public boolean singleLine = false;
 	
@@ -153,6 +198,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		super(parent);
 		this.singleLine = singleLine;
 		setupStyle();
+		history.push();
 	}
 	
 	protected void setupStyle() {
@@ -187,8 +233,12 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		panView().setPan(panx, pany);
 		repaint();
 	}
-	
+
 	public void setText(String text) {
+		setText(text, true);
+	}
+
+	private void setText(String text, boolean resetHistory) {
 		lines.clear();
 		Matcher m = newlineRegex.matcher(text);
 		if(singleLine) {
@@ -214,6 +264,11 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			line.length = text.length()-pos;
 		}
 		cursorLine = null;
+		
+		if(resetHistory) {
+			history.clear();
+			history.push();
+		}
 	}
 	
 	@Override
@@ -227,7 +282,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		
 		descent = fm.getDescent();
 		tabWidth = fm.stringWidth("    ");
-		y0 = lineHeight*(1+displayLine); //-descent;
+		y0 = lineHeight*(1+displayLine)-descent;
 		x0 = (int)(4/pixelScale);
 		g.graph.getClipBounds(clipBounds);
 		minx = (int)Math.floor(clipBounds.getMinX());
@@ -287,7 +342,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			g.fillRect(minx, y-lineHeight+descent, maxx, maxy-y+lineHeight-descent, colorBackground);
 		
 		w = (w+x0*2)*pixelScale;
-		float h = singleLine ? 0 : (lineHeight*lines.size()+descent)*pixelScale;
+		float h = singleLine ? 0 : lineHeight*lines.size()*pixelScale;
 		if(updateSize || getWidth()!=w || getHeight()!=h) {
 			panView().setPanRangeForClient(w, h);
 			if(w<getParent().getWidth())
@@ -547,7 +602,9 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	}
 	
 	public void pasteAtCursor() {
-		deleteSelection();
+		history.push();
+		
+		boolean changed = deleteSelection(false);
 		checkCursorLineCache();
 		int pos = cursorLineStart+cursor.col;
 
@@ -558,16 +615,25 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				modify(pos, add, pos);
 				// setText may strip newlines and tabs, setCursor must consider the difference
 				int len = text.length();
-				setText(text);
+				setText(text, false);
 				setCursor(pos+add.length()-(len-text.length()));
+				changed = true;
 			} catch(UnsupportedFlavorException | IOException e) {
 			}
+		}
+		
+		if(changed) {
+			history.push();
+			historyAction = HistoryAction.unspecified;
 		}
 		scrollToCursor();
 	}
 	
-	public void deleteSelection() {
+	private boolean deleteSelection(boolean pushHistory) {
 		if(selStart!=null) {
+			if(pushHistory)
+				history.push();
+			
 			cursor.set(selMin);
 			if(selMin.line==selMax.line) {
 				modify(selMin.line, selMin.col, "", selMax.col);
@@ -576,13 +642,26 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				int start = lines.get(selMin.line).calcStart()+selMin.col;
 				int end = lines.get(selMax.line).calcStart()+selMax.col;
 				modify(start, "", end);
-				setText(text);
+				setText(text, false);
 			}
 			deselect();
+			
+			if(pushHistory) {
+				history.push();
+				historyAction = HistoryAction.unspecified;
+			}
+			return true;
 		}
+		else
+			return false;
+	}
+	
+	public void deleteSelection() {
+		deleteSelection(true);
 	}
 	
 	public void indentSelection(String indent) {
+		boolean changed = false;
 		if(selStart!=null) {
 			int indentLen = indent.length();
 			Line startLine = lines.get(selMin.line);
@@ -593,6 +672,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				if(line.length>0 && !(i==selMax.line && selMax.col==0)) {
 					modify(pos, indent, pos);
 					line.length += indentLen;
+					changed = true;
 				}
 				pos += line.length;
 			}
@@ -600,9 +680,12 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 			if(selMax.col>0) selMax.col += indentLen;
 			if(cursor.col>0) cursor.col += indentLen;
 		}
+		if(changed)
+			history.push();
 	}
 	
 	public void unindentSelection() {
+		boolean changed = false;
 		if(selStart!=null) {
 			Line startLine = lines.get(selMin.line);
 			int pos = startLine.calcStart()-startLine.offs;
@@ -616,10 +699,13 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					if(i==selMin.line && selMin.col>0) selMin.col--;
 					if(i==selMax.line && selMax.col>0) selMax.col--;
 					if(i==cursor.line && cursor.col>0) cursor.col--;
+					changed = true;
 				}
 				pos += line.length;
 			}
 		}
+		if(changed)
+			history.push();
 	}
 	
 	private void joinLineWithNext() {
@@ -681,6 +767,17 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		line.width = -1;
 	}
 
+	private void checkPushHistory(HistoryAction action) {
+		if(historyAction!=action) {
+			if(historyAction!=HistoryAction.unspecified)
+				history.push();
+			historyAction = action;
+		}
+		else {
+			// TODO push after timer
+		}
+	}
+	
 	protected boolean isCursorAtWordBoundary() {
 		checkCursorLineCache();
 		if(cursor.col==0 || cursor.col==cursorLine.length)
@@ -698,6 +795,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	public boolean onKeyPressed(char c, int code, int modifiers) {
 		switch(code) {
 			case KeyEvent.VK_LEFT:
+				checkPushHistory(HistoryAction.unspecified);
 				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else {
@@ -723,6 +821,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_RIGHT:
+				checkPushHistory(HistoryAction.unspecified);
 				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else {
@@ -746,6 +845,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_UP:
+				checkPushHistory(HistoryAction.unspecified);
 				if(modifiers==UIElement.modCtrlMask) {
 					panView().pan(0, lineHeight);
 				}
@@ -765,6 +865,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_DOWN:
+				checkPushHistory(HistoryAction.unspecified);
 				if(modifiers==UIElement.modCtrlMask) {
 					panView().pan(0, -lineHeight);
 				}
@@ -784,6 +885,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_PAGE_UP:
+				checkPushHistory(HistoryAction.unspecified);
 				if(modifiers==UIElement.modShiftMask)
 					startSelection();
 				else
@@ -799,6 +901,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_PAGE_DOWN:
+				checkPushHistory(HistoryAction.unspecified);
 				if(modifiers==UIElement.modShiftMask)
 					startSelection();
 				else
@@ -814,6 +917,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_HOME:
+				checkPushHistory(HistoryAction.unspecified);
 				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else
@@ -830,6 +934,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				break;
 				
 			case KeyEvent.VK_END:
+				checkPushHistory(HistoryAction.unspecified);
 				if((modifiers&UIElement.modShiftMask)>0)
 					startSelection();
 				else
@@ -851,6 +956,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					scrollToCursor();
 				}
 				else {
+					checkPushHistory(HistoryAction.deleting);
 					if(cursor.col>0) {
 						modify(cursor.line, cursor.col-1, "", cursor.col);
 						cursor.col--;
@@ -871,6 +977,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					scrollToCursor();
 				}
 				else {
+					checkPushHistory(HistoryAction.deleting);
 					if(cursor.col<lines.get(cursor.line).length) {
 						modify(cursor.line, cursor.col, "", cursor.col+1);
 					}
@@ -884,16 +991,19 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				if(!singleLine) {
 					if(selStart!=null)
 						deleteSelection();
+					checkPushHistory(HistoryAction.typing);
 					cursor.col = splitLineAtCursor();
 					cursor.line++;
 					scrollToCursor();
 				}
 				else {
+					checkPushHistory(HistoryAction.unspecified);
 					getBase().resetFocus();
 				}
 				break;
 
 			case KeyEvent.VK_ESCAPE:
+				checkPushHistory(HistoryAction.unspecified);
 				getBase().resetFocus();
 				break;
 				
@@ -901,16 +1011,19 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				if(!singleLine) {
 					if(selStart==null) {
 						if(modifiers==UIElement.modNone) {
+							checkPushHistory(HistoryAction.typing);
 							modify(cursor.line, cursor.col, "\t", cursor.col);
 							cursor.col++;
 							scrollToCursor();
 						}
 					}
 					else {
+						checkPushHistory(HistoryAction.unspecified);
 						if(modifiers==UIElement.modShiftMask)
 							unindentSelection();
 						else
 							indentSelection("\t");
+						history.push();
 					}
 				}
 				break;
@@ -919,16 +1032,28 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 				if(modifiers==UIElement.modCtrlMask) {
 					switch(code) {
 						case KeyEvent.VK_A:
+							checkPushHistory(HistoryAction.unspecified);
 							selectAll();
 							break;
 						case KeyEvent.VK_X:
+							checkPushHistory(HistoryAction.unspecified);
 							cutSelection();
 							break;
 						case KeyEvent.VK_C:
+							checkPushHistory(HistoryAction.unspecified);
 							copySelection();
 							break;
 						case KeyEvent.VK_V:
+							checkPushHistory(HistoryAction.unspecified);
 							pasteAtCursor();
+							break;
+						case KeyEvent.VK_Z:
+							checkPushHistory(HistoryAction.unspecified);
+							history.undo();
+							break;
+						case KeyEvent.VK_Y:
+							checkPushHistory(HistoryAction.unspecified);
+							history.redo();
 							break;
 					}
 				}
@@ -936,6 +1061,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 					if(!Character.isISOControl(c) && c!=KeyEvent.CHAR_UNDEFINED) {
 						if(selStart!=null)
 							deleteSelection();
+						checkPushHistory(HistoryAction.typing);
 						modify(cursor.line, cursor.col, Character.toString(c), cursor.col);
 						cursor.col++;
 						scrollToCursor();
