@@ -170,8 +170,8 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		int cx = x0+stringWidth(cursorLineStart, cursorLineStart+cursor.col);
 		if(cx<minx)
 			panx = cx*pixelScale;
-		else if(cx+4+x0>maxx) // FIXME progress bar width
-			panx += (cx+4+x0-maxx)*pixelScale;
+		else if(cx+x0>maxx)
+			panx += (cx+x0-maxx)*pixelScale; // FIXME error in this branch
 		
 		if(singleLine) {
 			pany = 0;
@@ -286,7 +286,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		if(!singleLine && y-lineHeight<maxy)
 			g.fillRect(minx, y-lineHeight+descent, maxx, maxy-y+lineHeight-descent, colorBackground);
 		
-		w = (w+x0*2)*pixelScale+4; // FIXME progress bar width
+		w = (w+x0*2)*pixelScale;
 		float h = singleLine ? 0 : (lineHeight*lines.size()+descent)*pixelScale;
 		if(updateSize || getWidth()!=w || getHeight()!=h) {
 			panView().setPanRangeForClient(w, h);

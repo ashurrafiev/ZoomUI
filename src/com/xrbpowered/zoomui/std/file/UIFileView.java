@@ -26,6 +26,7 @@ import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UIToolButton;
 import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
+import com.xrbpowered.zoomui.std.UIScrollBar;
 
 public class UIFileView extends UIScrollContainer {
 
@@ -179,17 +180,15 @@ public class UIFileView extends UIScrollContainer {
 					int textWidth = fm.stringWidth(str);
 					g.drawString(str, 20, 2+font.getSize());
 					
-					g.setStroke(2f);
 					g.setColor(colorText);
-					int w = (int)(getHeight()/2f);
+					int y = (int)(getHeight()/2f);
 					if(open)
-						g.graph.drawPolyline(new int[] {6, 10, 14}, new int[] {w-2, w+2, w-2}, 3);
+						UIScrollBar.drawDownArrow(g, 10, y);
 					else
-						g.graph.drawPolyline(new int[] {8, 12, 8}, new int[] {w-4, w, w+4}, 3);
+						UIScrollBar.drawRightArrow(g, 10, y);
 					
-					g.resetStroke();
 					g.setColor(colorBorderLight);
-					g.line(textWidth+28, w, getWidth()-8, w);
+					g.line(textWidth+28, y, getWidth()-8, y);
 				}
 				
 				@Override

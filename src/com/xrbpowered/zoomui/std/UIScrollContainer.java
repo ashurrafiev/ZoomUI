@@ -1,20 +1,37 @@
 package com.xrbpowered.zoomui.std;
 
-import java.awt.Color;
-
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIPanView;
 
 public abstract class UIScrollContainer extends UIContainer {
 
-	public static float scrollStep = 3f*GraphAssist.ptToPixels(9f);
+	public static int scrollStep = GraphAssist.ptToPixels(9f);
+	public static int wheelStep = 3*scrollStep;
 	
 	private UIPanView view;
+	private UIScrollBar scroll;
 	
 	public UIScrollContainer(UIContainer parent) {
 		super(parent);
 		view = new UIPanView(this);
+		scroll = new UIScrollBar(this, true) {
+			@Override
+			public void onChanged() {
+				view.setPan(0, getValue());
+			}
+			@Override
+			protected void paintSelf(GraphAssist g) {
+				if(view.getMaxPanY()>0) {
+					scroll.setThumbSpan(Math.round(getHeight()));
+					scroll.setRange(0, view.getMaxPanY(), scrollStep);
+					scroll.setValue(Math.round(view.getPanY()));
+				}
+				else
+					scroll.setRange(0, 0, 0);
+				super.paintSelf(g);
+			}
+		};
 	}
 	
 	public UIPanView getView() {
@@ -24,30 +41,21 @@ public abstract class UIScrollContainer extends UIContainer {
 	@Override
 	public
 	final void layout() {
+		scroll.setSize(getHeight());
+		scroll.setLocation(getWidth()-scroll.getWidth(), 0);
+		scroll.layout();
+		
 		view.setLocation(0, 0);
-		view.setSize(getWidth(), getHeight());
+		view.setSize(getWidth()-scroll.getWidth(), getHeight());
 		view.setPanRangeForClient(0, layoutView());
 	}
 	
 	protected abstract float layoutView();
 	
 	@Override
-	protected void paintChildren(GraphAssist g) {
-		super.paintChildren(g);
-		// TODO scroll bars
-		if(view.getMaxPanY()>0) {
-			g.fillRect(getWidth()-4f, 0, 4, getHeight(), new Color(0xdddddd));
-			float s = getHeight()/(view.getMaxPanY()+getHeight());
-			float top = view.getPanY() * s;
-			float h = getHeight() * s;
-			g.fillRect(getWidth()-4f, top, 4, h, new Color(0x777777));
-		}
-	}
-	
-	@Override
 	public boolean onMouseScroll(float x, float y, float delta, int modifiers) {
 		if(modifiers==modNone) {
-			view.pan(0, -delta*scrollStep);
+			view.pan(0, -delta*wheelStep);
 			repaint();
 			return true;
 		}
