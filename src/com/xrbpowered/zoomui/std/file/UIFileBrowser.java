@@ -10,8 +10,8 @@ import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.std.History;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIButtonBase;
-import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.std.text.UITextBox;
 
 public class UIFileBrowser extends UIContainer {
 
@@ -46,7 +46,7 @@ public class UIFileBrowser extends UIContainer {
 			public void onDirectorySet() {
 				File dir = view.getDirectory();
 				btnUp.setEnabled(dir!=null);
-				txtPath.text = dir!=null ? dir.getAbsolutePath() : "This computer";
+				txtPath.editor.setText(dir!=null ? dir.getAbsolutePath() : "This computer");
 			}
 			@Override
 			public void onBrowse() {
@@ -54,7 +54,7 @@ public class UIFileBrowser extends UIContainer {
 			}
 			@Override
 			public void onFileSelected(File file) {
-				txtFileName.text = file.getName();
+				txtFileName.editor.setText(file.getName());
 			}
 		};
 		

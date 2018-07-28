@@ -5,6 +5,7 @@ import java.awt.Font;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.std.text.UITextBox;
 
 public class UIListItem extends UIElement {
 	

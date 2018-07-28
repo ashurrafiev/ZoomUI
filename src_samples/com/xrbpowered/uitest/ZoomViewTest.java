@@ -13,8 +13,8 @@ import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
-import com.xrbpowered.zoomui.std.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.std.text.UITextBox;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class ZoomViewTest extends UIZoomView {
@@ -56,7 +56,7 @@ public class ZoomViewTest extends UIZoomView {
 			items[i] = "List item "+i;
 		list = new UIListBox(this, items);
 		text = new UITextBox(this);
-		text.text = "Hello world";
+		text.editor.setText("Hello world");
 		toolBtn = new UIToolButton(this, fileIcon, 32, 8) {
 			@Override
 			public void onAction() {

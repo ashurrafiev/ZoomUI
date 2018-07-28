@@ -4,11 +4,11 @@ import java.awt.Color;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.std.text.UITextBox;
 
 public class UIListBox extends UIScrollContainer {
 
 	public static Color colorBackground = UITextBox.colorBackground;
-	public static Color colorBorder = UITextBox.colorBorder;
 
 	protected UIListItem[] listItems;
 	
@@ -77,12 +77,6 @@ public class UIListBox extends UIScrollContainer {
 	@Override
 	protected void paintSelf(GraphAssist g) {
 		g.fill(this, colorBackground);
-	}
-	
-	@Override
-	protected void paintChildren(GraphAssist g) {
-		super.paintChildren(g);
-		g.border(this, colorBorder);
 	}
 	
 }

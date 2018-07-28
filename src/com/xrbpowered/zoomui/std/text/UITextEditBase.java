@@ -26,7 +26,6 @@ import com.xrbpowered.zoomui.UIPanView;
 import com.xrbpowered.zoomui.std.History;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListItem;
-import com.xrbpowered.zoomui.std.UITextBox;
 
 public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	
@@ -158,7 +157,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	public boolean autoIndent = true;
 	public boolean singleLine = false;
 	
-	private String text = "";
+	private String text;
 	private ArrayList<Line> lines = new ArrayList<>();
 	
 	private Position cursor = new Position(0, 0);
@@ -189,7 +188,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		super(parent);
 		this.singleLine = singleLine;
 		setupStyle();
-		history.push();
+		setText("");
 	}
 	
 	protected void setupStyle() {
@@ -209,8 +208,8 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		
 		checkCursorLineCache();
 		int cx = x0+stringWidth(cursorLineStart, cursorLineStart+cursor.col);
-		if(cx<minx)
-			panx = cx*pixelScale;
+		if(cx-x0<minx)
+			panx = (cx-x0)*pixelScale;
 		else if(cx+x0>maxx)
 			panx += (cx+x0-maxx)*pixelScale; // FIXME error in this branch
 		
@@ -312,7 +311,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 				g.fillRect(minx, y0-lineHeight, x0-minx, maxy-y0+lineHeight, colorBackground);
 		}
 
-		int y = singleLine ? (int)(getParent().getHeight()/pixelScale/2f-(fm.getAscent()-fm.getDescent())/2f) : y0;
+		int y = singleLine ? (int)(getParent().getHeight()/pixelScale/2f+(fm.getAscent()-fm.getDescent())/2f) : y0;
 		int pos = 0;
 		float w = 0;
 		int lineIndex = 0;

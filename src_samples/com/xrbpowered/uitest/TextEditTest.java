@@ -1,6 +1,5 @@
 package com.xrbpowered.uitest;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
@@ -8,49 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.xrbpowered.zoomui.GraphAssist;
-import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.std.UIScrollContainer;
-import com.xrbpowered.zoomui.std.UITextBox;
+import com.xrbpowered.zoomui.std.text.UITextArea;
 import com.xrbpowered.zoomui.std.text.UITextEditBase;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
-public class TextEditTest extends UIScrollContainer {
+public class TextEditTest {
 	
 	private static final String TEST_INPUT = "src_samples/com/xrbpowered/uitest/TextEditTest.java";
 
-	public static Color colorBorder = UITextBox.colorBorder;
-
-	public final UITextEditBase edit;
-	
-	public TextEditTest(UIContainer parent) {
-		super(parent);
-		edit = new UITextEditBase(getView(), false) {
-			@Override
-			protected void setupStyle() {
-				font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
-			}
-		};
-	}
-	
-	@Override
-	protected float layoutView() {
-		edit.setLocation(0, 0);
-		edit.updateSize();
-		return edit.getHeight();
-	}
-	
-	@Override
-	public void paint(GraphAssist g) {
-		super.paint(g);
-	}
-	
-	@Override
-	protected void paintChildren(GraphAssist g) {
-		super.paintChildren(g);
-		g.hborder(this, GraphAssist.TOP, colorBorder);
-	}
-	
 	public static byte[] loadBytes(InputStream s) throws IOException {
 		DataInputStream in = new DataInputStream(s);
 		byte bytes[] = new byte[in.available()];
@@ -76,7 +41,24 @@ public class TextEditTest extends UIScrollContainer {
 				return false;
 			}
 		};
-		new TextEditTest(frame.getContainer()).edit.setText(loadString(TEST_INPUT));
+		
+		new UITextArea(frame.getContainer()) {
+			@Override
+			protected UITextEditBase createEditor() {
+				return new UITextEditBase(getView(), false) {
+					@Override
+					protected void setupStyle() {
+						font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
+					}
+				};
+			}
+			
+			@Override
+			protected void paintBorder(GraphAssist g) {
+				g.hborder(this, GraphAssist.TOP, colorBorder);
+			}
+		}.editor.setText(loadString(TEST_INPUT));
+		
 		frame.show();
 	}
 

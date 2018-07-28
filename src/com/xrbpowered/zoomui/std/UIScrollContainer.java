@@ -1,10 +1,15 @@
 package com.xrbpowered.zoomui.std;
 
+import java.awt.Color;
+
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIPanView;
+import com.xrbpowered.zoomui.std.text.UITextBox;
 
 public abstract class UIScrollContainer extends UIContainer {
+
+	public static Color colorBorder = UITextBox.colorBorder;
 
 	public static int scrollStep = GraphAssist.ptToPixels(9f);
 	public static int wheelStep = 3*scrollStep;
@@ -51,6 +56,16 @@ public abstract class UIScrollContainer extends UIContainer {
 	}
 	
 	protected abstract float layoutView();
+	
+	@Override
+	protected void paintChildren(GraphAssist g) {
+		super.paintChildren(g);
+		paintBorder(g);
+	}
+	
+	protected void paintBorder(GraphAssist g) {
+		g.border(this, colorBorder);
+	}
 	
 	@Override
 	public boolean onMouseScroll(float x, float y, float delta, int modifiers) {
