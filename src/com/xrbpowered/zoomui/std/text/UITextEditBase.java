@@ -1,4 +1,4 @@
-package com.xrbpowered.uitest;
+package com.xrbpowered.zoomui.std.text;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -12,10 +12,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,25 +20,21 @@ import java.util.regex.Pattern;
 import com.xrbpowered.zoomui.DragActor;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
-import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
+import com.xrbpowered.zoomui.UIHoverElement;
 import com.xrbpowered.zoomui.UIPanView;
-import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.std.History;
+import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListItem;
-import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UITextBox;
-import com.xrbpowered.zoomui.swing.SwingFrame;
 
-public class UITextEdit extends UIElement implements KeyInputHandler {
-
-	private static final String TEST_INPUT = "src_samples/com/xrbpowered/uitest/UITextEdit.java";
+public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	
 	public static final Pattern newlineRegex = Pattern.compile("\\r?\\n");
 	public static final Pattern indentRegex = Pattern.compile("\\s*");
 	public static String newline = System.lineSeparator();
 
-	public Font font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
+	public Font font = UIButton.font;
 
 	public Color colorBackground = UITextBox.colorBackground;
 	public Color colorHighlight = UIListItem.colorHighlight;
@@ -49,8 +42,6 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	public Color colorSelection = UITextBox.colorSelection;
 	public Color colorSelectedText = UITextBox.colorSelectedText;
 	
-	public static Color colorBorder = UITextBox.colorBorder;
-
 	public static class Position {
 		public int line;
 		public int col;
@@ -132,17 +123,17 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		public String text;
 		
 		public HistoryState() {
-			text = UITextEdit.this.text;
-			cursor = new Position(UITextEdit.this.cursor);
-			selStart = copyPosition(UITextEdit.this.selStart);
-			selEnd = copyPosition(UITextEdit.this.selEnd);
+			text = UITextEditBase.this.text;
+			cursor = new Position(UITextEditBase.this.cursor);
+			selStart = copyPosition(UITextEditBase.this.selStart);
+			selEnd = copyPosition(UITextEditBase.this.selEnd);
 		}
 		
 		public void restore() {
 			setText(text, false);
-			UITextEdit.this.cursor.set(cursor);
-			UITextEdit.this.selStart = copyPosition(selStart);
-			UITextEdit.this.selEnd = copyPosition(selEnd);
+			UITextEditBase.this.cursor.set(cursor);
+			UITextEditBase.this.selStart = copyPosition(selStart);
+			UITextEditBase.this.selEnd = copyPosition(selEnd);
 			updateSelRange();
 			scrollToCursor();
 		}
@@ -194,7 +185,7 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	
 	private FontMetrics fm = null;
 	
-	public UITextEdit(UIPanView parent, boolean singleLine) {
+	public UITextEditBase(UIPanView parent, boolean singleLine) {
 		super(parent);
 		this.singleLine = singleLine;
 		setupStyle();
@@ -202,6 +193,10 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	}
 	
 	protected void setupStyle() {
+	}
+	
+	public void updateSize() {
+		this.updateSize = true;
 	}
 	
 	public UIPanView panView() {
@@ -224,9 +219,9 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 		}
 		else {
 			if(displayLine>cursor.line)
-				pany = (cursor.line*lineHeight+descent)*pixelScale;
+				pany = cursor.line*lineHeight*pixelScale;
 			else if(displayLine+page<=cursor.line) {
-				pany = (lineHeight*(cursor.line+1)+descent)*pixelScale - getParent().getHeight();
+				pany = lineHeight*(cursor.line+1)*pixelScale - getParent().getHeight();
 			}
 		}
 		
@@ -1023,7 +1018,6 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 							unindentSelection();
 						else
 							indentSelection("\t");
-						history.push();
 					}
 				}
 				break;
@@ -1120,58 +1114,6 @@ public class UITextEdit extends UIElement implements KeyInputHandler {
 	public void onFocusLost() {
 		deselect();
 		repaint();
-	}
-
-	private static class UITextEditScrollPane extends UIScrollContainer {
-		public final UITextEdit edit;
-		public UITextEditScrollPane(UIContainer parent) {
-			super(parent);
-			edit = new UITextEdit(getView(), false);
-		}
-		@Override
-		protected float layoutView() {
-			edit.setLocation(0, 0);
-			edit.updateSize = true;
-			return edit.getHeight();
-		}
-		@Override
-		public void paint(GraphAssist g) {
-			super.paint(g);
-		}
-		@Override
-		protected void paintChildren(GraphAssist g) {
-			super.paintChildren(g);
-			g.hborder(this, GraphAssist.TOP, colorBorder);
-		}
-	}
-	
-	public static byte[] loadBytes(InputStream s) throws IOException {
-		DataInputStream in = new DataInputStream(s);
-		byte bytes[] = new byte[in.available()];
-		in.readFully(bytes);
-		in.close();
-		return bytes;
-	}
-	
-	public static String loadString(String path) {
-		try {
-			return new String(loadBytes(new FileInputStream(path)));
-		} catch(IOException e) {
-			e.printStackTrace();
-			return "";
-		}
-	}
-	
-	public static void main(String[] args) {
-		UIWindow frame = new SwingFrame("UITextEdit", 800, 600) {
-			@Override
-			public boolean onClosing() {
-				confirmClosing();
-				return false;
-			}
-		};
-		new UITextEditScrollPane(frame.getContainer()).edit.setText(loadString(TEST_INPUT));
-		frame.show();
 	}
 
 }
