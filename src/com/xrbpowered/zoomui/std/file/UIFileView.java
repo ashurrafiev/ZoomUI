@@ -20,20 +20,18 @@ import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIHoverElement;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
-import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UIListItem;
 import com.xrbpowered.zoomui.std.UIMessageBox;
-import com.xrbpowered.zoomui.std.UIScrollContainer;
-import com.xrbpowered.zoomui.std.UIToolButton;
 import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
 import com.xrbpowered.zoomui.std.UIScrollBar;
+import com.xrbpowered.zoomui.std.UIScrollContainer;
+import com.xrbpowered.zoomui.std.UIToolButton;
 
 public class UIFileView extends UIScrollContainer {
 
 	public static Font font = UIButton.font;
 
 	public static Color colorBackground = Color.WHITE;
-	public static Color colorBorder = UIListBox.colorBorder;
 	public static Color colorBorderLight = new Color(0xcccccc);
 	public static Color colorText = UIListItem.colorText;
 	public static Color colorHighlight = UIListItem.colorHighlight;
@@ -430,9 +428,4 @@ public class UIFileView extends UIScrollContainer {
 		g.fill(this, colorBackground);
 	}
 	
-	@Override
-	protected void paintChildren(GraphAssist g) {
-		super.paintChildren(g);
-		g.border(this, colorBorder);
-	}
 }

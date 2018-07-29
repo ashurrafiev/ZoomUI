@@ -9,7 +9,6 @@ import java.io.InputStream;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.std.text.UITextArea;
-import com.xrbpowered.zoomui.std.text.UITextEditBase;
 import com.xrbpowered.zoomui.swing.SwingFrame;
 
 public class TextEditTest {
@@ -18,7 +17,7 @@ public class TextEditTest {
 
 	public static byte[] loadBytes(InputStream s) throws IOException {
 		DataInputStream in = new DataInputStream(s);
-		byte bytes[] = new byte[in.available()];
+		byte[] bytes = new byte[in.available()];
 		in.readFully(bytes);
 		in.close();
 		return bytes;
@@ -34,7 +33,7 @@ public class TextEditTest {
 	}
 	
 	public static void main(String[] args) {
-		UIWindow frame = new SwingFrame("UITextEdit", 800, 600) {
+		UIWindow frame = new SwingFrame("TextEditTest", 800, 600) {
 			@Override
 			public boolean onClosing() {
 				confirmClosing();
@@ -42,22 +41,14 @@ public class TextEditTest {
 			}
 		};
 		
-		new UITextArea(frame.getContainer()) {
-			@Override
-			protected UITextEditBase createEditor() {
-				return new UITextEditBase(getView(), false) {
-					@Override
-					protected void setupStyle() {
-						font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
-					}
-				};
-			}
-			
+		UITextArea text = new UITextArea(frame.getContainer()) {
 			@Override
 			protected void paintBorder(GraphAssist g) {
 				g.hborder(this, GraphAssist.TOP, colorBorder);
 			}
-		}.editor.setText(loadString(TEST_INPUT));
+		};
+		text.editor.font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
+		text.editor.setText(loadString(TEST_INPUT));
 		
 		frame.show();
 	}

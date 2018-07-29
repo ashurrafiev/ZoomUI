@@ -28,12 +28,12 @@ public abstract class UIScrollContainer extends UIContainer {
 			@Override
 			protected void paintSelf(GraphAssist g) {
 				if(view.getMaxPanY()>0) {
-					scroll.setThumbSpan(Math.round(getHeight()));
-					scroll.setRange(0, view.getMaxPanY(), scrollStep);
-					scroll.setValue(Math.round(view.getPanY()));
+					setThumbSpan(Math.round(getHeight()));
+					setRange(0, view.getMaxPanY(), scrollStep);
+					setValue(Math.round(view.getPanY()));
 				}
 				else
-					scroll.setRange(0, 0, 0);
+					setRange(0, 0, 0);
 				super.paintSelf(g);
 			}
 		};
@@ -46,13 +46,13 @@ public abstract class UIScrollContainer extends UIContainer {
 	@Override
 	public
 	final void layout() {
-		scroll.setSize(getHeight());
+		scroll.setLength(getHeight());
 		scroll.setLocation(getWidth()-scroll.getWidth(), 0);
-		scroll.layout();
 		
 		view.setLocation(0, 0);
 		view.setSize(getWidth()-scroll.getWidth(), getHeight());
 		view.setPanRangeForClient(0, layoutView());
+		super.layout();
 	}
 	
 	protected abstract float layoutView();

@@ -210,7 +210,7 @@ public class UIScrollBar extends UIContainer {
 		thumb.span = v;
 	}
 	
-	public void setSize(float length) {
+	public void setLength(float length) {
 		if(vertical)
 			setSize(defaultWidth, length);
 		else

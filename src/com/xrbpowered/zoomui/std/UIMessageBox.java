@@ -119,7 +119,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		if(icon!=null)
 			icon.paint(g.graph, 0, 16, 12, iconSize, getPixelScale(), true);
 		
-		if(hlabel!=label.getHeight())
+		if(hlabel!=label.getHeight()) // FIXME blink
 			getBase().getWindow().setClientSize((int)getWidth(), (int)(h+UIButton.defaultHeight+40));
 	}
 	

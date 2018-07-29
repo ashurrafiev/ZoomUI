@@ -76,7 +76,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 			int pos = 0;
 			for(Line line: lines) {
 				if(line==this)
-					return pos+offs;
+					return pos+line.offs;
 				pos += line.offs+line.length;
 			}
 			return 0;
@@ -104,7 +104,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 			y += dy * getPixelScale();
 			cursorToMouse(this.x, this.y);
 			scrollToCursor();
-			modifySelection(selStart);
+			modifySelection(true);
 			repaint();
 			return true;
 		}
@@ -116,10 +116,10 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	};
 
 	private class HistoryState {
-		public Position cursor;
-		public Position selStart;
-		public Position selEnd;
-		public String text;
+		public final Position cursor;
+		public final Position selStart;
+		public final Position selEnd;
+		public final String text;
 		
 		public HistoryState() {
 			text = UITextEditBase.this.text;
@@ -155,12 +155,12 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	};
 
 	public boolean autoIndent = true;
-	public boolean singleLine = false;
+	public final boolean singleLine;
 	
 	private String text;
 	private ArrayList<Line> lines = new ArrayList<>();
 	
-	private Position cursor = new Position(0, 0);
+	private final Position cursor = new Position(0, 0);
 	private Position selStart = null;
 	private Position selEnd = null;
 	private Position selMin = null;
@@ -187,11 +187,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	public UITextEditBase(UIPanView parent, boolean singleLine) {
 		super(parent);
 		this.singleLine = singleLine;
-		setupStyle();
 		setText("");
-	}
-	
-	protected void setupStyle() {
 	}
 	
 	public void updateSize() {
@@ -225,7 +221,6 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		}
 		
 		panView().setPan(panx, pany);
-		repaint();
 	}
 
 	public void setText(String text) {
@@ -351,7 +346,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa);
 	}
 	
-	private void drawLine(GraphAssist g, int lineIndex, int lineStart, int lineEnd, int y, Color bg, boolean drawCursor) {
+	protected void drawLine(GraphAssist g, int lineIndex, int lineStart, int lineEnd, int y, Color bg, boolean drawCursor) {
 		int x = x0;
 		if(selMin==null || lineIndex<selMin.line || lineIndex>selMax.line) {
 			x = drawText(g, x, y, lineStart, lineEnd, bg, colorText);
@@ -386,7 +381,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		}
 	}
 	
-	private void drawRemainder(GraphAssist g, int x, int y, Color bg) {
+	protected void drawRemainder(GraphAssist g, int x, int y, Color bg) {
 		if(x<maxx)
 			g.fillRect(x, y-lineHeight+descent, maxx-x, lineHeight, bg);
 	}
@@ -401,7 +396,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		return x + w;
 	}
 	
-	private int drawText(GraphAssist g, int x, int y, int c0, int c1, Color bg, Color fg) {
+	protected int drawText(GraphAssist g, int x, int y, int c0, int c1, Color bg, Color fg) {
 		int col = c0;
 		for(;;) {
 			int t = text.indexOf('\t', col);
@@ -425,7 +420,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		}
 	}
 	
-	private int stringWidth(int c0, int c1) {
+	protected int stringWidth(int c0, int c1) {
 		int x = 0;
 		int col = c0;
 		c1 = Math.min(c1, text.length());
@@ -450,7 +445,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		}
 	}
 	
-	private int searchCol(float tx) {
+	protected int searchCol(float tx) {
 		checkCursorLineCache();
 		Line line = cursorLine;
 		int lineStart = cursorLineStart;
@@ -535,17 +530,17 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		}
 	}
 	
-	private void modifySelection(Position keepStart) {
+	private void modifySelection(boolean keepStart) {
 		if(selStart!=null) {
 			selEnd.set(cursor);
-			if(selStart.equals(selEnd) && keepStart==null)
+			if(selStart.equals(selEnd) && !keepStart)
 				deselect();
 			updateSelRange();
 		}
 	}
 	
 	private void modifySelection() {
-		modifySelection(null);
+		modifySelection(false);
 	}
 	
 	private void updateSelRange() {
@@ -832,8 +827,8 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 						cursor.line++;
 						cursor.col = 0;
 					}
-					scrollToCursor();
 				} while((modifiers&UIElement.modCtrlMask)>0 && !isCursorAtWordBoundary());
+				scrollToCursor();
 				if((modifiers&UIElement.modShiftMask)>0)
 					modifySelection();
 				break;
@@ -888,8 +883,8 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 					cursor.line -= page;
 				else
 					cursor.line = 0;
-				scrollToCursor();
 				updateCursor();
+				scrollToCursor();
 				if(modifiers==UIElement.modShiftMask)
 					modifySelection();
 				break;
@@ -904,8 +899,8 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 					cursor.line += page;
 				else
 					cursor.line = lines.size()-1;
-				scrollToCursor();
 				updateCursor();
+				scrollToCursor();
 				if(modifiers==UIElement.modShiftMask)
 					modifySelection();
 				break;
@@ -918,7 +913,6 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 					deselect();
 				if((modifiers&UIElement.modCtrlMask)>0) {
 					cursor.line = 0;
-					scrollToCursor();
 				}
 				cursor.col = 0;
 				cursorX = -1;
@@ -935,7 +929,6 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 					deselect();
 				if((modifiers&UIElement.modCtrlMask)>0) {
 					cursor.line = lines.size()-1;
-					scrollToCursor();
 				}
 				cursor.col = lines.get(cursor.line).length;
 				cursorX = -1;
@@ -983,8 +976,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 				
 			case KeyEvent.VK_ENTER:
 				if(!singleLine) {
-					if(selStart!=null)
-						deleteSelection();
+					deleteSelection();
 					checkPushHistory(HistoryAction.typing);
 					cursor.col = splitLineAtCursor();
 					cursor.line++;
@@ -1052,8 +1044,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 				}
 				else {
 					if(!Character.isISOControl(c) && c!=KeyEvent.CHAR_UNDEFINED) {
-						if(selStart!=null)
-							deleteSelection();
+						deleteSelection();
 						checkPushHistory(HistoryAction.typing);
 						modify(cursor.line, cursor.col, Character.toString(c), cursor.col);
 						cursor.col++;
@@ -1083,6 +1074,8 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		if(button==Button.left) {
 			if(!isFocused())
 				getBase().setFocus(this);
+			else 
+				checkPushHistory(HistoryAction.unspecified);
 			deselect();
 			cursorToMouse(x, y);
 			repaint();
