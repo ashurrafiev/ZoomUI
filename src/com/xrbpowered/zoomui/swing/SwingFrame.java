@@ -33,7 +33,8 @@ public class SwingFrame extends UIWindow {
 		
 		panel = new BasePanel(this);
 		frame.setContentPane(panel);
-		setClientSize(w, h);
+		if(w>0 && h>0)
+			setClientSize(w, h);
 		center();
 	}
 	

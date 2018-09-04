@@ -77,8 +77,8 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 			if(ui!=uiInitiator && uiInitiator!=null)
 				uiInitiator.onMouseReleased();
 			uiInitiator = ui;
-			if(uiFocused!=null && uiFocused!=uiInitiator)
-				resetFocus();
+			//if(uiFocused!=null && uiFocused!=uiInitiator) // FIXME better strategy for losing focus?
+			//	resetFocus();
 		}
 		return this;
 	}
