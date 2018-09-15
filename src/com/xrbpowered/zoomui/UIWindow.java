@@ -27,6 +27,7 @@ public abstract class UIWindow {
 	
 	public void notifyResized() {
 		getContainer().invalidateLayout();
+		repaint();
 	}
 	
 	public abstract void show();
