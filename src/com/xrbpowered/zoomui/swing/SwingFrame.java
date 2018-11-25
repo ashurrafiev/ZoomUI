@@ -14,15 +14,14 @@ public class SwingFrame extends UIWindow {
 	public final JFrame frame;
 	public final BasePanel panel;
 	
-	public SwingFrame(String title, int w, int h) {
-		this(title, w, h, true);
-	}
-	
-	public SwingFrame(String title, int w, int h, boolean canResize) {
+	protected SwingFrame(SwingWindowFactory factory, String title, int w, int h, boolean canResize, boolean undecorated) {
+		super(factory);
+		
 		frame = new JFrame();
 		frame.setTitle(title);
 		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		frame.setResizable(canResize);
+		frame.setResizable(canResize && !undecorated);
+		frame.setUndecorated(undecorated);
 		
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
@@ -52,6 +51,21 @@ public class SwingFrame extends UIWindow {
 	public void setClientSize(int width, int height) {
 		panel.resize(width, height);
 	}
+	
+	@Override
+	public int getX() {
+		return frame.getX();
+	}
+	
+	@Override
+	public int getY() {
+		return frame.getY();
+	}
+	
+	@Override
+	public void moveTo(int x, int y) {
+		frame.setLocation(x, y);
+	}
 
 	@Override
 	public void center() {
@@ -77,7 +91,27 @@ public class SwingFrame extends UIWindow {
 	public void close() {
 		frame.dispose();
 		super.close();
-		System.exit(0);
+		//System.exit(0);
+	}
+
+	@Override
+	public int baseToScreenX(float x) {
+		return panel.baseToScreenX(x);
+	}
+
+	@Override
+	public int baseToScreenY(float y) {
+		return panel.baseToScreenY(y);
+	}
+
+	@Override
+	public float screenToBaseX(int x) {
+		return panel.screenToBaseX(x);
+	}
+
+	@Override
+	public float screenToBaseY(int y) {
+		return panel.screenToBaseY(y);
 	}
 
 }

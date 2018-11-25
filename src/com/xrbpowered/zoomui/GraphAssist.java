@@ -7,6 +7,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.util.LinkedList;
@@ -25,6 +26,8 @@ public class GraphAssist {
 	
 	private LinkedList<AffineTransform> txStack = new LinkedList<>();
 	private LinkedList<Rectangle> clipStack = new LinkedList<>();
+	private LinkedList<Boolean> aaStack = new LinkedList<>();
+	private LinkedList<Boolean> pureStrokeStack = new LinkedList<>();
 	
 	public GraphAssist(Graphics2D graph) {
 		this.graph = graph;
@@ -68,6 +71,34 @@ public class GraphAssist {
 	
 	public void popClip() {
 		graph.setClip(clipStack.removeFirst());
+	}
+	
+	public boolean isAntialisingOn() {
+		return graph.getRenderingHint(RenderingHints.KEY_ANTIALIASING)==RenderingHints.VALUE_ANTIALIAS_ON;
+	}
+	
+	public void pushAntialiasing(boolean aa) {
+		aaStack.addFirst(isAntialisingOn());
+		graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
+	}
+	
+	public void popAntialiasing() {
+		boolean aa = aaStack.removeFirst();
+		graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
+	}
+
+	public boolean isPureStrokeOn() {
+		return graph.getRenderingHint(RenderingHints.KEY_STROKE_CONTROL)==RenderingHints.VALUE_STROKE_PURE;
+	}
+	
+	public void pushPureStroke(boolean pure) {
+		pureStrokeStack.addFirst(isPureStrokeOn());
+		graph.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, pure ? RenderingHints.VALUE_STROKE_PURE : RenderingHints.VALUE_STROKE_NORMALIZE);
+	}
+	
+	public void popPureStroke() {
+		boolean pure = pureStrokeStack.removeFirst();
+		graph.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, pure ? RenderingHints.VALUE_STROKE_PURE : RenderingHints.VALUE_STROKE_NORMALIZE);
 	}
 
 	public void setColor(Color c) {
@@ -157,6 +188,44 @@ public class GraphAssist {
 		hborder(e, valign);
 	}
 
+	public float startPixelMode(UIElement e, boolean antialias) {
+		pushAntialiasing(antialias);
+		pushTx();
+		clearTransform();
+		translate(getTx().getTranslateX(), getTx().getTranslateY());
+		return e.getPixelScale();
+	}
+	
+	public float startPixelMode(UIElement e) {
+		return startPixelMode(e, false);
+	}
+	
+	public void finishPixelMode() {
+		popTx();
+		popAntialiasing();
+	}
+	
+	public void pixelBorder(UIElement e, int thickness, Color fill, Color stroke) {
+		float pixelScale = startPixelMode(e);
+		
+		int w = (int)Math.ceil(e.getWidth() / pixelScale);
+		int h = (int)Math.ceil(e.getHeight() / pixelScale);
+		
+		if(fill!=null) {
+			setColor(fill);
+			graph.fillRect(0, 0, w, h);
+		}
+		if(stroke!=null) {
+			for(int i=0; i<thickness; i++) {
+				resetStroke();
+				setColor(stroke);
+				graph.drawRect(i, i, w-i*2-1, h-i*2-1);
+			}
+		}
+		
+		finishPixelMode();
+	}
+	
 	public void drawString(String str, float x, float y) {
 		graph.drawString(str, x, y);
 	}

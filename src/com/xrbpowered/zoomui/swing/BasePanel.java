@@ -3,6 +3,7 @@ package com.xrbpowered.zoomui.swing;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
@@ -111,6 +112,32 @@ public class BasePanel extends JPanel {
 		setPreferredSize(new Dimension((int)(width*scale), (int)(height*scale)));
 		SwingUtilities.getWindowAncestor(this).pack();
 		window.notifyResized();
+	}
+	
+	private Point pt = new Point();
+	
+	public int baseToScreenX(float x) {
+		pt.setLocation(x, 0);
+		SwingUtilities.convertPointToScreen(pt, this);
+		return pt.x;
+	}
+	
+	public int baseToScreenY(float y) {
+		pt.setLocation(0, y);
+		SwingUtilities.convertPointToScreen(pt, this);
+		return pt.y;
+	}
+	
+	public float screenToBaseX(int x) {
+		pt.setLocation(x, 0);
+		SwingUtilities.convertPointFromScreen(pt, this);
+		return pt.x;
+	}
+	
+	public float screenToBaseY(int y) {
+		pt.setLocation(0, y);
+		SwingUtilities.convertPointFromScreen(pt, this);
+		return pt.y;
 	}
 	
 	private static Button getMouseButton(MouseEvent e) {

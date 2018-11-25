@@ -4,14 +4,14 @@ import java.awt.Color;
 
 import com.sun.glass.events.KeyEvent;
 import com.xrbpowered.zoomui.BaseContainer.ModalBaseContainer;
-import com.xrbpowered.zoomui.UIModalWindow.ResultHandler;
-import com.xrbpowered.zoomui.icons.IconPalette;
-import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIModalWindow;
-import com.xrbpowered.zoomui.swing.SwingModalDialog;
+import com.xrbpowered.zoomui.UIModalWindow.ResultHandlerWithDefault;
+import com.xrbpowered.zoomui.UIWindowFactory;
+import com.xrbpowered.zoomui.icons.IconPalette;
+import com.xrbpowered.zoomui.icons.SvgIcon;
 
 public class UIMessageBox extends UIContainer implements KeyInputHandler {
 
@@ -29,7 +29,11 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		}
 	}
 	
-	public static interface MessageResultHandler extends ResultHandler<MessageResult> { }
+	public static abstract class MessageResultHandler extends ResultHandlerWithDefault<MessageResult> {
+		public MessageResultHandler() {
+			super(MessageResult.cancel);
+		}
+	}
 	
 	public static final SvgIcon iconError = new SvgIcon(UIToolButton.iconPath+"error.svg", 160, new IconPalette(new Color[][] {
 		{new Color(0xeeeeee), new Color(0xeecccc), new Color(0xaa0000), Color.RED}
@@ -119,7 +123,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		if(icon!=null)
 			icon.paint(g.graph, 0, 16, 12, iconSize, getPixelScale(), true);
 		
-		if(hlabel!=label.getHeight()) // FIXME blink
+		if(hlabel!=label.getHeight()) // FIXME blink; measure before paint (stackoverflow)
 			getBase().getWindow().setClientSize((int)getWidth(), (int)(h+UIButton.defaultHeight+40));
 	}
 	
@@ -133,13 +137,17 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		g.line(0, y, w, y);
 	}
 	
-	public static void show(String title, String message, SvgIcon icon,
+	public static void show(UIWindowFactory factory, String title, String message, SvgIcon icon,
 			MessageResult[] options, MessageResultHandler onResult) {
 		int width = Math.max(options.length*2+1, 6) * (UIButton.defaultWidth+4) / 2 + 32;
-		UIModalWindow<MessageResult> dlg = new SwingModalDialog<MessageResult>(title, width, UIButton.defaultHeight+40, false, MessageResult.cancel);
-		dlg.onResult = onResult;
+		UIModalWindow<MessageResult> dlg = factory.createModal(title, width, UIButton.defaultHeight+40, false, onResult);
 		new UIMessageBox(dlg.getContainer(), message, icon, options);
 		dlg.show();
+	}
+
+	public static void show(String title, String message, SvgIcon icon,
+			MessageResult[] options, MessageResultHandler onResult) {
+		show(UIWindowFactory.getInstance(), title, message, icon, options, onResult);
 	}
 
 }

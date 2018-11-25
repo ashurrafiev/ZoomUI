@@ -6,6 +6,7 @@ import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIWindow;
+import com.xrbpowered.zoomui.UIWindowFactory;
 import com.xrbpowered.zoomui.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIButton;
@@ -16,6 +17,7 @@ import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
 import com.xrbpowered.zoomui.std.UIToolButton;
 import com.xrbpowered.zoomui.std.text.UITextBox;
 import com.xrbpowered.zoomui.swing.SwingFrame;
+import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class ZoomViewTest extends UIZoomView {
 
@@ -132,7 +134,7 @@ public class ZoomViewTest extends UIZoomView {
 	}
 	
 	public static void main(String[] args) {
-		UIWindow frame = new SwingFrame("ZoomViewTest", 800, 600) {
+		UIWindow frame = new SwingFrame((SwingWindowFactory)UIWindowFactory.getInstance(), "ZoomViewTest", 800, 600, true, false) {
 			@Override
 			public boolean onClosing() {
 				confirmClosing();

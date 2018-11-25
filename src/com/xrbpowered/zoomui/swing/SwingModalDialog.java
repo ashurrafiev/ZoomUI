@@ -14,8 +14,9 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 	public final JDialog dialog;
 	public final BasePanel panel;
 
-	public SwingModalDialog(String title, int w, int h, boolean canResize, A defaultResult) {
-		super(defaultResult);
+	protected SwingModalDialog(SwingWindowFactory factory, String title, int w, int h, boolean canResize, ResultHandler<A> onResult) {
+		super(factory, onResult);
+		
 		dialog = new JDialog();
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		dialog.setTitle(" "+title);
@@ -51,6 +52,21 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 	}
 
 	@Override
+	public int getX() {
+		return dialog.getX();
+	}
+	
+	@Override
+	public int getY() {
+		return dialog.getY();
+	}
+	
+	@Override
+	public void moveTo(int x, int y) {
+		dialog.setLocation(x, y);
+	}
+
+	@Override
 	public void center() {
 		dialog.setLocationRelativeTo(null);
 	}
@@ -71,9 +87,35 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 	}
 	
 	@Override
+	public void close() {
+		dialog.dispose();
+		super.close();
+	}
+	
+	@Override
 	public void closeWithResult(A result) {
 		dialog.dispose();
 		super.closeWithResult(result);
+	}
+
+	@Override
+	public int baseToScreenX(float x) {
+		return panel.baseToScreenX(x);
+	}
+
+	@Override
+	public int baseToScreenY(float y) {
+		return panel.baseToScreenY(y);
+	}
+
+	@Override
+	public float screenToBaseX(int x) {
+		return panel.screenToBaseX(x);
+	}
+
+	@Override
+	public float screenToBaseY(int y) {
+		return panel.screenToBaseY(y);
 	}
 
 }

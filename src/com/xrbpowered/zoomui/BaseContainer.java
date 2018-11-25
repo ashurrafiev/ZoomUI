@@ -40,8 +40,8 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	private UIElement uiInitiator = null;
 	private Button initiatorButton = Button.left;
 	private int initiatorMods = 0;
-	private float prevMouseX = 0f;
-	private float prevMouseY = 0f;
+	private int prevMouseX = 0;
+	private int prevMouseY = 0;
 	
 	private boolean invalidLayout = true;
 
@@ -69,8 +69,8 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	@Override
 	public UIElement notifyMouseDown(float x, float y, Button button, int mods) {
 		if(drag==null) {
-			prevMouseX = x;
-			prevMouseY = y;
+			prevMouseX = getWindow().baseToScreenX(x);
+			prevMouseY = getWindow().baseToScreenY(y);
 			initiatorButton = button;
 			initiatorMods = mods;
 			UIElement ui = super.notifyMouseDown(x, y, button, mods);
@@ -127,14 +127,16 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	}
 	
 	public void onMouseDragged(float x, float y) {
+		int sx = getWindow().baseToScreenX(x);
+		int sy = getWindow().baseToScreenY(y);
 		if(drag==null && uiInitiator!=null) {
-			drag = uiInitiator.acceptDrag(prevMouseX, prevMouseY, initiatorButton, initiatorMods);
+			drag = uiInitiator.acceptDrag(getWindow().screenToBaseX(prevMouseX), getWindow().screenToBaseY(prevMouseY), initiatorButton, initiatorMods);
 		}
 		if(drag!=null) {
-			if(!drag.notifyMouseMove(x-prevMouseX, y-prevMouseY))
+			if(!drag.notifyMouseMove(sx-prevMouseX, sy-prevMouseY))
 				drag = null;
-			prevMouseX = x;
-			prevMouseY = y;
+			prevMouseX = sx;
+			prevMouseY = sy;
 		}
 		updateMouseMove(x, y);
 	}
@@ -172,7 +174,7 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	}
 	
 	public void setBaseScale(float scale) {
-		this.baseScale = (scale>0f) ? scale :UIWindow.getSystemScale();
+		this.baseScale = (scale>0f) ? scale :getWindow().getFactory().getSystemScale();
 		invalidateLayout();
 	}
 	
@@ -232,6 +234,7 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 			layout();
 		g.graph.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
 		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		g.graph.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
 		super.paint(g);
 	}
 	

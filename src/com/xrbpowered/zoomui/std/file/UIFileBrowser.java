@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.io.File;
 
-import com.xrbpowered.zoomui.BaseContainer.ModalBaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.UIModalWindow.ResultHandler;
 import com.xrbpowered.zoomui.std.History;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIButtonBase;
@@ -38,7 +38,7 @@ public class UIFileBrowser extends UIContainer {
 		}
 	};
 	
-	public UIFileBrowser(final ModalBaseContainer<File> parent) {
+	public UIFileBrowser(UIContainer parent, final ResultHandler<File> resultHandler) {
 		super(parent);
 		
 		view = new UIFileView(this, null, true) {
@@ -107,13 +107,15 @@ public class UIFileBrowser extends UIContainer {
 		btnOk = new UIButton(this, "OK") {
 			@Override
 			public void onAction() {
-				parent.getWindow().closeWithResult(view.selectedFile);
+				if(resultHandler!=null)
+					resultHandler.onResult(view.selectedFile);
 			};
 		};
 		btnCancel = new UIButton(this, "Cancel") {
 			@Override
 			public void onAction() {
-				parent.getWindow().close();
+				if(resultHandler!=null)
+					resultHandler.onCancel();
 			}
 		};
 		

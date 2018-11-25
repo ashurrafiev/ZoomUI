@@ -5,7 +5,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -286,13 +285,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 		if(lineHeight>0 && !singleLine)
 			displayLine = (int)(panView().getPanY() / pixelScale / lineHeight);
 		
-		Object aa = g.graph.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-		
-		g.pushTx();
-		g.clearTransform();
-		g.translate(g.getTx().getTranslateX(), g.getTx().getTranslateY());
-		pixelScale = getPixelScale();
+		pixelScale = g.startPixelMode(this);
 		
 		g.setFont(font.deriveFont(font.getSize()/pixelScale));
 		updateMetrics(g);
@@ -342,8 +335,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 			updateSize = false;
 		}
 		
-		g.popTx();
-		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa);
+		g.finishPixelMode();
 	}
 	
 	protected void drawLine(GraphAssist g, int lineIndex, int lineStart, int lineEnd, int y, Color bg, boolean drawCursor) {

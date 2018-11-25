@@ -5,18 +5,31 @@ import com.xrbpowered.zoomui.BaseContainer.ModalBaseContainer;
 public abstract class UIModalWindow<A> extends UIWindow {
 
 	public static interface ResultHandler<A> {
-		public void onResult(UIModalWindow<A> dlg, A result);
+		public void onResult(A result);
+		public void onCancel();
+	}
+
+	public static abstract class ResultHandlerWithDefault<A> implements ResultHandler<A> {
+		public final A defaultResult;
+		public ResultHandlerWithDefault(A defaultResult) {
+			this.defaultResult = defaultResult;
+		}
+		@Override
+		public void onCancel() {
+			onResult(defaultResult);
+		}
 	}
 	
-	private final A defaultResult;
+	public ResultHandler<A> onResult = null;	
 	
-	public UIModalWindow(A defaultResult) {
-		this.defaultResult = defaultResult;
+	public UIModalWindow(UIWindowFactory factory, ResultHandler<A> onResult) {
+		super(factory);
+		this.onResult = onResult;
 	}
-	
+
 	@Override
 	protected BaseContainer createContainer() {
-		return new ModalBaseContainer<A>(this, UIWindow.getBaseScale());
+		return new ModalBaseContainer<A>(this, factory.getBaseScale());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -24,15 +37,29 @@ public abstract class UIModalWindow<A> extends UIWindow {
 		return (ModalBaseContainer<A>) this.container;
 	}
 	
-	public ResultHandler<A> onResult = null;	
 	@Override
 	public void close() {
-		closeWithResult(defaultResult);
+		onClose();
+		if(onResult!=null)
+			onResult.onCancel();
 	}
 	
 	public void closeWithResult(A result) {
 		onClose();
 		if(onResult!=null)
-			onResult.onResult(this, result);
+			onResult.onResult(result);
+	}
+	
+	public ResultHandler<A> wrapInResultHandler() {
+		return new ResultHandler<A>() {
+			@Override
+			public void onResult(A result) {
+				closeWithResult(result);
+			}
+			@Override
+			public void onCancel() {
+				close();
+			}
+		};
 	}
 }

@@ -8,8 +8,10 @@ import java.io.InputStream;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIWindow;
+import com.xrbpowered.zoomui.UIWindowFactory;
 import com.xrbpowered.zoomui.std.text.UITextArea;
 import com.xrbpowered.zoomui.swing.SwingFrame;
+import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class TextEditTest {
 	
@@ -33,7 +35,7 @@ public class TextEditTest {
 	}
 	
 	public static void main(String[] args) {
-		UIWindow frame = new SwingFrame("TextEditTest", 800, 600) {
+		UIWindow frame = new SwingFrame((SwingWindowFactory)UIWindowFactory.getInstance(), "TextEditTest", 800, 600, true, false) {
 			@Override
 			public boolean onClosing() {
 				confirmClosing();
