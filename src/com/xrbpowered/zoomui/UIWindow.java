@@ -10,6 +10,8 @@ public abstract class UIWindow {
 
 	protected final UIWindowFactory factory;
 	protected final BaseContainer container;
+
+	protected boolean exitOnClose = false;
 	
 	public UIWindow(UIWindowFactory factory) {
 		this.factory = factory;
@@ -57,11 +59,18 @@ public abstract class UIWindow {
 	
 	public abstract void setCursor(Cursor cursor);
 	
+	public UIWindow exitOnClose(boolean exit) {
+		this.exitOnClose = exit;
+		return this;
+	}
+	
 	public boolean onClosing() {
 		return true;
 	}
 	
 	public void onClose() {
+		if(exitOnClose)
+			System.exit(0);
 	}
 	
 	public boolean requestClosing() {

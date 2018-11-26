@@ -16,6 +16,7 @@ public class SwingFrame extends UIWindow {
 	
 	protected SwingFrame(SwingWindowFactory factory, String title, int w, int h, boolean canResize, boolean undecorated) {
 		super(factory);
+		exitOnClose(true);
 		
 		frame = new JFrame();
 		frame.setTitle(title);
@@ -91,7 +92,6 @@ public class SwingFrame extends UIWindow {
 	public void close() {
 		frame.dispose();
 		super.close();
-		//System.exit(0);
 	}
 
 	@Override
