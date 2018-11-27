@@ -38,6 +38,11 @@ public class SwingFrame extends UIWindow {
 		center();
 	}
 	
+	public SwingFrame maximize() {
+		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		return this;
+	}
+	
 	@Override
 	public int getClientWidth() {
 		return panel.getWidth();

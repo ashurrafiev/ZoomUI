@@ -7,16 +7,8 @@ import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public abstract class UIWindowFactory {
 
-	private static UIWindowFactory instance = new SwingWindowFactory();
+	public static UIWindowFactory instance = new SwingWindowFactory();
 	
-	public static UIWindowFactory getInstance() {
-		return instance;
-	}
-	
-	public static void setInstance(UIWindowFactory instance) {
-		UIWindowFactory.instance = instance;
-	}
-
 	private float baseScale = getSystemScale();
 	
 	public float getBaseScale() {
@@ -27,7 +19,7 @@ public abstract class UIWindowFactory {
 		baseScale = (scale > 0f) ? scale : getSystemScale();
 	}
 	
-	public float getSystemScale() {
+	public static float getSystemScale() {
 		return Toolkit.getDefaultToolkit().getScreenResolution() / 96f;
 	}
 	

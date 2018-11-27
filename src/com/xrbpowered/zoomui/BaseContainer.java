@@ -174,7 +174,7 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	}
 	
 	public void setBaseScale(float scale) {
-		this.baseScale = (scale>0f) ? scale :getWindow().getFactory().getSystemScale();
+		this.baseScale = (scale>0f) ? scale :getWindow().getFactory().getBaseScale();
 		invalidateLayout();
 	}
 	

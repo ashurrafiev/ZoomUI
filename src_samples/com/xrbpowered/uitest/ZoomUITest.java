@@ -8,7 +8,7 @@ import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIElement.Button;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIWindowFactory;
+import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class ZoomUITest {
 
@@ -129,7 +129,7 @@ public class ZoomUITest {
 	}
 	
 	public static void main(String[] args) {
-		UIWindow frame = UIWindowFactory.getInstance().create("ZoomUI", 1200, 600, true);
+		UIWindow frame = SwingWindowFactory.use().createFrame("ZoomUI", 1200, 600);
 		new TestContainer(frame.getContainer(), MAX_LEVEL);
 		frame.show();
 	}

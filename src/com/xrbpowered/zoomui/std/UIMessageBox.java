@@ -147,7 +147,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 
 	public static void show(String title, String message, SvgIcon icon,
 			MessageResult[] options, MessageResultHandler onResult) {
-		show(UIWindowFactory.getInstance(), title, message, icon, options, onResult);
+		show(UIWindowFactory.instance, title, message, icon, options, onResult);
 	}
 
 }

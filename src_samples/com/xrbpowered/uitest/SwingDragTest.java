@@ -7,9 +7,9 @@ import com.xrbpowered.zoomui.DragWindowActor;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIWindowFactory;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIFormattedLabel;
+import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class SwingDragTest extends UIContainer {
 
@@ -57,7 +57,7 @@ public class SwingDragTest extends UIContainer {
 	}
 	
 	public static void main(String[] args) {
-		UIWindow frame = UIWindowFactory.getInstance().createUndecorated(200, 200);
+		UIWindow frame = SwingWindowFactory.use().createUndecorated(200, 200);
 		new SwingDragTest(frame.getContainer());
 		frame.show();
 	}

@@ -14,8 +14,8 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 	public final JDialog dialog;
 	public final BasePanel panel;
 
-	protected SwingModalDialog(SwingWindowFactory factory, String title, int w, int h, boolean canResize, ResultHandler<A> onResult) {
-		super(factory, onResult);
+	protected SwingModalDialog(SwingWindowFactory factory, String title, int w, int h, boolean canResize) {
+		super(factory);
 		
 		dialog = new JDialog();
 		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

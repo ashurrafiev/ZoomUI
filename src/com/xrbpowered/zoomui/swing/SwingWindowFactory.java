@@ -7,26 +7,45 @@ import com.xrbpowered.zoomui.UIWindowFactory;
 
 public class SwingWindowFactory extends UIWindowFactory {
 
-	public SwingWindowFactory() {
-	}
-
-	public SwingWindowFactory(float baseScale) {
-		this.setBaseScale(baseScale);
-	}
-
 	@Override
 	public UIWindow create(String title, int w, int h, boolean canResize) {
-		return new SwingFrame(this, title, w, h, canResize, false);
+		return new SwingFrame(this, title, w, h, canResize, false).exitOnClose(false);
 	}
 
 	@Override
 	public <A> UIModalWindow<A> createModal(String title, int w, int h, boolean canResize, ResultHandler<A> onResult) {
-		return new SwingModalDialog<>(this, title, w, h, canResize, onResult);
+		SwingModalDialog<A> dlg = new SwingModalDialog<>(this, title, w, h, canResize);
+		dlg.onResult = onResult;
+		return dlg;
 	}
 
 	@Override
 	public UIWindow createUndecorated(int w, int h) {
-		return new SwingFrame(this, null, w, h, false, true);
+		return new SwingFrame(this, null, w, h, false, true).exitOnClose(false);
 	}
 
+	public SwingFrame createFrame(String title, int w, int h, boolean canResize) {
+		return new SwingFrame(this, title, w, h, canResize, false);
+	}
+
+	public SwingFrame createFrame(String title, int w, int h) {
+		return new SwingFrame(this, title, w, h, true, false);
+	}
+
+	public SwingFrame createFullscreen() {
+		return new SwingFrame(this, null, 1024, 600, false, true).maximize();
+	}
+
+	public static SwingWindowFactory use() {
+		if(!(UIWindowFactory.instance instanceof SwingWindowFactory))
+			UIWindowFactory.instance = new SwingWindowFactory();
+		return (SwingWindowFactory) UIWindowFactory.instance;
+	}
+
+	public static SwingWindowFactory use(float baseScale) {
+		SwingWindowFactory factory = use();
+		factory.setBaseScale(baseScale);
+		return factory;
+	}
+	
 }

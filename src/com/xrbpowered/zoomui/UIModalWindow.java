@@ -22,9 +22,8 @@ public abstract class UIModalWindow<A> extends UIWindow {
 	
 	public ResultHandler<A> onResult = null;	
 	
-	public UIModalWindow(UIWindowFactory factory, ResultHandler<A> onResult) {
+	public UIModalWindow(UIWindowFactory factory) {
 		super(factory);
-		this.onResult = onResult;
 	}
 
 	@Override

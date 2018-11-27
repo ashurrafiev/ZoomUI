@@ -6,11 +6,11 @@ import java.awt.Font;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIWindowFactory;
 import com.xrbpowered.zoomui.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIToolButton;
+import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class SvgHtmlTest extends UIZoomView {
 
@@ -65,9 +65,7 @@ public class SvgHtmlTest extends UIZoomView {
 	}
 
 	public static void main(String[] args) {
-		UIWindowFactory factory = UIWindowFactory.getInstance();
-		factory.setBaseScale(2f);
-		UIWindow frame = factory.create("SvgHtmlTest", 300, 200, true);
+		UIWindow frame = SwingWindowFactory.use(2f).createFrame("SvgHtmlTest", 300, 200);
 		new SvgHtmlTest(frame.getContainer());
 		frame.show();
 	}

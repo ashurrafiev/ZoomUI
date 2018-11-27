@@ -7,9 +7,9 @@ import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIWindowFactory;
 import com.xrbpowered.zoomui.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgFile;
+import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class RenderSvg extends UIZoomView {
 
@@ -38,9 +38,7 @@ public class RenderSvg extends UIZoomView {
 	}
 
 	public static void main(String[] args) {
-		UIWindowFactory factory = UIWindowFactory.getInstance();
-		factory.setBaseScale(1f);
-		UIWindow frame = factory.create("RenderSvg", 1800, 960, true);
+		UIWindow frame = SwingWindowFactory.use(1f).createFrame("RenderSvg", 1800, 960);
 		new RenderSvg(frame.getContainer());
 		frame.show();
 	}
