@@ -13,7 +13,7 @@ import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
 public class SwingDragTest extends UIContainer {
 
-	private DragActor dragActor = new DragWindowActor(this);
+	private DragWindowActor dragActor = new DragWindowActor(this);
 
 	private UIButton btnClose;
 	private UIFormattedLabel label;
@@ -53,7 +53,7 @@ public class SwingDragTest extends UIContainer {
 
 	@Override
 	public boolean onMouseDown(float x, float y, Button button, int mods) {
-		return (isInside(x, y) && button==Button.left);
+		return isInside(x, y) && dragActor.isTrigger(button, mods);
 	}
 	
 	public static void main(String[] args) {

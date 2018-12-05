@@ -216,11 +216,10 @@ public class GraphAssist {
 			graph.fillRect(0, 0, w, h);
 		}
 		if(stroke!=null) {
-			for(int i=0; i<thickness; i++) {
-				resetStroke();
-				setColor(stroke);
+			resetStroke();
+			setColor(stroke);
+			for(int i=0; i<thickness; i++)
 				graph.drawRect(i, i, w-i*2-1, h-i*2-1);
-			}
 		}
 		
 		finishPixelMode();

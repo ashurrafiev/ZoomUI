@@ -8,6 +8,7 @@ import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIModalWindow;
+import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.UIModalWindow.ResultHandlerWithDefault;
 import com.xrbpowered.zoomui.UIWindowFactory;
 import com.xrbpowered.zoomui.icons.IconPalette;
@@ -123,8 +124,12 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		if(icon!=null)
 			icon.paint(g.graph, 0, 16, 12, iconSize, getPixelScale(), true);
 		
-		if(hlabel!=label.getHeight()) // FIXME blink; measure before paint (stackoverflow)
-			getBase().getWindow().setClientSize((int)getWidth(), (int)(h+UIButton.defaultHeight+40));
+		if(hlabel!=label.getHeight()) { // FIXME blink; measure before paint (stackoverflow)
+			UIWindow window = getBase().getWindow();
+			window.setClientSize((int)getWidth(), (int)(h+UIButton.defaultHeight+40));
+			window.center();
+			//window.getContainer().layout();
+		}
 	}
 	
 	@Override
