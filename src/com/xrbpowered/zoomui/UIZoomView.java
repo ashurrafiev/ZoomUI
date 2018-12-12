@@ -37,10 +37,24 @@ public class UIZoomView extends UIPanView {
 		scale = s;
 		checkScaleRange();
 	}
-	
+
 	public void scale(float ds) {
+		scale(ds, getWidth()/2f, getHeight()/2f);
+	}
+
+	public void scale(float ds, float x, float y) {
+		float s = scale;
 		scale *= ds;
 		checkScaleRange();
+		ds = scale / s;
+		super.setPan(
+				(ds-1f)*x+ds*panX,
+				(ds-1f)*y+ds*panY
+			);
+	}
+	
+	public float getScale() {
+		return scale;
 	}
 	
 	@Override
@@ -77,7 +91,7 @@ public class UIZoomView extends UIPanView {
 	@Override
 	public boolean onMouseScroll(float x, float y, float delta, int mods) {
 		if(mods==modCtrlMask) {
-			scale(1.0f+delta*0.2f);
+			scale(1.0f+delta*0.2f, x, y);
 			repaint();
 			return true;
 		}

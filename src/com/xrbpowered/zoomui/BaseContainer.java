@@ -122,7 +122,7 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 		if(drag==null) {
 			updateMouseMove(x, y);
 			if(uiUnderMouse!=null && uiUnderMouse!=this)
-				uiUnderMouse.onMouseMoved(x, y, mods);
+				uiUnderMouse.onMouseMoved(uiUnderMouse.baseToLocalX(x), uiUnderMouse.baseToLocalY(y), mods);
 		}
 	}
 	
