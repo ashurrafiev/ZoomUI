@@ -170,7 +170,7 @@ public class GraphAssist {
 
 	public void vborder(UIElement e, int halign) {
 		float x = align(e.getWidth(), halign);
-		drawRect(x, 0, x, e.getHeight());
+		line(x, 0, x, e.getHeight());
 	}
 	
 	public void vborder(UIElement e, int halign, Color c) {
@@ -180,7 +180,7 @@ public class GraphAssist {
 
 	public void hborder(UIElement e, int valign) {
 		float y = align(e.getHeight(), valign);
-		drawRect(0, y, e.getWidth(), y);
+		line(0, y, e.getWidth(), y);
 	}
 	
 	public void hborder(UIElement e, int valign, Color c) {
