@@ -11,8 +11,8 @@ public abstract class UIScrollContainer extends UIContainer {
 
 	public static Color colorBorder = UITextBox.colorBorder;
 
-	public static int scrollStep = GraphAssist.ptToPixels(9f);
-	public static int wheelStep = 3*scrollStep;
+	public int scrollStep = GraphAssist.ptToPixels(9f);
+	public int wheelStep = 3*scrollStep;
 	
 	private UIPanView view;
 	private UIScrollBar scroll;
@@ -48,11 +48,12 @@ public abstract class UIScrollContainer extends UIContainer {
 	final void layout() {
 		scroll.setLength(getHeight());
 		scroll.setLocation(getWidth()-scroll.getWidth(), 0);
+		scroll.layout();
 		
 		view.setLocation(0, 0);
 		view.setSize(getWidth()-scroll.getWidth(), getHeight());
 		view.setPanRangeForClient(0, layoutView());
-		super.layout();
+		view.layout();
 	}
 	
 	protected abstract float layoutView();

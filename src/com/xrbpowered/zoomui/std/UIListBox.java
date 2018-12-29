@@ -53,6 +53,14 @@ public class UIListBox extends UIScrollContainer {
 		}
 	}
 	
+	public int getNumItems() {
+		return listItems.length;
+	}
+	
+	public UIListItem getItem(int index) {
+		return listItems[index];
+	}
+	
 	public void onItemSelected(UIListItem item) {
 	}
 
@@ -64,12 +72,13 @@ public class UIListBox extends UIScrollContainer {
 	
 	@Override
 	protected float layoutView() {
-		float w = getWidth();
+		float w = getView().getWidth();
 		float y = 0;
 		for(int i=0; i<listItems.length; i++) {
 			listItems[i].setLocation(0, y);
-			listItems[i].setSize(w, 20f);
-			y += 20f;
+			float h = listItems[i].getHeight();
+			listItems[i].setSize(w, h);
+			y += h;
 		}
 		return y;
 	}

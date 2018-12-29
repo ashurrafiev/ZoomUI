@@ -57,6 +57,14 @@ public class UIZoomView extends UIPanView {
 		return scale;
 	}
 	
+	public float getMinScale() {
+		return minScale;
+	}
+	
+	public float getMaxScale() {
+		return maxScale;
+	}
+	
 	@Override
 	public void setPan(float x, float y) {
 		super.setPan(x*scale, y*scale);

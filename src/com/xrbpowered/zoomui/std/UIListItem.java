@@ -9,6 +9,8 @@ import com.xrbpowered.zoomui.std.text.UITextBox;
 
 public class UIListItem extends UIElement {
 	
+	public static float defaultHeight = 20f;
+	
 	public static Font font = UIButton.font;
 
 	public static Color colorText = UITextBox.colorText;
@@ -17,7 +19,7 @@ public class UIListItem extends UIElement {
 	public static Color colorSelectedText = UITextBox.colorSelectedText;
 
 	public final int index;
-	protected Object object;
+	public final Object object;
 	
 	public final UIListBox list;
 	protected boolean hover = false;
@@ -27,6 +29,7 @@ public class UIListItem extends UIElement {
 		this.index = index;
 		this.object = object;
 		this.list = list;
+		setSize(0, defaultHeight);
 	}
 	
 	@Override

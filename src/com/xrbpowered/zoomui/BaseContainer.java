@@ -163,12 +163,6 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 		return uiFocused;
 	}
 
-	@Override
-	protected void addChild(UIElement c) {
-		super.addChild(c);
-		resetFocus();
-	}
-
 	public float getBaseScale() {
 		return baseScale;
 	}

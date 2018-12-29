@@ -63,7 +63,7 @@ public abstract class UIElement {
 			return 1f;
 	}
 	
-	protected void repaint() {
+	public void repaint() {
 		getBase().getWindow().repaint();
 	}
 	
