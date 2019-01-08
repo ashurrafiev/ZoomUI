@@ -12,6 +12,7 @@ import com.xrbpowered.zoomui.UIHoverElement;
 public class UIScrollBar extends UIContainer {
 
 	public static int defaultWidth = 16;
+	public static int arrowSpan = 4;
 	
 	public static Color colorBg = new Color(0xf2f2f2);
 	public static Color colorBorder = new Color(0xcccccc);
@@ -241,20 +242,37 @@ public class UIScrollBar extends UIContainer {
 		super.paintChildren(g);
 	}
 	
+	public static void drawUpArrow(GraphAssist g, int x, int y, int span) {
+		g.graph.fillPolygon(new int[] {x-span, x, x+span}, new int[] {y+span/2, y-span/2, y+span/2}, 3);
+	}
+
+	public static void drawDownArrow(GraphAssist g, int x, int y, int span) {
+		g.graph.fillPolygon(new int[] {x-span, x, x+span}, new int[] {y-span/2, y+span/2, y-span/2}, 3);
+	}
+
+	public static void drawLeftArrow(GraphAssist g, int x, int y, int span) {
+		g.graph.fillPolygon(new int[] {x+span/2, x-span/2, x+span/2}, new int[] {y-span, y, y+span}, 3);
+	}
+
+	public static void drawRightArrow(GraphAssist g, int x, int y, int span) {
+		g.graph.fillPolygon(new int[] {x-span/2, x+span/2, x-span/2}, new int[] {y-span, y, y+span}, 3);
+	}
+
 	public static void drawUpArrow(GraphAssist g, int x, int y) {
-		g.graph.fillPolygon(new int[] {x-4, x, x+4}, new int[] {y+2, y-2, y+2}, 3);
+		drawUpArrow(g, x, y, arrowSpan);
 	}
 
 	public static void drawDownArrow(GraphAssist g, int x, int y) {
-		g.graph.fillPolygon(new int[] {x-4, x, x+4}, new int[] {y-2, y+2, y-2}, 3);
+		drawDownArrow(g, x, y, arrowSpan);
 	}
 
 	public static void drawLeftArrow(GraphAssist g, int x, int y) {
-		g.graph.fillPolygon(new int[] {x+2, x-2, x+2}, new int[] {y-4, y, y+4}, 3);
+		drawLeftArrow(g, x, y, arrowSpan);
 	}
 
 	public static void drawRightArrow(GraphAssist g, int x, int y) {
-		g.graph.fillPolygon(new int[] {x-2, x+2, x-2}, new int[] {y-4, y, y+4}, 3);
+		drawRightArrow(g, x, y, arrowSpan);
 	}
+
 
 }
