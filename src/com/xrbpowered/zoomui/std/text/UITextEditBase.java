@@ -23,7 +23,6 @@ import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIHoverElement;
 import com.xrbpowered.zoomui.UIPanView;
 import com.xrbpowered.zoomui.std.History;
-import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListItem;
 
 public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
@@ -32,7 +31,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	public static final Pattern indentRegex = Pattern.compile("\\s*");
 	public static String newline = System.lineSeparator();
 
-	public Font font = UIButton.font;
+	public Font font = UITextBox.font;
 
 	public Color colorBackground = UITextBox.colorBackground;
 	public Color colorHighlight = UIListItem.colorHighlight;
@@ -224,6 +223,10 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 
 	public void setText(String text) {
 		setText(text, true);
+	}
+	
+	public String getText() {
+		return text;
 	}
 
 	private void setText(String text, boolean resetHistory) {
