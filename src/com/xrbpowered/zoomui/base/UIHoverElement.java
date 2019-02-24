@@ -1,4 +1,7 @@
-package com.xrbpowered.zoomui;
+package com.xrbpowered.zoomui.base;
+
+import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.UIElement;
 
 public abstract class UIHoverElement extends UIElement {
 

@@ -6,6 +6,7 @@ import java.awt.GradientPaint;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.base.UIButtonBase;
 
 public class UIButton extends UIButtonBase {
 
@@ -20,7 +21,7 @@ public class UIButton extends UIButtonBase {
 	public static int defaultWidth = 88;
 	public static int defaultHeight = 20;
 
-	protected String label;
+	public String label;
 	
 	public UIButton(UIContainer parent, String label) {
 		super(parent);

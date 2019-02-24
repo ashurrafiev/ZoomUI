@@ -7,7 +7,7 @@ import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIZoomView;
+import com.xrbpowered.zoomui.base.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgFile;
 import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 

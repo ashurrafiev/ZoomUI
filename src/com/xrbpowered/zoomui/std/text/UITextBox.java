@@ -5,7 +5,8 @@ import java.awt.Font;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
-import com.xrbpowered.zoomui.UIPanView;
+import com.xrbpowered.zoomui.base.UIPanView;
+import com.xrbpowered.zoomui.base.UITextEditBase;
 import com.xrbpowered.zoomui.std.UIButton;
 
 public class UITextBox extends UIPanView {

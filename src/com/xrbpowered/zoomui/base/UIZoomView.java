@@ -1,4 +1,7 @@
-package com.xrbpowered.zoomui;
+package com.xrbpowered.zoomui.base;
+
+import com.xrbpowered.zoomui.GraphAssist;
+import com.xrbpowered.zoomui.UIContainer;
 
 public class UIZoomView extends UIPanView {
 

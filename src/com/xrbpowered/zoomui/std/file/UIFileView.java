@@ -17,13 +17,13 @@ import java.util.HashMap;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
-import com.xrbpowered.zoomui.UIHoverElement;
+import com.xrbpowered.zoomui.base.UIHoverElement;
 import com.xrbpowered.zoomui.icons.SvgIcon;
+import com.xrbpowered.zoomui.std.UIArrowButton;
 import com.xrbpowered.zoomui.std.UIButton;
 import com.xrbpowered.zoomui.std.UIListItem;
 import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
-import com.xrbpowered.zoomui.std.UIScrollBar;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 import com.xrbpowered.zoomui.std.UIToolButton;
 
@@ -181,9 +181,9 @@ public class UIFileView extends UIScrollContainer {
 					g.setColor(colorText);
 					int y = (int)(getHeight()/2f);
 					if(open)
-						UIScrollBar.drawDownArrow(g, 10, y);
+						UIArrowButton.drawDownArrow(g, 10, y);
 					else
-						UIScrollBar.drawRightArrow(g, 10, y);
+						UIArrowButton.drawRightArrow(g, 10, y);
 					
 					g.setColor(colorBorderLight);
 					g.line(textWidth+28, y, getWidth()-8, y);

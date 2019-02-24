@@ -1,6 +1,7 @@
 package com.xrbpowered.zoomui.std.text;
 
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.base.UITextEditBase;
 import com.xrbpowered.zoomui.std.UIScrollContainer;
 
 public class UITextArea extends UIScrollContainer {

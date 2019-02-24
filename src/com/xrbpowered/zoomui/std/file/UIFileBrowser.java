@@ -7,9 +7,9 @@ import java.io.File;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIModalWindow.ResultHandler;
-import com.xrbpowered.zoomui.std.History;
+import com.xrbpowered.zoomui.base.History;
+import com.xrbpowered.zoomui.base.UIButtonBase;
 import com.xrbpowered.zoomui.std.UIButton;
-import com.xrbpowered.zoomui.std.UIButtonBase;
 import com.xrbpowered.zoomui.std.UIToolButton;
 import com.xrbpowered.zoomui.std.text.UITextBox;
 

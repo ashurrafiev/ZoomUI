@@ -1,9 +1,9 @@
-package com.xrbpowered.zoomui.std;
+package com.xrbpowered.zoomui.base;
 
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 
-public abstract class UIListBoxBase<T extends UIElement> extends UIScrollContainer {
+public abstract class UIListBoxBase<T extends UIElement> extends UIScrollContainerBase {
 
 	protected UIElement[] listItems;
 	

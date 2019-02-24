@@ -1,8 +1,7 @@
-package com.xrbpowered.zoomui.std;
+package com.xrbpowered.zoomui.base;
 
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
-import com.xrbpowered.zoomui.UIHoverElement;
 
 public abstract class UIButtonBase extends UIHoverElement {
 

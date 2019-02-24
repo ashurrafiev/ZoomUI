@@ -4,6 +4,7 @@ import java.awt.Color;
 
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.base.UIButtonBase;
 import com.xrbpowered.zoomui.icons.IconPalette;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 

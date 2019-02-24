@@ -6,7 +6,7 @@ import java.awt.Font;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIWindow;
-import com.xrbpowered.zoomui.UIZoomView;
+import com.xrbpowered.zoomui.base.UIZoomView;
 import com.xrbpowered.zoomui.icons.SvgIcon;
 import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIToolButton;

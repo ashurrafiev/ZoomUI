@@ -1,4 +1,4 @@
-package com.xrbpowered.zoomui.std.text;
+package com.xrbpowered.zoomui.base;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -20,10 +20,8 @@ import com.xrbpowered.zoomui.DragActor;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
 import com.xrbpowered.zoomui.UIElement;
-import com.xrbpowered.zoomui.UIHoverElement;
-import com.xrbpowered.zoomui.UIPanView;
-import com.xrbpowered.zoomui.std.History;
 import com.xrbpowered.zoomui.std.UIListItem;
+import com.xrbpowered.zoomui.std.text.UITextBox;
 
 public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	
@@ -31,7 +29,7 @@ public class UITextEditBase extends UIHoverElement implements KeyInputHandler {
 	public static final Pattern indentRegex = Pattern.compile("\\s*");
 	public static String newline = System.lineSeparator();
 
-	public Font font = UITextBox.font;
+	public Font font = UITextBox.font; // TODO remove std fonts/colors from base controls
 
 	public Color colorBackground = UITextBox.colorBackground;
 	public Color colorHighlight = UIListItem.colorHighlight;

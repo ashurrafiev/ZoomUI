@@ -1,4 +1,9 @@
-package com.xrbpowered.zoomui;
+package com.xrbpowered.zoomui.base;
+
+import com.xrbpowered.zoomui.DragActor;
+import com.xrbpowered.zoomui.GraphAssist;
+import com.xrbpowered.zoomui.UIContainer;
+import com.xrbpowered.zoomui.UIElement;
 
 public class UIPanView extends UIContainer {
 
