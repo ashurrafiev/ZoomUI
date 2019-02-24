@@ -12,7 +12,7 @@ public class UIScrollBar extends UIScrollBarBase {
 
 	public static int defaultWidth = 16;
 	
-	public static Color colorBg = new Color(0xf2f2f2);
+	public static Color colorBackground = new Color(0xf2f2f2);
 	public static Color colorBorder = new Color(0xcccccc);
 	
 	public UIScrollBar(UIContainer parent, boolean vertical, int thumbWidth) {
@@ -36,7 +36,7 @@ public class UIScrollBar extends UIScrollBarBase {
 	@Override
 	protected void paintSelf(GraphAssist g) {
 		super.paintSelf(g);
-		g.fill(this, colorBg);
+		g.fill(this, colorBackground);
 		g.border(this, colorBorder);
 	}
 	

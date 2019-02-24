@@ -10,7 +10,7 @@ import com.xrbpowered.zoomui.UIElement.Button;
 import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.swing.SwingWindowFactory;
 
-public class ZoomUITest {
+public class TestEvents {
 
 	private static final int MAX_LEVEL = 2;
 	private static final Font font = new Font("Tahoma", Font.BOLD, GraphAssist.ptToPixels(14f));

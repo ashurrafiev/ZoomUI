@@ -13,6 +13,7 @@ import com.xrbpowered.zoomui.std.UIFormattedLabel;
 import com.xrbpowered.zoomui.std.UIListBox;
 import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
+import com.xrbpowered.zoomui.std.UIOptionBox;
 import com.xrbpowered.zoomui.std.text.UITextBox;
 import com.xrbpowered.zoomui.std.UIToolButton;
 import com.xrbpowered.zoomui.swing.SwingFrame;
@@ -26,6 +27,7 @@ public class ZoomViewTest extends UIZoomView {
 	private UIListBox list;
 	private UITextBox text;
 	private UIToolButton toolBtn;
+	private UIOptionBox<String> options;
 	private UIFormattedLabel html;
 	
 	public ZoomViewTest(UIContainer parent) {
@@ -53,7 +55,7 @@ public class ZoomViewTest extends UIZoomView {
 			}
 		};
 		String[] items = new String[20];
-		for(int i=0; i<20; i++)
+		for(int i=0; i<items.length; i++)
 			items[i] = "List item "+i;
 		list = new UIListBox(this, items);
 		text = new UITextBox(this);
@@ -66,6 +68,11 @@ public class ZoomViewTest extends UIZoomView {
 						UIMessageBox.iconAlert, new MessageResult[] {MessageResult.ok}, null);
 			}
 		};
+		
+		items = new String[5];
+		for(int i=0; i<items.length; i++)
+			items[i] = "Option "+i;
+		options = new UIOptionBox<>(this, items);
 		
 		html = new UIFormattedLabel(this, "This is an example of a <b>formatted label</b>. Click <a href=\"link\">here</a> to test if the link works or not.") {
 			@Override
@@ -94,8 +101,10 @@ public class ZoomViewTest extends UIZoomView {
 		text.setLocation(16, 32+48+120);
 		text.setSize(list.getWidth(), text.getHeight());
 		toolBtn.setLocation(-40, list.getY());
+		options.setLocation(16, 56+48+120);
+		options.setSize(list.getWidth(), options.getHeight());
 		
-		html.setLocation(16, 64+48+120);
+		html.setLocation(16, 88+48+120);
 		html.setSize(list.getWidth(), 0);
 	}
 	
