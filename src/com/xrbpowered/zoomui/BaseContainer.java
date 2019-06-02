@@ -43,8 +43,13 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	private int prevMouseX = 0;
 	private int prevMouseY = 0;
 	
-	private boolean invalidLayout = true;
+	protected boolean invalidLayout = true;
 
+	@Override
+	public void repaint() {
+		window.repaint();
+	}
+	
 	public void invalidateLayout() {
 		invalidLayout = true;
 	}

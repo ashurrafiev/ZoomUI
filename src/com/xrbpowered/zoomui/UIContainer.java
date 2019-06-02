@@ -37,7 +37,7 @@ public abstract class UIContainer extends UIElement {
 	}
 	
 	protected void paintChildren(GraphAssist g) {
-		Rectangle clip = g.graph.getClipBounds();
+		Rectangle clip = g.getClip();
 		for(UIElement c : children) {
 			if(c.isVisible(clip)) {
 				g.pushTx();

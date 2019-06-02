@@ -64,7 +64,8 @@ public abstract class UIElement {
 	}
 	
 	public void repaint() {
-		getBase().getWindow().repaint();
+		if(parent!=null)
+			parent.repaint();
 	}
 	
 	public void invalidateLayout() {

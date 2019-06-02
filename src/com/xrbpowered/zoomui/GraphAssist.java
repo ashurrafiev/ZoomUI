@@ -20,7 +20,7 @@ public class GraphAssist {
 	public static final int TOP = 0;
 	public static final int BOTTOM = 2;
 	
-	private static final Stroke defaultStroke = new BasicStroke(1f);
+	protected static final Stroke defaultStroke = new BasicStroke(1f);
 	
 	public final Graphics2D graph;
 	
@@ -33,16 +33,24 @@ public class GraphAssist {
 		this.graph = graph;
 	}
 	
+	public AffineTransform getTransform() {
+		return graph.getTransform();
+	}
+	
+	public void setTransform(AffineTransform t) {
+		graph.setTransform(t);
+	}
+	
 	public AffineTransform getTx() {
 		return txStack.getFirst();
 	}
 	
 	public void pushTx() {
-		txStack.addFirst(graph.getTransform());
+		txStack.addFirst(getTransform());
 	}
 	
 	public void popTx() {
-		graph.setTransform(txStack.removeFirst());
+		setTransform(txStack.removeFirst());
 	}
 	
 	public void clearTransform() {
@@ -57,12 +65,20 @@ public class GraphAssist {
 		graph.scale(scale, scale);
 	}
 	
+	public Rectangle getClip() {
+		return graph.getClipBounds();
+	}
+	
+	public void setClip(Rectangle r) {
+		graph.setClip(r);
+	}
+	
 	public boolean pushClip(float x, float y, float w, float h) {
-		Rectangle clip = graph.getClipBounds();
+		Rectangle clip = getClip();
 		Rectangle r = new Rectangle((int)x, (int)y, (int)w, (int)h);
 		if(r.intersects(clip)) {
 			clipStack.addFirst(clip);
-			graph.setClip(r.intersection(clip));
+			setClip(r.intersection(clip));
 			return true;
 		}
 		else
@@ -70,7 +86,7 @@ public class GraphAssist {
 	}
 	
 	public void popClip() {
-		graph.setClip(clipStack.removeFirst());
+		setClip(clipStack.removeFirst());
 	}
 	
 	public boolean isAntialisingOn() {
