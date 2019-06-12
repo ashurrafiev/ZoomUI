@@ -109,7 +109,7 @@ public class UIFileBrowser extends UIContainer {
 			public void onAction() {
 				if(resultHandler!=null)
 					resultHandler.onResult(view.selectedFile);
-			};
+			}
 		};
 		btnCancel = new UIButton(this, "Cancel") {
 			@Override

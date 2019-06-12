@@ -27,7 +27,7 @@ public class RenderSvg extends UIZoomView {
 				g.pushPureStroke(true);
 				svg.render(g.graph, 10);
 				g.popPureStroke();
-			};
+			}
 		};
 		setScaleRange(0.1f, 10);
 	}
