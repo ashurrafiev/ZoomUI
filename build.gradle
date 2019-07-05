@@ -1,0 +1,26 @@
+plugins {
+    id "java-library"
+    id "maven-publish"
+}
+
+version = "0.3.1"
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["src"]
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = "com.xrbpowered"
+            artifactId = "zoom-ui"
+            version = project.version
+
+            from components.java
+        }
+    }
+}
