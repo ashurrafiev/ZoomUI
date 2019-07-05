@@ -17,7 +17,7 @@ publishing {
     publications {
         maven(MavenPublication) {
             groupId = "com.xrbpowered"
-            artifactId = "zoom-ui"
+            artifactId = "zoomui"
             version = project.version
 
             from components.java
