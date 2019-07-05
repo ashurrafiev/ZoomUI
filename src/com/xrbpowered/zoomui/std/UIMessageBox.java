@@ -1,8 +1,8 @@
 package com.xrbpowered.zoomui.std;
 
 import java.awt.Color;
+import java.awt.event.KeyEvent;
 
-import com.sun.glass.events.KeyEvent;
 import com.xrbpowered.zoomui.BaseContainer.ModalBaseContainer;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.KeyInputHandler;
