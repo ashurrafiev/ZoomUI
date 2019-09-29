@@ -66,6 +66,7 @@ public abstract class History<T> {
 		while(maxSize>0 && size>maxSize) {
 			history.removeFirst();
 			size--;
+			index--;
 		}
 		onUpdate();
 	}
