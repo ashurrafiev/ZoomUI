@@ -193,6 +193,16 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 	}
 	
 	@Override
+	protected float localToParentX(float x) {
+		return x * baseScale;
+	}
+
+	@Override
+	protected float localToParentY(float y) {
+		return y * baseScale;
+	}
+
+	@Override
 	public void layout() {
 		for(UIElement c : children) {
 			c.setLocation(0, 0);

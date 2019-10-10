@@ -117,6 +117,16 @@ public class UIPanView extends UIContainer {
 	protected float parentToLocalY(float y) {
 		return super.parentToLocalY(y)+panY;
 	}
+	
+	@Override
+	protected float localToParentX(float x) {
+		return super.localToParentX(x-panX);
+	}
+	
+	@Override
+	protected float localToParentY(float y) {
+		return super.localToParentY(y-panY);
+	}
 
 	protected void applyTransform(GraphAssist g) {
 		g.translate(-panX, -panY);

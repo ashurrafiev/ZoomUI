@@ -48,12 +48,28 @@ public abstract class UIElement {
 		return y - this.y;
 	}
 	
+	protected float localToParentX(float x) {
+		return x + this.x;
+	}
+
+	protected float localToParentY(float y) {
+		return y + this.y;
+	}
+
 	public float baseToLocalX(float x) {
 		return parentToLocalX(parent==null ? x : parent.baseToLocalX(x));
 	}
 
 	public float baseToLocalY(float y) {
 		return parentToLocalY(parent==null ? y : parent.baseToLocalY(y));
+	}
+	
+	public float localToBaseX(float x) {
+		return parent==null ? localToParentX(x) : parent.localToBaseX(localToParentX(x));
+	}
+
+	public float localToBaseY(float y) {
+		return parent==null ? localToParentY(y) : parent.localToBaseY(localToParentY(y));
 	}
 
 	public float getPixelScale() {
