@@ -73,6 +73,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		}
 			
 		this.label = new UIFormattedLabel(this, message);
+		this.label.setSize(0, 0);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -107,7 +108,7 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		float x = (icon==null) ? 0 : iconSize+12; 
 		float h = Math.max(label.getHeight(), (icon==null) ? 0 : iconSize+8);
 		label.setLocation(x+16, (h-label.getHeight())/2f+8);
-		label.setSize(getWidth()-x-32, 0);
+		label.setSize(getWidth()-x-32, label.getHeight());
 		label.layout();
 		
 		float y = getHeight()-8-UIButton.defaultHeight;
@@ -124,11 +125,10 @@ public class UIMessageBox extends UIContainer implements KeyInputHandler {
 		if(icon!=null)
 			icon.paint(g.graph, 0, 16, 12, iconSize, getPixelScale(), true);
 		
-		if(hlabel!=label.getHeight()) { // FIXME blink; measure before paint (stackoverflow)
+		if(hlabel!=label.getHeight()) {
 			UIWindow window = getBase().getWindow();
 			window.setClientSize((int)getWidth(), (int)(h+UIButton.defaultHeight+40));
-			window.center();
-			//window.getContainer().layout();
+			window.center(); // FIXME message box centering 
 		}
 	}
 	
