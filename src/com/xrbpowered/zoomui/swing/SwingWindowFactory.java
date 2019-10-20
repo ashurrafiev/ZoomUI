@@ -1,6 +1,5 @@
 package com.xrbpowered.zoomui.swing;
 
-import com.xrbpowered.zoomui.UIModalWindow;
 import com.xrbpowered.zoomui.UIModalWindow.ResultHandler;
 import com.xrbpowered.zoomui.UIWindow;
 import com.xrbpowered.zoomui.UIWindowFactory;
@@ -8,12 +7,14 @@ import com.xrbpowered.zoomui.UIWindowFactory;
 public class SwingWindowFactory extends UIWindowFactory {
 
 	@Override
-	public UIWindow create(String title, int w, int h, boolean canResize) {
-		return new SwingFrame(this, title, w, h, canResize, false).exitOnClose(false);
+	public SwingFrame create(String title, int w, int h, boolean canResize) {
+		SwingFrame frame = new SwingFrame(this, title, w, h, canResize, false);
+		frame.exitOnClose(false);
+		return frame;
 	}
 
 	@Override
-	public <A> UIModalWindow<A> createModal(String title, int w, int h, boolean canResize, ResultHandler<A> onResult) {
+	public <A> SwingModalDialog<A> createModal(String title, int w, int h, boolean canResize, ResultHandler<A> onResult) {
 		SwingModalDialog<A> dlg = new SwingModalDialog<>(this, title, w, h, canResize);
 		dlg.onResult = onResult;
 		return dlg;

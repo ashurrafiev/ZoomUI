@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
@@ -110,7 +111,9 @@ public class BasePanel extends JPanel {
 	public void resize(int width, int height) {
 		float scale = window.getContainer().getBaseScale();
 		setPreferredSize(new Dimension((int)(width*scale), (int)(height*scale)));
-		SwingUtilities.getWindowAncestor(this).pack();
+		Window javaWindow = SwingUtilities.getWindowAncestor(this);
+		if(javaWindow!=null)
+			javaWindow.pack();
 		window.notifyResized();
 	}
 	
