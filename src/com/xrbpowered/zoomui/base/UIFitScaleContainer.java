@@ -6,12 +6,12 @@ import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.UIElement;
 
-public class UIFitContainer extends UIContainer {
+public class UIFitScaleContainer extends UIContainer {
 
 	protected float scale = 1f;
 	protected float targetWidth, targetHeight;
 
-	public UIFitContainer(UIContainer parent, float targetWidth, float targetHeight) {
+	public UIFitScaleContainer(UIContainer parent, float targetWidth, float targetHeight) {
 		super(parent);
 		this.targetWidth = targetWidth;
 		this.targetHeight = targetHeight;

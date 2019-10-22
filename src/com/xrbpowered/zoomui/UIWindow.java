@@ -1,6 +1,8 @@
 package com.xrbpowered.zoomui;
 
 import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
 
 import com.xrbpowered.zoomui.std.UIMessageBox;
 import com.xrbpowered.zoomui.std.UIMessageBox.MessageResult;
@@ -58,6 +60,13 @@ public abstract class UIWindow {
 	public abstract float screenToBaseY(int y);
 	
 	public abstract void setCursor(Cursor cursor);
+	
+	public abstract FontMetrics getFontMetrics(Font font);
+	
+	public FontMetrics getFontMetrics(Font font, float size, float pixelScale) {
+		return getFontMetrics(font.deriveFont(Math.round(size/pixelScale)));
+	}
+
 	
 	public UIWindow exitOnClose(boolean exit) {
 		this.exitOnClose = exit;

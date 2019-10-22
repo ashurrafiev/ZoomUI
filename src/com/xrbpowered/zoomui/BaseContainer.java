@@ -2,7 +2,9 @@ package com.xrbpowered.zoomui;
 
 import java.awt.RenderingHints;
 
-public class BaseContainer extends UIContainer implements KeyInputHandler {
+import com.xrbpowered.zoomui.base.UILayersContainer;
+
+public class BaseContainer extends UILayersContainer implements KeyInputHandler {
 
 	public static class ModalBaseContainer<A> extends BaseContainer {
 		protected ModalBaseContainer(UIModalWindow<A> window, float scale) {
@@ -204,11 +206,7 @@ public class BaseContainer extends UIContainer implements KeyInputHandler {
 
 	@Override
 	public void layout() {
-		for(UIElement c : children) {
-			c.setLocation(0, 0);
-			c.setSize(getWidth(), getHeight());
-			c.layout();
-		}
+		super.layout();
 		invalidLayout = false;
 	}
 	

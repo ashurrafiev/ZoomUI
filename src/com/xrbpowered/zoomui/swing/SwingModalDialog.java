@@ -1,6 +1,8 @@
 package com.xrbpowered.zoomui.swing;
 
 import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
@@ -116,6 +118,11 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 	@Override
 	public float screenToBaseY(int y) {
 		return panel.screenToBaseY(y);
+	}
+
+	@Override
+	public FontMetrics getFontMetrics(Font font) {
+		return panel.getFontMetrics(font);
 	}
 
 }

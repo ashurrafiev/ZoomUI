@@ -1,5 +1,6 @@
 package com.xrbpowered.zoomui.swing;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -17,6 +18,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -141,6 +143,14 @@ public class BasePanel extends JPanel {
 		pt.setLocation(0, y);
 		SwingUtilities.convertPointFromScreen(pt, this);
 		return pt.y;
+	}
+
+	public void setBorder(int width, Color color) {
+		setBorder(BorderFactory.createLineBorder(color, width));
+	}
+	
+	public void removeBorder() {
+		setBorder(BorderFactory.createEmptyBorder());
 	}
 	
 	private static Button getMouseButton(MouseEvent e) {
