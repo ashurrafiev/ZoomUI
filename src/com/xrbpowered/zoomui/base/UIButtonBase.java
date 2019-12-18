@@ -6,33 +6,26 @@ import com.xrbpowered.zoomui.UIElement;
 public abstract class UIButtonBase extends UIHoverElement {
 
 	public boolean down = false;
-	private boolean disabled = false;
+	private boolean enabled = true;
 	
 	public UIButtonBase(UIContainer parent) {
 		super(parent);
 	}
 	
-	public boolean isDisabled() {
-		return disabled;
-	}
-	
 	public boolean isEnabled() {
-		return !disabled;
+		return enabled;
 	}
 	
 	public void setEnabled(boolean enabled) {
-		this.disabled = !enabled;
+		this.enabled = enabled;
+		if(!enabled) {
+			hover = false;
+			down = false;
+		}
 	}
 	
-	public UIButtonBase enable() {
-		disabled = false;
-		return this;
-	}
-
 	public UIButtonBase disable() {
-		disabled = true;
-		hover = false;
-		down = false;
+		setEnabled(false);
 		return this;
 	}
 	
@@ -54,10 +47,10 @@ public abstract class UIButtonBase extends UIHoverElement {
 	@Override
 	public boolean onMouseDown(float x, float y, Button button, int mods) {
 		if(button==Button.left) {
-			if(isDisabled())
-				return true;
-			down = true;
-			repaint();
+			if(isEnabled()) {
+				down = true;
+				repaint();
+			}
 			return true;
 		}
 		else
@@ -70,7 +63,7 @@ public abstract class UIButtonBase extends UIHoverElement {
 			return false;
 		if(button==Button.left) {
 			down = false;
-			if(!isDisabled())
+			if(isEnabled())
 				onAction();
 			repaint();
 			return true;

@@ -6,7 +6,7 @@ import java.awt.Font;
 import com.xrbpowered.zoomui.GraphAssist;
 import com.xrbpowered.zoomui.UIContainer;
 import com.xrbpowered.zoomui.base.UIPanView;
-import com.xrbpowered.zoomui.base.UITextEditBase;
+import com.xrbpowered.zoomui.base.UITextEdit;
 import com.xrbpowered.zoomui.std.UIButton;
 
 public class UITextBox extends UIPanView {
@@ -22,7 +22,7 @@ public class UITextBox extends UIPanView {
 	public static int defaultWidth = 120;
 	public static int defaultHeight = 20;
 
-	public final UITextEditBase editor;
+	public final UITextEdit editor;
 	
 	public UITextBox(UIContainer parent) {
 		super(parent);
@@ -30,8 +30,8 @@ public class UITextBox extends UIPanView {
 		setSize(defaultWidth, defaultHeight);
 	}
 	
-	protected UITextEditBase createEditor() {
-		return new UITextEditBase(this, true);
+	protected UITextEdit createEditor() {
+		return new UITextEdit(this, true);
 	}
 
 	@Override

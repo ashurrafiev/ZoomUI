@@ -63,7 +63,7 @@ public class UIToolButton extends UIButtonBase {
 			g.setColor(colorBorder);
 			g.drawRect(0, 0, w, h);
 		}
-		icon.paint(g.graph, isDisabled() ? STYLE_DISABLED : STYLE_NORMAL, (w-iconSize)/2f, (h-iconSize)/2f, iconSize, getPixelScale(), true);
+		icon.paint(g.graph, isEnabled() ? STYLE_NORMAL : STYLE_DISABLED, (w-iconSize)/2f, (h-iconSize)/2f, iconSize, getPixelScale(), true);
 	}
 
 }

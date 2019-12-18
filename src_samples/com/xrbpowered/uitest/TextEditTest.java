@@ -48,7 +48,7 @@ public class TextEditTest {
 				g.hborder(this, GraphAssist.TOP, colorBorder);
 			}
 		};
-		text.editor.font = new Font("Verdana", Font.PLAIN, GraphAssist.ptToPixels(10f));
+		text.editor.setFont(new Font("Verdana", Font.PLAIN, 10), 10f);
 		text.editor.setText(loadString(TEST_INPUT));
 		
 		frame.show();
