@@ -4,7 +4,7 @@ import java.awt.RenderingHints;
 
 import com.xrbpowered.zoomui.base.UILayersContainer;
 
-public class BaseContainer extends UILayersContainer implements KeyInputHandler {
+public class BaseContainer extends UILayersContainer implements Measurable, KeyInputHandler {
 
 	public static class ModalBaseContainer<A> extends BaseContainer {
 		protected ModalBaseContainer(UIModalWindow<A> window, float scale) {
@@ -208,6 +208,32 @@ public class BaseContainer extends UILayersContainer implements KeyInputHandler 
 	public void layout() {
 		super.layout();
 		invalidLayout = false;
+	}
+	
+	@Override
+	public float measureWidth() {
+		float max = 0;
+		for(UIElement c : children) {
+			if(c instanceof Measurable) {
+				float w = ((Measurable) c).measureWidth();
+				if(w>max)
+					max = w;
+			}
+		}
+		return max;
+	}
+	
+	@Override
+	public float measureHeight() {
+		float max = 0;
+		for(UIElement c : children) {
+			if(c instanceof Measurable) {
+				float h = ((Measurable) c).measureHeight();
+				if(h>max)
+					max = h;
+			}
+		}
+		return max;
 	}
 	
 	@Override

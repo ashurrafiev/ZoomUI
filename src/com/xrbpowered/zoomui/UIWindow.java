@@ -36,6 +36,21 @@ public abstract class UIWindow {
 	public abstract int getClientHeight();
 	public abstract void setClientSize(int width, int height);
 	
+	public boolean setClientSizeFor(Measurable m) {
+		int w = (int)m.measureWidth();
+		int h = (int)m.measureHeight();
+		if(w>0 && h>0) {
+			setClientSize(w, h);
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	public boolean setClientSizeToContent() {
+		return setClientSizeFor(getContainer());
+	}
+	
 	public abstract int getX();
 	public abstract int getY();
 	public abstract void moveTo(int x, int y);
@@ -51,6 +66,7 @@ public abstract class UIWindow {
 		repaint();
 	}
 	
+	public abstract boolean isVisible();
 	public abstract void show();
 	public abstract void repaint();
 	

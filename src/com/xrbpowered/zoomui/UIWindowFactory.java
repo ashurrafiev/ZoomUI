@@ -25,6 +25,7 @@ public abstract class UIWindowFactory {
 	
 	public abstract UIWindow create(String title, int w, int h, boolean canResize);
 	public abstract <A> UIModalWindow<A> createModal(String title, int w, int h, boolean canResize, ResultHandler<A> onResult);
+	public abstract UIPopupWindow createPopup();
 	public abstract UIWindow createUndecorated(int w, int h);
 	
 }

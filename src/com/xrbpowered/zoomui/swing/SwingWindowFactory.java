@@ -20,6 +20,10 @@ public class SwingWindowFactory extends UIWindowFactory {
 		return dlg;
 	}
 
+	public SwingPopup createPopup() {
+		return new SwingPopup(this);
+	}
+	
 	@Override
 	public UIWindow createUndecorated(int w, int h) {
 		return new SwingFrame(this, null, w, h, false, true).exitOnClose(false);
@@ -47,6 +51,19 @@ public class SwingWindowFactory extends UIWindowFactory {
 		SwingWindowFactory factory = use();
 		factory.setBaseScale(baseScale);
 		return factory;
+	}
+	
+	public static BasePanel getBasePanel(UIWindow window) {
+		if(window==null)
+			return null;
+		else if(window instanceof SwingFrame)
+			return ((SwingFrame) window).panel;
+		else if(window instanceof SwingModalDialog<?>)
+			return ((SwingModalDialog<?>) window).panel;
+		else if(window instanceof SwingPopup)
+			return ((SwingPopup) window).panel;
+		else
+			return null;
 	}
 	
 }

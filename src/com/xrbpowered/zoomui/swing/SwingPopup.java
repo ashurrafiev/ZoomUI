@@ -1,50 +1,49 @@
 package com.xrbpowered.zoomui.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
+import javax.swing.BorderFactory;
+import javax.swing.JPopupMenu;
+import javax.swing.UIManager;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
+import com.xrbpowered.zoomui.UIPopupWindow;
 import com.xrbpowered.zoomui.UIWindow;
 
-public class SwingFrame extends UIWindow {
+public class SwingPopup extends UIPopupWindow {
 
-	public final JFrame frame;
+	public final JPopupMenu popup;
 	public final BasePanel panel;
-	
-	protected SwingFrame(SwingWindowFactory factory, String title, int w, int h, boolean canResize, boolean undecorated) {
+
+	public SwingPopup(SwingWindowFactory factory) {
 		super(factory);
-		exitOnClose(true);
+		UIManager.put("PopupMenu.consumeEventOnClose", Boolean.TRUE);
 		
-		frame = new JFrame();
-		frame.setTitle(title);
-		frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		frame.setResizable(canResize && !undecorated);
-		frame.setUndecorated(undecorated);
-		
-		frame.addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				requestClosing();
-			}
-		});
+		popup = new JPopupMenu();
+		popup.setBorder(BorderFactory.createEmptyBorder());
+		popup.setLayout(new BorderLayout());
 		
 		panel = new BasePanel(this);
-		frame.setContentPane(panel);
-		if(w>0 && h>0)
-			setClientSize(w, h);
-		center();
+		popup.add(panel, BorderLayout.CENTER);
+		
+		popup.addPopupMenuListener(new PopupMenuListener() {
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+			}
+			@Override
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+				onClose();
+			}
+			@Override
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
+		});
 	}
-	
-	public SwingFrame maximize() {
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		return this;
-	}
-	
+
 	@Override
 	public int getClientWidth() {
 		return panel.getWidth();
@@ -62,32 +61,27 @@ public class SwingFrame extends UIWindow {
 	
 	@Override
 	public int getX() {
-		return frame.getX();
+		return popup.getX();
 	}
 	
 	@Override
 	public int getY() {
-		return frame.getY();
+		return popup.getY();
 	}
 	
 	@Override
 	public void moveTo(int x, int y) {
-		frame.setLocation(x, y);
+		popup.setLocation(x, y);
 	}
 
 	@Override
 	public void center() {
-		frame.setLocationRelativeTo(null);
 	}
 
 	@Override
-	public boolean isVisible() {
-		return frame.isVisible();
-	}
-	
-	@Override
-	public void show() {
-		frame.setVisible(true);
+	public void show(UIWindow invoker, float x, float y) {
+		BasePanel panel = SwingWindowFactory.getBasePanel(invoker);
+		popup.show(panel, (int)x, (int)y);
 	}
 
 	@Override
@@ -102,8 +96,7 @@ public class SwingFrame extends UIWindow {
 	
 	@Override
 	public void close() {
-		frame.dispose();
-		super.close();
+		popup.setVisible(false);
 	}
 
 	@Override
@@ -125,10 +118,14 @@ public class SwingFrame extends UIWindow {
 	public float screenToBaseY(int y) {
 		return panel.screenToBaseY(y);
 	}
-	
+
 	@Override
 	public FontMetrics getFontMetrics(Font font) {
 		return panel.getFontMetrics(font);
+	}
+	
+	public boolean isVisible() {
+		return popup.isVisible();
 	}
 
 }

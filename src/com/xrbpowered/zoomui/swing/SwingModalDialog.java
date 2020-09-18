@@ -74,6 +74,11 @@ public class SwingModalDialog<A> extends UIModalWindow<A> {
 	}
 
 	@Override
+	public boolean isVisible() {
+		return dialog.isVisible();
+	}
+	
+	@Override
 	public void show() {
 		dialog.setVisible(true);
 	}
