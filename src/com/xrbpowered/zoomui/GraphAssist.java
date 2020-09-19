@@ -232,10 +232,7 @@ public class GraphAssist {
 			graph.fillRect(0, 0, w, h);
 		}
 		if(stroke!=null) {
-			resetStroke();
-			setColor(stroke);
-			for(int i=0; i<thickness; i++)
-				graph.drawRect(i, i, w-i*2-1, h-i*2-1);
+			pixelRect(graph, 0, 0, w, h, thickness, stroke);
 		}
 		
 		finishPixelMode();
@@ -261,6 +258,13 @@ public class GraphAssist {
 	
 	public static float align(float span, int align) {
 		return span * (float)align / 2f;
+	}
+	
+	public static void pixelRect(Graphics2D graph, int left, int top, int width, int height, int thickness, Color color) {
+		graph.setStroke(defaultStroke);
+		graph.setColor(color);
+		for(int i=0; i<thickness; i++)
+			graph.drawRect(left+i, top+i, width-i*2-1, height-i*2-1);
 	}
 	
 }

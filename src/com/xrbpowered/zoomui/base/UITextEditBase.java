@@ -286,10 +286,6 @@ public class UITextEditBase<L extends UITextEditBase<L>.Line> extends UIHoverEle
 		this.fm = null;
 	}
 	
-	/*public void setTokeniser(LineTokeniser tokeniser) {
-		this.tokeniser = (tokeniser==null) ? new LineTokeniser(null) : tokeniser;
-	}*/
-	
 	protected void updateFont(GraphAssist g, int f) {
 		fonts[f] = font.deriveFont(f, fontSize);
 		fm[f] = g.graph.getFontMetrics(fonts[f]);
@@ -571,6 +567,10 @@ public class UITextEditBase<L extends UITextEditBase<L>.Line> extends UIHoverEle
 		updateSelRange();
 	}
 	
+	public boolean hasSelection() {
+		return selStart!=null && (selStart.line!=selEnd.line || selStart.col!=selEnd.col);
+	}
+	
 	public String getSelectedText() {
 		if(selStart!=null) {
 			int start = lines.get(selMin.line).calcStart()+selMin.col;
@@ -720,6 +720,7 @@ public class UITextEditBase<L extends UITextEditBase<L>.Line> extends UIHoverEle
 				if(line.length>0 && !(i==selMax.line && selMax.col==0)) {
 					modify(pos, indent, pos);
 					line.length += indentLen;
+					line.reset();
 					changed = true;
 				}
 				pos += line.length;
@@ -747,6 +748,7 @@ public class UITextEditBase<L extends UITextEditBase<L>.Line> extends UIHoverEle
 					if(i==selMin.line && selMin.col>0) selMin.col--;
 					if(i==selMax.line && selMax.col>0) selMax.col--;
 					if(i==cursor.line && cursor.col>0) cursor.col--;
+					line.reset();
 					changed = true;
 				}
 				pos += line.length;

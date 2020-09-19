@@ -1,5 +1,6 @@
 package com.xrbpowered.zoomui;
 
+import java.awt.Color;
 import java.awt.RenderingHints;
 
 import com.xrbpowered.zoomui.base.UILayersContainer;
@@ -47,6 +48,19 @@ public class BaseContainer extends UILayersContainer implements Measurable, KeyI
 	
 	protected boolean invalidLayout = true;
 
+	private int clientBorderWidth = 0;
+	private Color clientBorderColor = null;
+	
+	public void setClientBorder(int thickness, Color color) {
+		this.clientBorderWidth = thickness;
+		this.clientBorderColor = color;
+	}
+	
+	public void removeClientBorder() {
+		this.clientBorderWidth = 0;
+		this.clientBorderColor = null;
+	}
+	
 	@Override
 	public void repaint() {
 		window.repaint();
@@ -265,10 +279,18 @@ public class BaseContainer extends UILayersContainer implements Measurable, KeyI
 	public void paint(GraphAssist g) {
 		if(invalidLayout)
 			layout();
-		g.graph.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-		g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g.graph.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		if(g.graph!=null) {
+			g.graph.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
+			g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			g.graph.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+		}
 		super.paint(g);
+		
+		if(clientBorderWidth>0 && clientBorderColor!=null && g.graph!=null) {
+			g.graph.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+			g.graph.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_NORMALIZE);
+			GraphAssist.pixelRect(g.graph, 0, 0, window.getClientWidth(), window.getClientHeight(), clientBorderWidth, clientBorderColor);
+		}
 	}
 	
 	@Override
