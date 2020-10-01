@@ -362,8 +362,10 @@ public class UITextEditBase<L extends UITextEditBase<L>.Line> extends UIHoverEle
 			pos = lineEnd;
 			lineIndex++;
 		}
-		if(!singleLine && y-lineHeight<maxy)
-			g.fillRect(minx, y-lineHeight+descent, maxx, maxy-y+lineHeight-descent, colorBackground);
+		if(!singleLine && y-lineHeight<maxy) {
+			fillRemainder(g, y);
+		}
+			
 		
 		w = (w+x0*2)*pixelScale;
 		float h = singleLine ? 0 : lineHeight*lines.size()*pixelScale;
@@ -378,6 +380,10 @@ public class UITextEditBase<L extends UITextEditBase<L>.Line> extends UIHoverEle
 		}
 		
 		g.finishPixelMode();
+	}
+	
+	protected void fillRemainder(GraphAssist g, int y) {
+		g.fillRect(minx, y-lineHeight+descent, maxx, maxy-y+lineHeight-descent, colorBackground);
 	}
 	
 	protected class DrawLineState {
