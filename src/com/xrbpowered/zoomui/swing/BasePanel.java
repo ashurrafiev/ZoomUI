@@ -48,7 +48,7 @@ public class BasePanel extends JPanel {
 			
 			@Override
 			public void focusLost(FocusEvent e) {
-				window.getContainer().resetFocus();
+				// window.getContainer().resetFocus();
 			}
 		});
 		

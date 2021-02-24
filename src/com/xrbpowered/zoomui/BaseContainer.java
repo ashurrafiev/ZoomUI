@@ -76,7 +76,6 @@ public class BaseContainer extends UILayersContainer implements Measurable, KeyI
 	
 	@Override
 	public void onFocusLost() {
-		resetFocus();
 	}
 	
 	@Override
